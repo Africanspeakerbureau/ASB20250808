@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchPublishedSpeakers } from '../lib/airtable'
+import { fetchAllPublishedSpeakers } from '../lib/airtable'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
-  const langs = (s.languages || []).join(', ')
+  const langs = (s.spokenLanguages || []).join(', ')
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
 
   return (
@@ -61,7 +61,7 @@ export default function FindSpeakersPage() {
     ;(async () => {
       try {
         setLoading(true)
-        const rows = await fetchPublishedSpeakers()
+        const rows = await fetchAllPublishedSpeakers({ limit: 15 })
         if (alive) setAll(rows)
       } catch (e) {
         console.error('Fetch speakers failed:', e)
@@ -77,9 +77,9 @@ export default function FindSpeakersPage() {
   const { categories, countries, languages, feeRanges } = useMemo(() => {
     const cats = new Set(), ctys = new Set(), lngs = new Set(), fees = new Set()
     all.forEach(s => {
-      (s.expertise || []).forEach(v => cats.add(v))
+      ;(s.expertise || []).forEach(v => cats.add(v))
       if (s.country) ctys.add(s.country)
-      ;(s.languages || []).forEach(v => lngs.add(v))
+      ;(s.spokenLanguages || []).forEach(v => lngs.add(v))
       if (s.feeRange) fees.add(s.feeRange)
     })
     return {
@@ -96,14 +96,14 @@ export default function FindSpeakersPage() {
     return all.filter(s => {
       if (cat !== 'All Categories' && !(s.expertise || []).includes(cat)) return false
       if (country !== 'All Countries' && s.country !== country) return false
-      if (lang !== 'All Languages' && !(s.languages || []).includes(lang)) return false
+      if (lang !== 'All Languages' && !(s.spokenLanguages || []).includes(lang)) return false
       if (fee !== 'All Fee Ranges' && s.feeRange !== fee) return false
 
       if (text) {
         const hay = [
           s.name, s.title, s.keyMessage,
           (s.expertise || []).join(' '),
-          s.location, s.country, (s.languages || []).join(' ')
+          s.location, s.country, (s.spokenLanguages || []).join(' ')
         ].join(' ').toLowerCase()
         if (!hay.includes(text)) return false
       }
@@ -156,4 +156,3 @@ export default function FindSpeakersPage() {
     </div>
   )
 }
-
