@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
-import MeetOurSpeakers from './components/MeetOurSpeakers'
-import SpeakerCard from './components/SpeakerCard'
+import MeetOurSpeakers from './sections/MeetOurSpeakers'
+import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
-import { fetchPublishedSpeakers } from './lib/airtable'
 import ReactDOM from 'react-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -146,7 +145,6 @@ function App() {
   const [currency, setCurrency] = useState('ZAR');
   const [countryCode, setCountryCode] = useState('ZA');
   const [currencyInfo, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 });
-  const [convertedFees, setConvertedFees] = useState({});
 
   // Initialize currency based on geolocation
   useEffect(() => {
@@ -291,28 +289,6 @@ function App() {
       loadAdminData()
     }
   }, [currentPage, isAdminLoggedIn])
-
-  // Load featured speakers for public site
-  useEffect(() => {
-    const loadFeaturedSpeakers = async () => {
-      try {
-        const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/Speaker%20Applications?filterByFormula={Featured}="Yes"`, {
-          headers: {
-            'Authorization': `Bearer ${AIRTABLE_API_KEY}`
-          }
-        })
-        const data = await response.json()
-        setFeaturedSpeakers(data.records || [])
-      } catch (error) {
-        console.error('Error loading featured speakers:', error)
-      }
-    }
-    
-    if (currentPage === 'home') {
-      loadFeaturedSpeakers()
-    }
-  }, [currentPage])
-
   // Initialize currency conversion
   useEffect(() => {
     const initializeCurrency = async () => {
@@ -326,21 +302,6 @@ function App() {
     }
     initializeCurrency()
   }, [])
-
-  // Convert fee ranges when currency info changes
-  useEffect(() => {
-    if (featuredSpeakers.length > 0 && currencyInfo.rate !== 1) {
-      const converted = {}
-      featuredSpeakers.forEach(speaker => {
-        const feeRange = speaker.fields['Fee Range']
-        if (feeRange && feeRange.includes('$')) {
-          converted[speaker.id] = convertFeeRange(feeRange, currencyInfo)
-        }
-      })
-      setConvertedFees(converted)
-    }
-  }, [featuredSpeakers, currencyInfo])
-
   // Initialize Cloudinary upload widget
   useEffect(() => {
     if (window.cloudinary) {
@@ -2924,29 +2885,6 @@ function App() {
       </div>
     )
   }
-
-  // Home page
-  // Choose one source that is already available on this page:
-  const sourceList =
-    (publishedSpeakers && publishedSpeakers.length
-      ? publishedSpeakers
-      : [...(featuredSpeakers || []), ...(randomSpeakers || [])]) || [];
-
-  // Show published; exclude exactly Featured === "Yes" if present.
-  // If "Featured" is normalized to s.featured, this still works.
-  const meetList = sourceList
-    .filter((s) => {
-      const status = s.status || s.fields?.Status || [];
-      const isPublished = Array.isArray(status)
-        ? status.includes("Published on Site")
-        : String(status).includes("Published on Site");
-      const featuredVal =
-        (s.featured ?? s.fields?.Featured ?? "").toString().toLowerCase();
-      const notFeaturedYes = featuredVal !== "yes";
-      return isPublished && notFeaturedYes;
-    })
-    .slice(0, 8);
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -3075,68 +3013,10 @@ function App() {
         </div>
       </section>
 
-      {/* ======== WHY AFRICAN SPEAKER BUREAU? + FEATURED SPEAKERS ======== */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-start">
-          {/* Left: Why ASB */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Why African Speaker Bureau?</h2>
-            <p className="text-gray-700">
-              We are the exclusive gateway to authentic African expertise, connecting global audiences with the continent's most compelling voices who bring unparalleled insights and transformative perspectives.
-            </p>
-          </div>
-
-          {/* Right: Featured Speakers */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Featured Speakers</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-              {featuredSpeakers.length > 0 ? (
-                featuredSpeakers.slice(0, 3).map((speaker, index) => {
-                  const fields = speaker.fields
-                  const name = `${fields['First Name']} ${fields['Last Name']}`
-                  const expertise = fields['Professional Title'] || 'Professional Speaker'
-                  const photoUrl = fields['Profile Image']?.[0]?.url || 'https://via.placeholder.com/128x128/3b82f6/ffffff?text=Speaker'
-                  
-                  return (
-                    <div 
-                      key={speaker.id} 
-                      className="text-center cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => {
-                        setSelectedSpeakerId(speaker.id)
-                        setCurrentPage('speaker-profile')
-                      }}
-                    >
-                      <img
-                        src={photoUrl}
-                        alt={name}
-                        className="mx-auto rounded-lg w-32 h-32 object-cover mb-3"
-                      />
-                      <h3 className="font-medium">{name}</h3>
-                      <p className="text-blue-600">{expertise}</p>
-                    </div>
-                  )
-                })
-              ) : (
-                <div className="col-span-3 text-center py-8">
-                  <p className="text-gray-500">No featured speakers available at the moment.</p>
-                </div>
-              )}
-            </div>
-            <div className="text-center">
-              <a
-                href="#"
-                onClick={() => setCurrentPage('find-speakers')}
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
-              >
-                VIEW ALL SPEAKERS
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      <FeaturedSpeakers />
 
       {/* ===== MEET OUR SPEAKERS (single instance) ===== */}
-      <MeetOurSpeakers speakers={meetList} />
+      <MeetOurSpeakers />
 
       {/* ======== PLAN YOUR EVENT ======== */}
       <section className="py-16 bg-gray-50">

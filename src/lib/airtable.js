@@ -1,55 +1,119 @@
-// src/lib/airtable.js
-const AIRTABLE_BASE_ID   = import.meta.env.VITE_AIRTABLE_BASE_ID   || 'apppWmiOseyJwQRcn';
-const AIRTABLE_API_TOKEN = import.meta.env.VITE_AIRTABLE_API_TOKEN || '';
-const AIRTABLE_ENDPOINT  = 'https://api.airtable.com/v0';
+const BASE_ID =
+  import.meta.env.VITE_AIRTABLE_BASE_ID ||
+  import.meta.env.AIRTABLE_BASE_ID;
 
-export async function fetchPublishedSpeakers() {
-  if (!AIRTABLE_API_TOKEN) throw new Error('Missing VITE_AIRTABLE_API_TOKEN');
+const API_KEY =
+  import.meta.env.VITE_AIRTABLE_API_KEY ||
+  import.meta.env.AIRTABLE_API_KEY;
 
-  // Table: Speaker Applications
-  // Multi-select field: Status (includes "Published on Site")
-  const url = new URL(`${AIRTABLE_ENDPOINT}/${AIRTABLE_BASE_ID}/Speaker%20Applications`);
-  url.searchParams.set('pageSize', '100');
-  url.searchParams.set('maxRecords', '200');
-  // find "Published on Site" inside multi-select Status via ARRAYJOIN
-  url.searchParams.set('filterByFormula', `FIND("Published on Site", ARRAYJOIN({Status}))`);
+const API = 'https://api.airtable.com/v0';
+const TBL_SPEAKERS = encodeURIComponent('Speaker Applications');
 
-  const res = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${AIRTABLE_API_TOKEN}` }
+function ensureEnv() {
+  if (!BASE_ID || !API_KEY) {
+    throw new Error(
+      'Airtable env missing: VITE_AIRTABLE_BASE_ID/AIRTABLE_BASE_ID and VITE_AIRTABLE_API_KEY/AIRTABLE_API_KEY'
+    );
+  }
+}
+
+function toQuery(params) {
+  const usp = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === undefined || v === null) return;
+    usp.set(k, String(v));
   });
+  return usp.toString();
+}
+
+async function list(
+  table,
+  { filterByFormula, fields, pageSize = 50, sort, maxRecords } = {}
+) {
+  ensureEnv();
+  const headers = { Authorization: `Bearer ${API_KEY}` };
+  const params = {
+    ...(filterByFormula ? { filterByFormula } : {}),
+    ...(fields ? { fields } : {}),
+    ...(pageSize ? { pageSize } : {}),
+    ...(sort ? { sort } : {}),
+    ...(maxRecords ? { maxRecords } : {})
+  };
+  const url = `${API}/${BASE_ID}/${table}?${toQuery(params)}`;
+  const res = await fetch(url, { headers });
   if (!res.ok) {
-    const t = await res.text();
+    const t = await res.text().catch(() => '');
     throw new Error(`Airtable ${res.status}: ${t}`);
   }
-  const data = await res.json();
+  const json = await res.json();
+  return json.records || [];
+}
 
-  // Normalize to what the UI needs
-  return (data.records || []).map(r => {
-    const f = r.fields || {};
-    // attachments: Profile Image, Header Image
-    const profile = Array.isArray(f['Profile Image']) && f['Profile Image'][0]?.url;
-    const header  = Array.isArray(f['Header Image'])  && f['Header Image'][0]?.url;
-    const photoUrl = profile || header || '';
+function mapSpeaker(r) {
+  const f = r.fields || {};
+  const image = Array.isArray(f['Profile Image']) ? f['Profile Image'][0]?.url : '';
+  const title = f['Title'] ? String(f['Title']).trim() : '';
+  const first = f['First Name'] ? String(f['First Name']).trim() : '';
+  const last = f['Last Name'] ? String(f['Last Name']).trim() : '';
+  const name = [title, first, last].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  const slugBase = f['Full Name'] || name || `${first}-${last}` || r.id;
+  const slug = String(slugBase)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 
-    const langs = Array.isArray(f['Spoken Languages']) ? f['Spoken Languages'] : (f['Spoken Languages'] ? [f['Spoken Languages']] : []);
-    const expertise = Array.isArray(f['Expertise Areas']) ? f['Expertise Areas'] : (f['Expertise Areas'] ? [f['Expertise Areas']] : []);
+  return {
+    id: r.id,
+    name,
+    firstName: first,
+    lastName: last,
+    title: f['Professional Title'] || '',
+    location: f['Location'] || '',
+    country: f['Country'] || '',
+    spokenLanguages: f['Spoken Languages'] || [],
+    expertise: f['Expertise Areas'] || [],
+    keyMessage: f['Key Messages'] || '',
+    feeRange: f['Fee Range'] || '',
+    photoUrl: image || '',
+    featured: f['Featured'] === 'Yes',
+    status: f['Status'] || [],
+    slug
+  };
+}
 
-    return {
-      id: r.id,
-      firstName: f['First Name'] || '',
-      lastName:  f['Last Name']  || '',
-      name:      `${f['Title'] ? f['Title'] + ' ' : ''}${f['First Name'] || ''} ${f['Last Name'] || ''}`.trim(),
-      title:     f['Professional Title'] || '',
-      location:  f['Location'] || '',
-      country:   f['Country'] || '',
-      languages: langs,
-      keyMessage: (f['Key Messages'] || '').toString().trim(),
-      expertise,
-      feeRange:  f['Fee Range'] || '',
-      photoUrl,
-      // build a simple slug for /speaker/:slug if you need
-      slug:      `${(f['First Name']||'').toLowerCase()}-${(f['Last Name']||'').toLowerCase()}`.replace(/[^a-z0-9\-]/g,'')
-    };
+const PUBLISHED = "FIND('Published on Site', ARRAYJOIN({Status}))";
+
+export async function fetchFeaturedSpeakers(limit = 3) {
+  const filterByFormula = `AND(${PUBLISHED}, {Featured}='Yes')`;
+  const records = await list(TBL_SPEAKERS, {
+    filterByFormula,
+    maxRecords: limit,
+    pageSize: limit
   });
+  return records.map(mapSpeaker);
+}
+
+export async function fetchPublishedSpeakers({
+  limit = 8,
+  excludeFeatured = false
+} = {}) {
+  const exclude = excludeFeatured ? ", {Featured}!='Yes'" : '';
+  const filterByFormula = `AND(${PUBLISHED}${exclude})`;
+  const records = await list(TBL_SPEAKERS, {
+    filterByFormula,
+    maxRecords: limit,
+    pageSize: limit
+  });
+  return records.map(mapSpeaker);
+}
+
+export async function fetchAllPublishedSpeakers({ limit = 15 } = {}) {
+  const filterByFormula = `AND(${PUBLISHED})`;
+  const records = await list(TBL_SPEAKERS, {
+    filterByFormula,
+    maxRecords: limit,
+    pageSize: limit
+  });
+  return records.map(mapSpeaker);
 }
 

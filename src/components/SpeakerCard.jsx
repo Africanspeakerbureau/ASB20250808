@@ -2,16 +2,18 @@ import React from 'react';
 
 export default function SpeakerCard({ speaker, variant = 'search' }) {
   const s = speaker || {};
-  const img = s.photo || '/images/profile-default.jpg';
-  const langs = Array.isArray(s.spokenLanguages) ? s.spokenLanguages.join(', ') : (s.spokenLanguages || '')
-  const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
-  const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
-  const kmFull = s.keyMessage || '';
+  const img = s.photoUrl || s.photo || '/images/profile-default.jpg';
+  const langsArr = s.spokenLanguages || s.languages || [];
+  const langs = Array.isArray(langsArr) ? langsArr.join(', ') : String(langsArr);
+  const cityCountry = [s.location, s.country].filter(Boolean).join(', ');
+  const locLang = [cityCountry, langs].filter(Boolean).join(' | ');
+  const kmFull = s.keyMessage || s.keyMessages || '';
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
-  const tags = (s.expertise || []).slice(0, 3);
+  const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
+  const professionalTitle = s.professionalTitle || s.title;
 
   const Wrapper = ({ children }) => (
-    <a href={`/speakers/${s.id}`} className="group block h-full">{children}</a>
+    <a href={`/speakers/${s.slug || s.id}`} className="group block h-full">{children}</a>
   );
 
   // ===== Search page card (bigger, like your mockup) =====
@@ -30,8 +32,8 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
 
           <h3 className="text-lg font-semibold text-center mt-4">{s.name}</h3>
           {locLang && <p className="text-sm text-center text-gray-600">{locLang}</p>}
-          {s.professionalTitle && (
-            <p className="text-base text-center text-gray-800 mt-1">{s.professionalTitle}</p>
+          {professionalTitle && (
+            <p className="text-base text-center text-gray-800 mt-1">{professionalTitle}</p>
           )}
 
           {km && <p className="text-gray-700 mt-3 text-center">{km}</p>}
@@ -75,8 +77,8 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           </div>
           <h3 className="text-base font-semibold text-center mt-3">{s.name}</h3>
           {locLang && <p className="text-xs text-center text-gray-600">{locLang}</p>}
-          {s.professionalTitle && (
-            <p className="text-sm text-center text-gray-800 mt-1">{s.professionalTitle}</p>
+          {professionalTitle && (
+            <p className="text-sm text-center text-gray-800 mt-1">{professionalTitle}</p>
           )}
         </Wrapper>
       </div>
@@ -85,4 +87,3 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
 
   return null;
 }
-
