@@ -146,6 +146,24 @@ function App() {
   const [editingRecord, setEditingRecord] = useState(null)
 
   useEffect(() => {
+    const sync = () => {
+      const p = window.location.pathname
+      if (p === '/find') {
+        setCurrentPage('find-speakers')
+      } else if (p.startsWith('/speaker/')) {
+        const id = p.split('/speaker/')[1]
+        if (id) setSelectedSpeakerId(id)
+        setCurrentPage('speaker-profile')
+      } else {
+        setCurrentPage('home')
+      }
+    }
+    sync()
+    window.addEventListener('popstate', sync)
+    return () => window.removeEventListener('popstate', sync)
+  }, [])
+
+  useEffect(() => {
     let alive = true
     ;(async () => {
       try {
