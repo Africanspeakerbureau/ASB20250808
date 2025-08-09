@@ -1,42 +1,26 @@
-import { useEffect, useState } from 'react';
-import SpeakerCard from '@/components/SpeakerCard';
-import { fetchPublishedSpeakers } from '@/lib/airtable';
+import SpeakerCard from '../components/SpeakerCard'
 
-export default function MeetOurSpeakers() {
-  const [items, setItems] = useState([]);
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const rows = await fetchPublishedSpeakers({ limit: 8, excludeFeatured: true });
-        if (alive) setItems(rows);
-      } catch (e) {
-        console.error('MeetOurSpeakers load failed', e);
-        if (alive) setItems([]);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
+export default function MeetOurSpeakers({ speakers = [] }) {
+  const items = (speakers || []).slice(0, 8)
 
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-6xl mx-auto px-4">
-        <h2 className="text-2xl font-semibold">Meet Our Speakers</h2>
-        <p className="text-gray-600 mb-8">Voices That Inspire</p>
+    <section className="py-12 md:py-16">
+      <div className="container mx-auto px-4">
+        <header className="mb-6">
+          <h2 className="text-2xl md:text-3xl font-semibold">Meet Our Speakers</h2>
+          <p className="text-gray-500">Voices That Inspire</p>
+        </header>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {items.map((s) => (
-            <SpeakerCard key={s.id} speaker={s} variant="compact" />
-          ))}
-        </div>
-
-        {items.length === 0 && (
-          <p className="text-gray-500">No speakers found.</p>
+        {items.length === 0 ? (
+          <p className="text-gray-400">No speakers available at the moment.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {items.map((s) => (
+              <SpeakerCard key={s.id} speaker={s} variant="compact" />
+            ))}
+          </div>
         )}
       </div>
     </section>
-  );
+  )
 }

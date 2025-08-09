@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
+import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
 import PlanYourEvent from './sections/PlanYourEvent'
 import Footer from './components/Footer'
@@ -10,6 +11,7 @@ import {
   getSpeakerApplications,
   getClientInquiries,
   getQuickInquiries,
+  fetchPublishedSpeakers,
 } from '@/lib/airtable'
 import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
@@ -224,6 +226,19 @@ function App() {
         setApps([]); setClients([]); setQuick([])
       } finally {
         if (alive) setLoading(false)
+      }
+    })()
+    return () => { alive = false }
+  }, [])
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const rows = await fetchPublishedSpeakers({ limit: 8, excludeFeatured: true })
+        if (alive) setPublishedSpeakers(rows)
+      } catch (e) {
+        console.error('Fetch published speakers failed', e)
       }
     })()
     return () => { alive = false }
@@ -2986,7 +3001,8 @@ function App() {
         </div>
       </section>
       <div id="about" className="scroll-mt-24">
-        <FeaturedSpeakers />
+        <FeaturedSpeakers speakers={publishedSpeakers} />
+        <MeetOurSpeakers speakers={publishedSpeakers} />
       </div>
       <PlanYourEvent onBookingInquiry={() => setCurrentPage('client-booking')} />
 
