@@ -155,20 +155,29 @@ function App() {
   useEffect(() => {
     const syncAndScroll = () => {
       const { pathname, hash } = window.location
+
+      // Path → state
       if (pathname === '/find') setCurrentPage('find-speakers')
       else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
       else setCurrentPage('home')
 
-      requestAnimationFrame(() => {
+      // Smooth scroll to anchors after content is on screen
+      const doScroll = () => {
         if (hash) {
-          const id = decodeURIComponent(hash.slice(1))
-          const el = document.getElementById(id)
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        } else {
-          window.scrollTo(0, 0)
+          const el = document.getElementById(decodeURIComponent(hash.slice(1)))
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            return
+          }
         }
-      })
+        // default: go top
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+      }
+
+      // wait 1 frame to ensure Home sections mounted
+      requestAnimationFrame(() => requestAnimationFrame(doScroll))
     }
+
     syncAndScroll()
     window.addEventListener('popstate', syncAndScroll)
     window.addEventListener('hashchange', syncAndScroll)
@@ -2963,7 +2972,9 @@ function App() {
         </div>
       </section>
 
-      <FeaturedSpeakers />
+      <section id="about" className="scroll-mt-24">
+        <FeaturedSpeakers />
+      </section>
       <PlanYourEvent onBookingInquiry={() => setCurrentPage('client-booking')} />
 
       {/* ======== INSIGHTS FROM OUR SPEAKERS ======== */}
