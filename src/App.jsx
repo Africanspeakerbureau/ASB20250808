@@ -143,6 +143,18 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('speakers')
   const [selectedService, setSelectedService] = useState('keynote-speakers')
+
+  const hashToService = {
+    keynote: 'keynote-speakers',
+    panel: 'panel-discussions',
+    boardroom: 'boardroom-consulting',
+    workshops: 'workshop-facilitators',
+    virtual: 'virtual-events',
+    coaching: 'leadership-coaching'
+  }
+  const serviceToHash = Object.fromEntries(
+    Object.entries(hashToService).map(([k, v]) => [v, k])
+  )
   const [editingRecord, setEditingRecord] = useState(null)
 
   const handleNav = (e) => {
@@ -155,16 +167,23 @@ function App() {
   useEffect(() => {
     const syncAndScroll = () => {
       const { pathname, hash } = window.location
+      const id = hash ? decodeURIComponent(hash.slice(1)) : ''
 
       // Path → state
       if (pathname === '/find') setCurrentPage('find-speakers')
+      else if (pathname === '/services') setCurrentPage('services')
+      else if (pathname === '/about') setCurrentPage('about')
       else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
       else setCurrentPage('home')
 
+      if (pathname === '/services' && id && hashToService[id]) {
+        setSelectedService(hashToService[id])
+      }
+
       // Smooth scroll to anchors after content is on screen
       const doScroll = () => {
-        if (hash) {
-          const el = document.getElementById(decodeURIComponent(hash.slice(1)))
+        if (id) {
+          const el = document.getElementById(id)
           if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'start' })
             return
@@ -2637,7 +2656,7 @@ function App() {
           </div>
 
           {/* Service Content */}
-          <div className="max-w-6xl mx-auto">
+          <section id={serviceToHash[selectedService]} className="scroll-mt-24 max-w-6xl mx-auto">
             <div className="mb-8">
               <div className={`border-l-4 border-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-500 pl-6`}>
                 <h2 className={`text-3xl font-bold text-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-600 mb-4`}>
@@ -2687,7 +2706,7 @@ function App() {
                 {currentService.investment.cta}
               </Button>
             </div>
-          </div>
+          </section>
 
           {/* Call to Action Section */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-12 text-center">
@@ -2887,8 +2906,8 @@ function App() {
             <nav className="hidden md:flex items-center space-x-8">
               <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
               <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
-              <Button asChild variant="ghost"><a href="/#services" onClick={handleNav}>Services</a></Button>
-              <Button asChild variant="ghost"><a href="/#about" onClick={handleNav}>About</a></Button>
+              <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+              <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
               <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
               <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>

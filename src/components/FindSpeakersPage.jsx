@@ -173,8 +173,8 @@ export default function FindSpeakersPage() {
             <nav className="hidden md:flex items-center space-x-8">
               <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
               <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
-              <Button asChild variant="ghost"><a href="/#services" onClick={handleNav}>Services</a></Button>
-              <Button asChild variant="ghost"><a href="/#about" onClick={handleNav}>About</a></Button>
+              <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+              <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
               <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
               <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
