@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import SpeakerCard from '@/components/SpeakerCard';
 import { fetchFeaturedSpeakers } from '@/lib/airtable';
 
@@ -21,21 +22,29 @@ export default function FeaturedSpeakers() {
   }, []);
 
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-6xl mx-auto px-4">
-        <h2 className="text-2xl font-semibold mb-4">Featured Speakers</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-          {items.map((s) => (
-            <SpeakerCard key={s.id} speaker={s} variant="compact" />
-          ))}
+    <section className="py-16">
+      <div className="mx-auto max-w-7xl px-4 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+        <div>
+          <h2 className="text-3xl font-semibold mb-4">Why African Speaker Bureau?</h2>
+          <p className="text-gray-600 leading-7">
+            We are the exclusive gateway to authentic African expertise, connecting global audiences with the continent's most compelling voices who bring unparalleled insights and transformative perspectives.
+          </p>
         </div>
-        <div className="text-center">
-          <a
-            href="/find-speakers"
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
-          >
-            VIEW ALL SPEAKERS
-          </a>
+        <div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {items.slice(0, 3).map((s) => (
+              <SpeakerCard key={s.id} speaker={s} variant="compact" />
+            ))}
+          </div>
+
+          <div className="mt-8">
+            <Link
+              to="/find-speakers"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
+            >
+              VIEW ALL SPEAKERS
+            </Link>
+          </div>
         </div>
       </div>
     </section>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { fetchAllPublishedSpeakers } from '../lib/airtable'
 import Footer from './Footer'
 
@@ -7,6 +8,8 @@ function SearchCard({ s }) {
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
   const langs = (s.spokenLanguages || []).join(', ')
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
+  const slug = s.slug || s.Slug || s.id || s.recordId
+  const to = `/speakers/${slug}`
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col items-center text-center">
@@ -39,9 +42,13 @@ function SearchCard({ s }) {
 
       {s.feeRange && <p className="mt-5 font-medium">{s.feeRange}</p>}
 
-      <a href={`/speakers/${s.slug}`} className="mt-6 inline-block px-5 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700">
+      <Link
+        to={to}
+        className="mt-6 inline-block px-5 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700"
+        aria-label={`View ${s.name}'s profile`}
+      >
         View Profile
-      </a>
+      </Link>
     </div>
   )
 }

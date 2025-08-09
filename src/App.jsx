@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
-import About from './sections/About'
 import PlanYourEvent from './sections/PlanYourEvent'
 import Footer from './components/Footer'
 import ReactDOM from 'react-dom'
@@ -2963,7 +2962,6 @@ function App() {
         </div>
       </section>
 
-      <About />
       <FeaturedSpeakers />
       <PlanYourEvent onBookingInquiry={() => setCurrentPage('client-booking')} />
 
