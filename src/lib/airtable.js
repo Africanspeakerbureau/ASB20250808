@@ -7,6 +7,13 @@ const BASE_ID =
 const API = `https://api.airtable.com/v0/${BASE_ID}`;
 const TBL_SPEAKERS = encodeURIComponent('Speaker Applications');
 
+export function toSlug(str = '') {
+  return String(str)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
 function ensureEnv() {
   if (!BASE_ID || !API_KEY) {
     throw new Error(
@@ -54,11 +61,8 @@ function mapSpeaker(r) {
   const first = f['First Name'] ? String(f['First Name']).trim() : '';
   const last = f['Last Name'] ? String(f['Last Name']).trim() : '';
   const name = [title, first, last].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
-  const slugBase = f['Full Name'] || name || `${first}-${last}` || r.id;
-  const slug = String(slugBase)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+  const slugBase = f['Slug'] || f['Full Name'] || name || `${first}-${last}` || r.id;
+  const slug = toSlug(slugBase);
 
   return {
     id: r.id,

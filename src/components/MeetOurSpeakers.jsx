@@ -51,7 +51,7 @@ export default function MeetOurSpeakers({ speakers = [] }) {
 
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-8">
           {items.map((s) => {
-            const href = `/speakers/${s.slug || s.id}`;
+            const href = `/speakers/${s.slug}`;
             return (
               <a key={s.id || href} href={href} className="block group">
                 <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 shadow-sm">

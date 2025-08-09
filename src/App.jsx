@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
-import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
+import PlanYourEvent from './sections/PlanYourEvent'
+import Footer from './components/Footer'
 import ReactDOM from 'react-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -2169,35 +2170,6 @@ function App() {
         </header>
 
         <FindSpeakersPage />
-
-        {/* Footer */}
-        <footer className="bg-gray-900 text-white py-12 mt-16">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center text-center">
-              <div className="flex items-center space-x-2 mb-6">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div>
-                  <div className="font-bold text-white text-sm">AFRICAN</div>
-                  <div className="font-bold text-white text-sm">SPEAKER</div>
-                  <div className="font-bold text-white text-sm">BUREAU</div>
-                </div>
-              </div>
-              
-              <nav className="flex flex-wrap justify-center gap-8 mb-8">
-                <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-                <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setCurrentPage('about')}>About</Button>
-                <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setCurrentPage('contact')}>Contact</Button>
-                <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
-              </nav>
-              
-              <p className="text-gray-400 text-sm">
-                © 2024 African Speaker Bureau. Connecting Africa's voices with the world.
-              </p>
-            </div>
-          </div>
-        </footer>
       </div>
     )
   }
@@ -2991,27 +2963,7 @@ function App() {
       </section>
 
       <FeaturedSpeakers />
-
-      {/* ===== MEET OUR SPEAKERS (single instance) ===== */}
-      <MeetOurSpeakers />
-
-      {/* ======== PLAN YOUR EVENT ======== */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-semibold mb-4">Plan Your Event with ASB</h2>
-          <p className="text-gray-700 mb-6">
-            Let us help you find the perfect speaker to elevate your next event. From keynotes to workshops,
-            we have the expertise to make your event unforgettable.
-          </p>
-          <a
-            href="#"
-            onClick={() => setCurrentPage('contact')}
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
-          >
-            Booking Inquiry
-          </a>
-        </div>
-      </section>
+      <PlanYourEvent onBookingInquiry={() => setCurrentPage('client-booking')} />
 
       {/* ======== INSIGHTS FROM OUR SPEAKERS ======== */}
       <section className="py-16 bg-white">
@@ -3122,60 +3074,7 @@ function App() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="h-12 flex items-center mb-6">
-                <div className="bg-blue-600 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block">BUREAU</span>
-                </div>
-              </div>
-              <p className="text-gray-400">
-                Connecting authentic African voices with global audiences since 2008.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
-                <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
-                <li><a href="#" className="hover:text-white">Contact</a></li>
-                <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Services</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white text-green-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('keynote-speakers'), 100); }}>Keynote Speakers</a></li>
-                <li><a href="#" className="hover:text-white text-blue-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('panel-discussions'), 100); }}>Panel Discussions</a></li>
-                <li><a href="#" className="hover:text-white text-orange-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('boardroom-consulting'), 100); }}>Boardroom Consulting</a></li>
-                <li><a href="#" className="hover:text-white text-blue-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('workshop-facilitators'), 100); }}>Workshop Facilitators</a></li>
-                <li><a href="#" className="hover:text-white text-teal-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('virtual-events'), 100); }}>Virtual Events</a></li>
-                <li><a href="#" className="hover:text-white text-pink-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('leadership-coaching'), 100); }}>Leadership Coaching</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>+1 (555) 123-4567</li>
-                <li>info@africanspeakerbureau.com</li>
-                <li>New York • London • Lagos •</li>
-                <li>Cape Town</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>© 2025 African Speaker Bureau. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Admin Login Modal */}
       {showAdminLogin && (
@@ -3231,8 +3130,13 @@ function App() {
 
       {/* Edit Record Dialog */}
       {console.log('editingRecord state:', editingRecord)}
-      {editingRecord && currentPage === 'admin' && isAdminLoggedIn && window.location.pathname.startsWith('/admin') && ReactDOM.createPortal(
-        <div 
+      {(() => {
+        const rec = editingRecord ?? null;
+        const id = rec?.id ?? null;
+        const fields = rec?.fields ?? {};
+        if (!rec || currentPage !== 'admin' || !isAdminLoggedIn || !window.location.pathname.startsWith('/admin')) return null;
+        return ReactDOM.createPortal(
+        <div
           className="modal-overlay"
           style={{
             position: 'fixed',
@@ -3247,25 +3151,25 @@ function App() {
             justifyContent: 'center'
           }}
         >
-          {console.log('Rendering edit dialog for:', editingRecord)}
+          {console.log('Rendering edit dialog for:', rec)}
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">
-              Edit {editingRecord.type === 'speaker' ? 'Speaker' : editingRecord.type === 'client' ? 'Client' : 'Quick Inquiry'}
+              Edit {rec.type === 'speaker' ? 'Speaker' : rec.type === 'client' ? 'Client' : 'Quick Inquiry'}
             </h2>
-            
+
             <div className="space-y-4">
-              {Object.entries(editingRecord.fields).map(([key, value]) => (
+              {Object.entries(fields).map(([key, value]) => (
                 <div key={key}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{key}</label>
                   {key === 'Status' ? (
-                    <select 
+                    <select
                       className="w-full p-2 border border-gray-300 rounded"
                       defaultValue={value}
                       onChange={(e) => {
-                        editingRecord.fields[key] = e.target.value;
+                        fields[key] = e.target.value;
                       }}
                     >
-                      {editingRecord.type === 'speaker' ? (
+                      {rec.type === 'speaker' ? (
                         <>
                           <option value="Pending">Pending</option>
                           <option value="Under Review">Under Review</option>
@@ -3318,8 +3222,8 @@ function App() {
                     </div>
                   ) : (() => {
                     // Get table name for fieldPresets lookup
-                    const tableName = editingRecord.type === 'speaker' ? 'Speaker Applications' : 
-                                     editingRecord.type === 'client' ? 'Client Inquiries' : 'Quick Inquiries';
+                    const tableName = rec.type === 'speaker' ? 'Speaker Applications' :
+                                     rec.type === 'client' ? 'Client Inquiries' : 'Quick Inquiries';
                     const presets = fieldPresets[tableName]?.[key];
                     const fieldValue = value || "";
 
@@ -3330,7 +3234,7 @@ function App() {
                           className="w-full p-2 border border-gray-300 rounded"
                           value={fieldValue}
                           onChange={e => {
-                            editingRecord.fields[key] = e.target.value;
+                            fields[key] = e.target.value;
                           }}
                         >
                           <option value="">Select…</option>
@@ -3355,7 +3259,7 @@ function App() {
                                   const next = e.target.checked
                                     ? [...selected, opt]
                                     : selected.filter(v => v !== opt);
-                                  editingRecord.fields[key] = next;
+                                  fields[key] = next;
                                 }}
                               />
                               <span className="text-sm">{opt}</span>
@@ -3376,7 +3280,7 @@ function App() {
                           className="w-full p-2 border border-gray-300 rounded min-h-[100px]"
                           defaultValue={fieldValue || ''}
                           onChange={(e) => {
-                            editingRecord.fields[key] = e.target.value;
+                            fields[key] = e.target.value;
                           }}
                         />
                       );
@@ -3391,7 +3295,7 @@ function App() {
                           className="w-full p-2 border border-gray-300 rounded"
                           defaultValue={fieldValue || ''}
                           onChange={(e) => {
-                            editingRecord.fields[key] = e.target.value;
+                            fields[key] = e.target.value;
                           }}
                         />
                       );
@@ -3405,7 +3309,7 @@ function App() {
                           className="w-full p-2 border border-gray-300 rounded"
                           defaultValue={fieldValue || ''}
                           onChange={(e) => {
-                            editingRecord.fields[key] = e.target.value;
+                            fields[key] = e.target.value;
                           }}
                         />
                       );
@@ -3419,7 +3323,7 @@ function App() {
                           className="w-full p-2 border border-gray-300 rounded"
                           defaultValue={fieldValue || ''}
                           onChange={(e) => {
-                            editingRecord.fields[key] = e.target.value;
+                            fields[key] = e.target.value;
                           }}
                         />
                       );
@@ -3433,7 +3337,7 @@ function App() {
                           className="w-full p-2 border border-gray-300 rounded"
                           defaultValue={fieldValue || ''}
                           onChange={(e) => {
-                            editingRecord.fields[key] = e.target.value;
+                            fields[key] = e.target.value;
                           }}
                         />
                       );
@@ -3446,7 +3350,7 @@ function App() {
                         className="w-full p-2 border border-gray-300 rounded"
                         defaultValue={fieldValue || ''}
                         onChange={(e) => {
-                          editingRecord.fields[key] = e.target.value;
+                          fields[key] = e.target.value;
                         }}
                       />
                     );
@@ -3467,16 +3371,16 @@ function App() {
                 onClick={async () => {
                   try {
                     // Handle image upload if new image is selected
-                    if (editImageFile) {
-                      const imageUrl = await uploadImageToImgBB(editImageFile)
-                      if (imageUrl) {
-                        editingRecord.fields['Profile Image'] = [{ url: imageUrl }]
+                      if (editImageFile) {
+                        const imageUrl = await uploadImageToImgBB(editImageFile)
+                        if (imageUrl) {
+                          fields['Profile Image'] = [{ url: imageUrl }]
+                        }
                       }
-                    }
                     
-                    const tableName = editingRecord.type === 'speaker' ? 'Speaker%20Applications' : 
-                                     editingRecord.type === 'client' ? 'Client%20Inquiries' : 'Quick%20Inquiries';
-                    await updateRecord(tableName, editingRecord.id, editingRecord.fields);
+                    const tableName = rec.type === 'speaker' ? 'Speaker%20Applications' :
+                                     rec.type === 'client' ? 'Client%20Inquiries' : 'Quick%20Inquiries';
+                    await updateRecord(tableName, id, fields);
                     setEditingRecord(null);
                     setEditImageFile(null);
                     setEditImagePreview(null);
@@ -3492,7 +3396,8 @@ function App() {
           </div>
         </div>,
         document.body
-      )}
+        );
+      })()}
     </div>
   )
 }

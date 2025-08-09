@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { toSlug } from '@/lib/airtable';
 
 export default function SpeakerCard({ speaker, variant = 'search' }) {
   const s = speaker || {};
@@ -11,62 +13,62 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
-
-  const Wrapper = ({ children }) => (
-    <a href={`/speakers/${s.slug || s.id}`} className="group block h-full">{children}</a>
-  );
+  const slug = s.slug || s.Slug || (s.name ? toSlug(s.name) : '') || s.id || s.recordId;
+  const to = `/speakers/${slug}`;
 
   // ===== Search page card (bigger, like your mockup) =====
   if (variant === 'search') {
     return (
       <div className="bg-white rounded-2xl shadow p-6 h-full flex flex-col">
-        <Wrapper>
-          <div className="w-full flex justify-center">
-            <img
-              src={img}
-              alt={s.name}
-              loading="lazy"
-              className="w-40 h-40 object-cover rounded-xl"
-            />
+        <div className="w-full flex justify-center">
+          <img
+            src={img}
+            alt={s.name}
+            loading="lazy"
+            className="w-40 h-40 object-cover rounded-xl"
+          />
+        </div>
+
+        <h3 className="text-lg font-semibold text-center mt-4">{s.name}</h3>
+        {locLang && <p className="text-sm text-center text-gray-600">{locLang}</p>}
+        {professionalTitle && (
+          <p className="text-base text-center text-gray-800 mt-1">{professionalTitle}</p>
+        )}
+
+        {km && <p className="text-gray-700 mt-3 text-center">{km}</p>}
+
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 justify-center mt-4">
+            {tags.map((t) => (
+              <span key={t} className="text-xs bg-indigo-50 px-3 py-1 rounded-full">
+                {t}
+              </span>
+            ))}
           </div>
+        )}
 
-          <h3 className="text-lg font-semibold text-center mt-4">{s.name}</h3>
-          {locLang && <p className="text-sm text-center text-gray-600">{locLang}</p>}
-          {professionalTitle && (
-            <p className="text-base text-center text-gray-800 mt-1">{professionalTitle}</p>
-          )}
+        {s.feeRange && (
+          <div className="text-base font-semibold text-center mt-4">{s.feeRange}</div>
+        )}
 
-          {km && <p className="text-gray-700 mt-3 text-center">{km}</p>}
-
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 justify-center mt-4">
-              {tags.map((t) => (
-                <span key={t} className="text-xs bg-indigo-50 px-3 py-1 rounded-full">
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {s.feeRange && (
-            <div className="text-base font-semibold text-center mt-4">{s.feeRange}</div>
-          )}
-
-          <div className="flex justify-center mt-4">
-            <span className="inline-block bg-blue-600 group-hover:bg-blue-700 text-white text-sm font-semibold py-2 px-5 rounded-lg">
-              View Profile
-            </span>
-          </div>
-        </Wrapper>
+        <div className="flex justify-center mt-4">
+          <Link
+            to={to}
+            className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-5 rounded-lg"
+            aria-label={`View ${s.name}'s profile`}
+          >
+            View Profile
+          </Link>
+        </div>
       </div>
     );
   }
 
-  // ===== Compact (used on Home) – unchanged =====
+  // ===== Compact (used on Home) =====
   if (variant === 'compact') {
     return (
       <div className="bg-white rounded-xl shadow p-5 h-full">
-        <Wrapper>
+        <Link to={to} className="group block h-full">
           <div className="w-full flex justify-center">
             <img
               src={img}
@@ -80,7 +82,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           {professionalTitle && (
             <p className="text-sm text-center text-gray-800 mt-1">{professionalTitle}</p>
           )}
-        </Wrapper>
+        </Link>
       </div>
     );
   }
