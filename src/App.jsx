@@ -143,24 +143,67 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('speakers')
   const [selectedService, setSelectedService] = useState('keynote-speakers')
+
+  const hashToService = {
+    keynote: 'keynote-speakers',
+    panel: 'panel-discussions',
+    boardroom: 'boardroom-consulting',
+    workshops: 'workshop-facilitators',
+    virtual: 'virtual-events',
+    coaching: 'leadership-coaching'
+  }
+  const serviceToHash = Object.fromEntries(
+    Object.entries(hashToService).map(([k, v]) => [v, k])
+  )
   const [editingRecord, setEditingRecord] = useState(null)
 
+  const handleNav = (e) => {
+    e.preventDefault()
+    const href = e.currentTarget.getAttribute('href')
+    window.history.pushState({}, '', href)
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  }
+
   useEffect(() => {
-    const sync = () => {
-      const p = window.location.pathname
-      if (p === '/find') {
-        setCurrentPage('find-speakers')
-      } else if (p.startsWith('/speaker/')) {
-        const id = p.split('/speaker/')[1]
-        if (id) setSelectedSpeakerId(id)
-        setCurrentPage('speaker-profile')
-      } else {
-        setCurrentPage('home')
+    const syncAndScroll = () => {
+      const { pathname, hash } = window.location
+      const id = hash ? decodeURIComponent(hash.slice(1)) : ''
+
+      // Path → state
+      if (pathname === '/find') setCurrentPage('find-speakers')
+      else if (pathname === '/services') setCurrentPage('services')
+      else if (pathname === '/about') setCurrentPage('about')
+      else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
+      else setCurrentPage('home')
+
+      if (pathname === '/services' && id && hashToService[id]) {
+        setSelectedService(hashToService[id])
       }
+
+      // Smooth scroll to anchors after content is on screen
+      const doScroll = () => {
+        if (id) {
+          const el = document.getElementById(id)
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            return
+          }
+        }
+        // default: go top
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+      }
+
+      // wait 1 frame to ensure Home sections mounted
+      requestAnimationFrame(() => requestAnimationFrame(doScroll))
     }
-    sync()
-    window.addEventListener('popstate', sync)
-    return () => window.removeEventListener('popstate', sync)
+
+    syncAndScroll()
+    window.addEventListener('popstate', syncAndScroll)
+    window.addEventListener('hashchange', syncAndScroll)
+    return () => {
+      window.removeEventListener('popstate', syncAndScroll)
+      window.removeEventListener('hashchange', syncAndScroll)
+    }
   }, [])
 
   useEffect(() => {
@@ -1167,24 +1210,24 @@ function App() {
         <header className="bg-white shadow-sm border-b sticky top-0 z-40">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center cursor-pointer" onClick={() => setCurrentPage('home')}>
-                <div className="h-12 flex items-center">
-                  <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                    <span className="text-white font-bold text-lg">ASB</span>
-                  </div>
-                  <div className="ml-3">
-                    <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                  </div>
+              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
+                  <span className="text-white font-bold text-lg">ASB</span>
                 </div>
-              </div>
+                <div className="ml-3">
+                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
+                </div>
+              </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-                <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
-                <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1281,25 +1324,24 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center cursor-pointer" onClick={() => setCurrentPage('home')}>
-                <div className="h-12 flex items-center">
-                  <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                    <span className="text-white font-bold text-lg">ASB</span>
-                  </div>
-                  <div className="ml-3">
-                    <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                  </div>
+              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
+                  <span className="text-white font-bold text-lg">ASB</span>
                 </div>
-              </div>
+                <div className="ml-3">
+                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
+                </div>
+              </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-                <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
-                <Button variant="ghost" onClick={() => setShowAdminLogin(true)}>Admin</Button>
-                <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1956,25 +1998,24 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center cursor-pointer" onClick={() => setCurrentPage('home')}>
-                <div className="h-12 flex items-center">
-                  <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                    <span className="text-white font-bold text-lg">ASB</span>
-                  </div>
-                  <div className="ml-3">
-                    <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                  </div>
+              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
+                  <span className="text-white font-bold text-lg">ASB</span>
                 </div>
-              </div>
+                <div className="ml-3">
+                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
+                </div>
+              </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-                <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
-                <Button variant="ghost" onClick={() => setShowAdminLogin(true)}>Admin</Button>
-                <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2165,25 +2206,24 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center cursor-pointer" onClick={() => setCurrentPage('home')}>
-                <div className="h-12 flex items-center">
-                  <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                    <span className="text-white font-bold text-lg">ASB</span>
-                  </div>
-                  <div className="ml-3">
-                    <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                  </div>
+              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
+                  <span className="text-white font-bold text-lg">ASB</span>
                 </div>
-              </div>
+                <div className="ml-3">
+                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
+                </div>
+              </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-                <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
-                <Button variant="ghost" onClick={() => setShowAdminLogin(true)}>Admin</Button>
-                <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2414,12 +2454,12 @@ function App() {
                 <div>
                   <h4 className="font-semibold mb-4">Services</h4>
                   <ul className="space-y-2 text-gray-400">
-                    <li><a href="#" className="hover:text-white text-green-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('keynote-speakers'), 100); }}>Keynote Speakers</a></li>
-                    <li><a href="#" className="hover:text-white text-blue-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('panel-discussions'), 100); }}>Panel Discussions</a></li>
-                    <li><a href="#" className="hover:text-white text-orange-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('boardroom-consulting'), 100); }}>Boardroom Consulting</a></li>
-                    <li><a href="#" className="hover:text-white text-blue-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('workshop-facilitators'), 100); }}>Workshop Facilitators</a></li>
-                    <li><a href="#" className="hover:text-white text-teal-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('virtual-events'), 100); }}>Virtual Events</a></li>
-                    <li><a href="#" className="hover:text-white text-pink-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('leadership-coaching'), 100); }}>Leadership Coaching</a></li>
+                    <li><a href="/services#keynote" onClick={handleNav} className="hover:text-white text-green-400">Keynote Speakers</a></li>
+                    <li><a href="/services#panel" onClick={handleNav} className="hover:text-white text-blue-400">Panel Discussions</a></li>
+                    <li><a href="/services#boardroom" onClick={handleNav} className="hover:text-white text-orange-400">Boardroom Consulting</a></li>
+                    <li><a href="/services#workshops" onClick={handleNav} className="hover:text-white text-blue-400">Workshop Facilitators</a></li>
+                    <li><a href="/services#virtual" onClick={handleNav} className="hover:text-white text-teal-400">Virtual Events</a></li>
+                    <li><a href="/services#coaching" onClick={handleNav} className="hover:text-white text-pink-400">Leadership Coaching</a></li>
                   </ul>
                 </div>
                 <div>
@@ -2565,25 +2605,24 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center cursor-pointer" onClick={() => setCurrentPage('home')}>
-                <div className="h-12 flex items-center">
-                  <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                    <span className="text-white font-bold text-lg">ASB</span>
-                  </div>
-                  <div className="ml-3">
-                    <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                  </div>
+              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
+                  <span className="text-white font-bold text-lg">ASB</span>
                 </div>
-              </div>
+                <div className="ml-3">
+                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
+                </div>
+              </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-                <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
-                <Button variant="ghost" onClick={() => setShowAdminLogin(true)}>Admin</Button>
-                <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2613,7 +2652,7 @@ function App() {
           </div>
 
           {/* Service Content */}
-          <div className="max-w-6xl mx-auto">
+          <section id={serviceToHash[selectedService]} className="scroll-mt-24 max-w-6xl mx-auto">
             <div className="mb-8">
               <div className={`border-l-4 border-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-500 pl-6`}>
                 <h2 className={`text-3xl font-bold text-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-600 mb-4`}>
@@ -2663,7 +2702,7 @@ function App() {
                 {currentService.investment.cta}
               </Button>
             </div>
-          </div>
+          </section>
 
           {/* Call to Action Section */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-12 text-center">
@@ -2713,12 +2752,12 @@ function App() {
               <div>
                 <h4 className="font-semibold mb-4">Services</h4>
                 <ul className="space-y-2 text-gray-400">
-                  <li><a href="#" className="hover:text-white text-green-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('keynote-speakers'), 100); }}>Keynote Speakers</a></li>
-                  <li><a href="#" className="hover:text-white text-blue-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('panel-discussions'), 100); }}>Panel Discussions</a></li>
-                  <li><a href="#" className="hover:text-white text-orange-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('boardroom-consulting'), 100); }}>Boardroom Consulting</a></li>
-                  <li><a href="#" className="hover:text-white text-blue-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('workshop-facilitators'), 100); }}>Workshop Facilitators</a></li>
-                  <li><a href="#" className="hover:text-white text-teal-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('virtual-events'), 100); }}>Virtual Events</a></li>
-                  <li><a href="#" className="hover:text-white text-pink-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('leadership-coaching'), 100); }}>Leadership Coaching</a></li>
+                  <li><a href="/services#keynote" onClick={handleNav} className="hover:text-white text-green-400">Keynote Speakers</a></li>
+                  <li><a href="/services#panel" onClick={handleNav} className="hover:text-white text-blue-400">Panel Discussions</a></li>
+                  <li><a href="/services#boardroom" onClick={handleNav} className="hover:text-white text-orange-400">Boardroom Consulting</a></li>
+                  <li><a href="/services#workshops" onClick={handleNav} className="hover:text-white text-blue-400">Workshop Facilitators</a></li>
+                  <li><a href="/services#virtual" onClick={handleNav} className="hover:text-white text-teal-400">Virtual Events</a></li>
+                  <li><a href="/services#coaching" onClick={handleNav} className="hover:text-white text-pink-400">Leadership Coaching</a></li>
                 </ul>
               </div>
               <div>
@@ -2746,25 +2785,24 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center cursor-pointer" onClick={() => setCurrentPage('home')}>
-                <div className="h-12 flex items-center">
-                  <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                    <span className="text-white font-bold text-lg">ASB</span>
-                  </div>
-                  <div className="ml-3">
-                    <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                    <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                  </div>
+              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
+                  <span className="text-white font-bold text-lg">ASB</span>
                 </div>
-              </div>
+                <div className="ml-3">
+                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
+                </div>
+              </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-                <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
-                <Button variant="ghost" onClick={() => setShowAdminLogin(true)}>Admin</Button>
-                <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2825,7 +2863,7 @@ function App() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="h-12 flex items-center">
+            <a href="/" onClick={handleNav} className="h-12 flex items-center">
               <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                 <span className="text-white font-bold text-lg">ASB</span>
               </div>
@@ -2834,7 +2872,7 @@ function App() {
                 <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                 <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
               </div>
-            </div>
+            </a>
             
             <div className="flex items-center">
               <div 
@@ -2861,12 +2899,13 @@ function App() {
             </div>
             
             <nav className="hidden md:flex items-center space-x-8">
-              <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-              <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-              <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-              <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
-              <Button variant="ghost" onClick={() => setShowAdminLogin(true)}>Admin</Button>
-              <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+              <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+              <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+              <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+              <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
+              <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+              <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+              <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
@@ -2946,8 +2985,9 @@ function App() {
           ))}
         </div>
       </section>
-
-      <FeaturedSpeakers />
+      <div id="about" className="scroll-mt-24">
+        <FeaturedSpeakers />
+      </div>
       <PlanYourEvent onBookingInquiry={() => setCurrentPage('client-booking')} />
 
       {/* ======== INSIGHTS FROM OUR SPEAKERS ======== */}
