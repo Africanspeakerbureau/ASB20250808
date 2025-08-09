@@ -176,6 +176,7 @@ function App() {
       else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
       else if (pathname === '/services') setCurrentPage('services')
       else if (pathname === '/about') setCurrentPage('about')
+      else if (pathname === '/book') setCurrentPage('client-booking')
       else if (pathname === '/admin') setCurrentPage('admin')
       else setCurrentPage('home')
 
@@ -183,7 +184,7 @@ function App() {
         setSelectedService(hashToService[id])
       }
 
-      // Scroll after view mounts (for /#book on Home)
+      // Scroll after view mounts for hash anchors
       requestAnimationFrame(() => {
         if (hash) {
           const el = document.getElementById(id)
@@ -1235,7 +1236,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1349,7 +1350,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2023,7 +2024,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2231,7 +2232,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2456,7 +2457,7 @@ function App() {
                     <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
-                    <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</a></li>
+                    <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
                   </ul>
                 </div>
                 <div>
@@ -2630,7 +2631,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2754,7 +2755,7 @@ function App() {
                   <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
-                  <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</a></li>
+                  <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
                 </ul>
               </div>
               <div>
@@ -2810,7 +2811,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2913,7 +2914,7 @@ function App() {
               <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
               <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
-              <Button asChild><a href="/#book">Book a Speaker</a></Button>
+              <Button asChild><a href="/book">Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
