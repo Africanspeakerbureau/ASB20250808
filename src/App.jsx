@@ -2971,10 +2971,9 @@ function App() {
           ))}
         </div>
       </section>
-
-      <section id="about" className="scroll-mt-24">
+      <div id="about" className="scroll-mt-24">
         <FeaturedSpeakers />
-      </section>
+      </div>
       <PlanYourEvent onBookingInquiry={() => setCurrentPage('client-booking')} />
 
       {/* ======== INSIGHTS FROM OUR SPEAKERS ======== */}
