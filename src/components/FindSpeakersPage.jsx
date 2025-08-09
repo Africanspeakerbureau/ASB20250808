@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchAllPublishedSpeakers } from '../lib/airtable'
+import Footer from './Footer'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
@@ -38,7 +39,7 @@ function SearchCard({ s }) {
 
       {s.feeRange && <p className="mt-5 font-medium">{s.feeRange}</p>}
 
-      <a href={`/speaker/${s.slug}`} className="mt-6 inline-block px-5 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700">
+      <a href={`/speakers/${s.slug}`} className="mt-6 inline-block px-5 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700">
         View Profile
       </a>
     </div>
@@ -115,7 +116,8 @@ export default function FindSpeakersPage() {
   const top15 = filtered.slice(0, 15)
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
+    <>
+    <div className="max-w-6xl mx-auto px-4 py-12 mb-16">
       <header className="text-center mb-8">
         <h1 className="text-4xl font-bold">Find Your Perfect Speaker</h1>
         <p className="text-gray-600 mt-2">Browse our extensive roster of African experts</p>
@@ -154,5 +156,7 @@ export default function FindSpeakersPage() {
         </div>
       )}
     </div>
+    <Footer />
+    </>
   )
 }

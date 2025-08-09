@@ -13,7 +13,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const professionalTitle = s.professionalTitle || s.title;
 
   const Wrapper = ({ children }) => (
-    <a href={`/speakers/${s.slug || s.id}`} className="group block h-full">{children}</a>
+    <a href={`/speakers/${s.slug}`} className="group block h-full">{children}</a>
   );
 
   // ===== Search page card (bigger, like your mockup) =====

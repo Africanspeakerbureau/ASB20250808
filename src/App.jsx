@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
-import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
+import About from './sections/About'
+import PlanYourEvent from './sections/PlanYourEvent'
+import Footer from './components/Footer'
 import ReactDOM from 'react-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -2169,35 +2171,6 @@ function App() {
         </header>
 
         <FindSpeakersPage />
-
-        {/* Footer */}
-        <footer className="bg-gray-900 text-white py-12 mt-16">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center text-center">
-              <div className="flex items-center space-x-2 mb-6">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div>
-                  <div className="font-bold text-white text-sm">AFRICAN</div>
-                  <div className="font-bold text-white text-sm">SPEAKER</div>
-                  <div className="font-bold text-white text-sm">BUREAU</div>
-                </div>
-              </div>
-              
-              <nav className="flex flex-wrap justify-center gap-8 mb-8">
-                <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-                <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setCurrentPage('about')}>About</Button>
-                <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setCurrentPage('contact')}>Contact</Button>
-                <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
-              </nav>
-              
-              <p className="text-gray-400 text-sm">
-                © 2024 African Speaker Bureau. Connecting Africa's voices with the world.
-              </p>
-            </div>
-          </div>
-        </footer>
       </div>
     )
   }
@@ -2990,28 +2963,9 @@ function App() {
         </div>
       </section>
 
+      <About />
       <FeaturedSpeakers />
-
-      {/* ===== MEET OUR SPEAKERS (single instance) ===== */}
-      <MeetOurSpeakers />
-
-      {/* ======== PLAN YOUR EVENT ======== */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-semibold mb-4">Plan Your Event with ASB</h2>
-          <p className="text-gray-700 mb-6">
-            Let us help you find the perfect speaker to elevate your next event. From keynotes to workshops,
-            we have the expertise to make your event unforgettable.
-          </p>
-          <a
-            href="#"
-            onClick={() => setCurrentPage('contact')}
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
-          >
-            Booking Inquiry
-          </a>
-        </div>
-      </section>
+      <PlanYourEvent onBookingInquiry={() => setCurrentPage('client-booking')} />
 
       {/* ======== INSIGHTS FROM OUR SPEAKERS ======== */}
       <section className="py-16 bg-white">
@@ -3122,60 +3076,7 @@ function App() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="h-12 flex items-center mb-6">
-                <div className="bg-blue-600 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block">BUREAU</span>
-                </div>
-              </div>
-              <p className="text-gray-400">
-                Connecting authentic African voices with global audiences since 2008.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
-                <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
-                <li><a href="#" className="hover:text-white">Contact</a></li>
-                <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Services</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white text-green-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('keynote-speakers'), 100); }}>Keynote Speakers</a></li>
-                <li><a href="#" className="hover:text-white text-blue-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('panel-discussions'), 100); }}>Panel Discussions</a></li>
-                <li><a href="#" className="hover:text-white text-orange-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('boardroom-consulting'), 100); }}>Boardroom Consulting</a></li>
-                <li><a href="#" className="hover:text-white text-blue-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('workshop-facilitators'), 100); }}>Workshop Facilitators</a></li>
-                <li><a href="#" className="hover:text-white text-teal-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('virtual-events'), 100); }}>Virtual Events</a></li>
-                <li><a href="#" className="hover:text-white text-pink-400" onClick={() => { setCurrentPage('services'); setTimeout(() => setSelectedService('leadership-coaching'), 100); }}>Leadership Coaching</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>+1 (555) 123-4567</li>
-                <li>info@africanspeakerbureau.com</li>
-                <li>New York • London • Lagos •</li>
-                <li>Cape Town</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>© 2025 African Speaker Bureau. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Admin Login Modal */}
       {showAdminLogin && (
