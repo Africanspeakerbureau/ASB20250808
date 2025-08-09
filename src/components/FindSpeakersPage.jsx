@@ -1,15 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { fetchAllPublishedSpeakers, toSlug } from '../lib/airtable'
-import Footer from './Footer'
+import { fetchAllPublishedSpeakers } from '../lib/airtable'
+import Footer from '../components/Footer'
+import { Button } from '@/components/ui/button.jsx'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
   const langs = (s.spokenLanguages || []).join(', ')
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
-  const slug = s.slug || s.Slug || (s.name ? toSlug(s.name) : '') || s.id || s.recordId
-  const to = `/speakers/${slug}`
+  const to = `/speaker/${s.id}`
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col items-center text-center">
@@ -42,13 +41,13 @@ function SearchCard({ s }) {
 
       {s.feeRange && <p className="mt-5 font-medium">{s.feeRange}</p>}
 
-      <Link
-        to={to}
+      <a
+        href={to}
         className="mt-6 inline-block px-5 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700"
         aria-label={`View ${s.name}'s profile`}
       >
         View Profile
-      </Link>
+      </a>
     </div>
   )
 }
@@ -62,6 +61,27 @@ export default function FindSpeakersPage() {
   const [country, setCountry] = useState('All Countries')
   const [lang, setLang] = useState('All Languages')
   const [fee, setFee] = useState('All Fee Ranges')
+  const [currency, setCurrency] = useState('ZAR')
+  const [countryCode, setCountryCode] = useState('ZA')
+  const [, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 })
+  const [, setShowAdminLogin] = useState(false)
+
+  const setCurrentPage = (page) => {
+    const path =
+      page === 'home'
+        ? '/'
+        : page === 'find-speakers'
+        ? '/find'
+        : page === 'services'
+        ? '/services'
+        : page === 'about'
+        ? '/about'
+        : page === 'client-booking'
+        ? '/client-booking'
+        : '/'
+    window.history.pushState({}, '', path)
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  }
 
   // fetch from Airtable directly (no reliance on App state)
   useEffect(() => {
@@ -124,11 +144,59 @@ export default function FindSpeakersPage() {
 
   return (
     <>
-    <div className="max-w-6xl mx-auto px-4 py-12 mb-16">
-      <header className="text-center mb-8">
-        <h1 className="text-4xl font-bold">Find Your Perfect Speaker</h1>
-        <p className="text-gray-600 mt-2">Browse our extensive roster of African experts</p>
+      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <a href="/" className="h-12 flex items-center">
+              <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
+                <span className="text-white font-bold text-lg">ASB</span>
+              </div>
+              <div className="ml-3">
+                <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
+                <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
+                <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
+              </div>
+            </a>
+
+            <div className="flex items-center">
+              <div
+                className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer"
+                onClick={() => {
+                  const currencies = ['USD', 'ZAR', 'GBP', 'EUR']
+                  const countries = ['US', 'ZA', 'GB', 'EU']
+                  const currentIndex = currencies.indexOf(currency)
+                  const nextIndex = (currentIndex + 1) % currencies.length
+                  setCountryCode(countries[nextIndex])
+                  setCurrency(currencies[nextIndex])
+                  setCurrencyInfo({ currency: currencies[nextIndex], rate: 1 })
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe h-4 w-4" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                  <path d="M2 12h20"></path>
+                </svg>
+                <span>{countryCode}</span>
+                <span className="text-blue-600 font-medium">{currency}</span>
+              </div>
+            </div>
+
+            <nav className="hidden md:flex items-center space-x-8">
+              <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
+              <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
+              <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
+              <Button variant="ghost" onClick={() => { setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Contact</Button>
+              <Button variant="ghost" onClick={() => setShowAdminLogin(true)}>Admin</Button>
+              <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+            </nav>
+          </div>
+        </div>
       </header>
+      <div className="max-w-6xl mx-auto px-4 py-12 mb-16">
+        <header className="text-center mb-8">
+          <h1 className="text-4xl font-bold">Find Your Perfect Speaker</h1>
+          <p className="text-gray-600 mt-2">Browse our extensive roster of African experts</p>
+        </header>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 mb-8">
         <div className="grid md:grid-cols-4 gap-4">
@@ -162,8 +230,8 @@ export default function FindSpeakersPage() {
           {top15.map(s => <SearchCard key={s.id} s={s} />)}
         </div>
       )}
-    </div>
-    <Footer />
+      </div>
+      <Footer />
     </>
   )
 }

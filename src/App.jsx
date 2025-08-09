@@ -146,6 +146,24 @@ function App() {
   const [editingRecord, setEditingRecord] = useState(null)
 
   useEffect(() => {
+    const sync = () => {
+      const p = window.location.pathname
+      if (p === '/find') {
+        setCurrentPage('find-speakers')
+      } else if (p.startsWith('/speaker/')) {
+        const id = p.split('/speaker/')[1]
+        if (id) setSelectedSpeakerId(id)
+        setCurrentPage('speaker-profile')
+      } else {
+        setCurrentPage('home')
+      }
+    }
+    sync()
+    window.addEventListener('popstate', sync)
+    return () => window.removeEventListener('popstate', sync)
+  }, [])
+
+  useEffect(() => {
     let alive = true
     ;(async () => {
       try {
@@ -2138,40 +2156,7 @@ function App() {
   }
 
   if (currentPage === 'find-speakers') {
-    return (
-      <div className="min-h-screen bg-white">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-8">
-                <div className="flex items-center space-x-2">
-                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">ASB</span>
-                  </div>
-                  <div>
-                    <div className="font-bold text-gray-900 text-sm">AFRICAN</div>
-                    <div className="font-bold text-gray-900 text-sm">SPEAKER</div>
-                    <div className="font-bold text-gray-900 text-sm">BUREAU</div>
-                  </div>
-                </div>
-              </div>
-              
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('home')}>Home</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')} className="text-blue-600">Find Speakers</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('contact')}>Contact</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('admin')}>Admin</Button>
-                <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
-              </nav>
-            </div>
-          </div>
-        </header>
-
-        <FindSpeakersPage />
-      </div>
-    )
+    return <FindSpeakersPage />
   }
 
     if (currentPage === 'about') {

@@ -1,6 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { toSlug } from '@/lib/airtable';
 
 export default function SpeakerCard({ speaker, variant = 'search' }) {
   const s = speaker || {};
@@ -13,8 +11,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
-  const slug = s.slug || s.Slug || (s.name ? toSlug(s.name) : '') || s.id || s.recordId;
-  const to = `/speakers/${slug}`;
+  const to = `/speaker/${s.id}`;
 
   // ===== Search page card (bigger, like your mockup) =====
   if (variant === 'search') {
@@ -52,13 +49,13 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
         )}
 
         <div className="flex justify-center mt-4">
-          <Link
-            to={to}
+          <a
+            href={to}
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-5 rounded-lg"
             aria-label={`View ${s.name}'s profile`}
           >
             View Profile
-          </Link>
+          </a>
         </div>
       </div>
     );
@@ -68,7 +65,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   if (variant === 'compact') {
     return (
       <div className="bg-white rounded-xl shadow p-5 h-full">
-        <Link to={to} className="group block h-full">
+        <a href={to} className="group block h-full">
           <div className="w-full flex justify-center">
             <img
               src={img}
@@ -82,7 +79,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           {professionalTitle && (
             <p className="text-sm text-center text-gray-800 mt-1">{professionalTitle}</p>
           )}
-        </Link>
+        </a>
       </div>
     );
   }
