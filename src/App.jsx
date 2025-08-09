@@ -145,22 +145,37 @@ function App() {
   const [selectedService, setSelectedService] = useState('keynote-speakers')
   const [editingRecord, setEditingRecord] = useState(null)
 
+  const handleNav = (e) => {
+    e.preventDefault()
+    const href = e.currentTarget.getAttribute('href')
+    window.history.pushState({}, '', href)
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  }
+
   useEffect(() => {
-    const sync = () => {
-      const p = window.location.pathname
-      if (p === '/find') {
-        setCurrentPage('find-speakers')
-      } else if (p.startsWith('/speaker/')) {
-        const id = p.split('/speaker/')[1]
-        if (id) setSelectedSpeakerId(id)
-        setCurrentPage('speaker-profile')
-      } else {
-        setCurrentPage('home')
-      }
+    const syncAndScroll = () => {
+      const { pathname, hash } = window.location
+      if (pathname === '/find') setCurrentPage('find-speakers')
+      else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
+      else setCurrentPage('home')
+
+      requestAnimationFrame(() => {
+        if (hash) {
+          const id = decodeURIComponent(hash.slice(1))
+          const el = document.getElementById(id)
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        } else {
+          window.scrollTo(0, 0)
+        }
+      })
     }
-    sync()
-    window.addEventListener('popstate', sync)
-    return () => window.removeEventListener('popstate', sync)
+    syncAndScroll()
+    window.addEventListener('popstate', syncAndScroll)
+    window.addEventListener('hashchange', syncAndScroll)
+    return () => {
+      window.removeEventListener('popstate', syncAndScroll)
+      window.removeEventListener('hashchange', syncAndScroll)
+    }
   }, [])
 
   useEffect(() => {
@@ -2825,7 +2840,7 @@ function App() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="h-12 flex items-center">
+            <a href="/" onClick={handleNav} className="h-12 flex items-center">
               <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                 <span className="text-white font-bold text-lg">ASB</span>
               </div>
@@ -2834,7 +2849,7 @@ function App() {
                 <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                 <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
               </div>
-            </div>
+            </a>
             
             <div className="flex items-center">
               <div 
@@ -2861,12 +2876,13 @@ function App() {
             </div>
             
             <nav className="hidden md:flex items-center space-x-8">
-              <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-              <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-              <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-              <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
-              <Button variant="ghost" onClick={() => setShowAdminLogin(true)}>Admin</Button>
-              <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+              <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+              <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+              <Button asChild variant="ghost"><a href="/#services" onClick={handleNav}>Services</a></Button>
+              <Button asChild variant="ghost"><a href="/#about" onClick={handleNav}>About</a></Button>
+              <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+              <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+              <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
             </nav>
           </div>
         </div>

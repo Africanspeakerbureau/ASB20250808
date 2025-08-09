@@ -5,6 +5,13 @@ export default function Footer() {
     import.meta.env.VITE_BUILD_VERSION ||
     new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
+  const handleNav = (e) => {
+    e.preventDefault();
+    const href = e.currentTarget.getAttribute('href');
+    window.history.pushState({}, '', href);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
+
   return (
     <footer className="bg-gray-900 text-white py-16 mt-16">
       <div className="container mx-auto px-4">
@@ -27,10 +34,13 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="/find" className="hover:text-white">Find Speakers</a></li>
-              <li><a href="/about" className="hover:text-white">About</a></li>
-              <li><a href="/contact" className="hover:text-white">Contact</a></li>
-              <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
+              <li><a href="/" onClick={handleNav} className="hover:text-white">Home</a></li>
+              <li><a href="/find" onClick={handleNav} className="hover:text-white">Find Speakers</a></li>
+              <li><a href="/#services" onClick={handleNav} className="hover:text-white">Services</a></li>
+              <li><a href="/#about" onClick={handleNav} className="hover:text-white">About</a></li>
+              <li><a href="/#contact" onClick={handleNav} className="hover:text-white">Contact</a></li>
+              <li><a href="/#book" onClick={handleNav} className="hover:text-white">Book a Speaker</a></li>
+              <li><a href="/admin" onClick={handleNav} className="hover:text-white">Admin</a></li>
             </ul>
           </div>
           <div>

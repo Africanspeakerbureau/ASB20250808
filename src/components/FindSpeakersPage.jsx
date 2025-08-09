@@ -64,22 +64,11 @@ export default function FindSpeakersPage() {
   const [currency, setCurrency] = useState('ZAR')
   const [countryCode, setCountryCode] = useState('ZA')
   const [, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 })
-  const [, setShowAdminLogin] = useState(false)
 
-  const setCurrentPage = (page) => {
-    const path =
-      page === 'home'
-        ? '/'
-        : page === 'find-speakers'
-        ? '/find'
-        : page === 'services'
-        ? '/services'
-        : page === 'about'
-        ? '/about'
-        : page === 'client-booking'
-        ? '/client-booking'
-        : '/'
-    window.history.pushState({}, '', path)
+  const handleNav = (e) => {
+    e.preventDefault()
+    const href = e.currentTarget.getAttribute('href')
+    window.history.pushState({}, '', href)
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
@@ -147,7 +136,7 @@ export default function FindSpeakersPage() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <a href="/" className="h-12 flex items-center">
+            <a href="/" onClick={handleNav} className="h-12 flex items-center">
               <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                 <span className="text-white font-bold text-lg">ASB</span>
               </div>
@@ -182,12 +171,13 @@ export default function FindSpeakersPage() {
             </div>
 
             <nav className="hidden md:flex items-center space-x-8">
-              <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
-              <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
-              <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
-              <Button variant="ghost" onClick={() => { setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>Contact</Button>
-              <Button variant="ghost" onClick={() => setShowAdminLogin(true)}>Admin</Button>
-              <Button onClick={() => setCurrentPage('client-booking')}>Book a Speaker</Button>
+              <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+              <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+              <Button asChild variant="ghost"><a href="/#services" onClick={handleNav}>Services</a></Button>
+              <Button asChild variant="ghost"><a href="/#about" onClick={handleNav}>About</a></Button>
+              <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+              <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+              <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
