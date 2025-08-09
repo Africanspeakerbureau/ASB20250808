@@ -5,6 +5,11 @@ import FindSpeakersPage from './components/FindSpeakersPage'
 import ReactDOM from 'react-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
+import {
+  getSpeakerApplications,
+  getClientInquiries,
+  getQuickInquiries,
+} from '@/lib/airtable'
 import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
@@ -121,11 +126,9 @@ function App() {
   const [editImagePreview, setEditImagePreview] = useState(null)
   
   // Admin Dashboard State
-  const [adminData, setAdminData] = useState({
-    speakerApplications: [],
-    clientInquiries: [],
-    quickInquiries: []
-  })
+  const [apps, setApps] = useState([])
+  const [clients, setClients] = useState([])
+  const [quick, setQuick] = useState([])
   const [featuredSpeakers, setFeaturedSpeakers] = useState([])
   const [randomSpeakers, setRandomSpeakers] = useState([])
   const [publishedSpeakers, setPublishedSpeakers] = useState([])
@@ -140,7 +143,30 @@ function App() {
   const [activeTab, setActiveTab] = useState('speakers')
   const [selectedService, setSelectedService] = useState('keynote-speakers')
   const [editingRecord, setEditingRecord] = useState(null)
-  
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        setLoading(true)
+        const [a, c, q] = await Promise.all([
+          getSpeakerApplications(),
+          getClientInquiries(),
+          getQuickInquiries(),
+        ])
+        if (!alive) return
+        setApps(a); setClients(c); setQuick(q)
+      } catch (e) {
+        console.error('Admin data load failed', e)
+        if (!alive) return
+        setApps([]); setClients([]); setQuick([])
+      } finally {
+        if (alive) setLoading(false)
+      }
+    })()
+    return () => { alive = false }
+  }, [])
+
   // Currency state
   const [currency, setCurrency] = useState('ZAR');
   const [countryCode, setCountryCode] = useState('ZA');
@@ -225,8 +251,10 @@ function App() {
   }
 
   // Airtable configuration
-  const AIRTABLE_API_KEY = 'patAQXn8Ge9RuWMZN.8e9e5ee4a91f7a4813a39467587fee1d94d185af1f17ebe4ad131ddc89ac267c'
-  const BASE_ID = 'apppWmiOseyJwQRcn'
+  const AIRTABLE_API_KEY =
+    import.meta.env.VITE_AIRTABLE_API_KEY || import.meta.env.AIRTABLE_API_KEY
+  const BASE_ID =
+    import.meta.env.VITE_AIRTABLE_BASE_ID || import.meta.env.AIRTABLE_BASE_ID
 
   const heroSlides = [
     {
@@ -283,12 +311,6 @@ function App() {
     return () => clearInterval(interval)
   }, [])
 
-  // Load admin data when admin page is accessed
-  useEffect(() => {
-    if (currentPage === 'admin' && isAdminLoggedIn) {
-      loadAdminData()
-    }
-  }, [currentPage, isAdminLoggedIn])
   // Initialize currency conversion
   useEffect(() => {
     const initializeCurrency = async () => {
@@ -417,67 +439,15 @@ function App() {
   const loadAdminData = async () => {
     setLoading(true)
     try {
-      // Load all Speakers
-      const speakersResponse = await fetch(`https://api.airtable.com/v0/${BASE_ID}/Speakers`, {
-        headers: {
-          'Authorization': `Bearer ${AIRTABLE_API_KEY}`
-        }
-      })
-      const speakersData = await speakersResponse.json()
-
-      // Load Client Inquiries
-      const clientsResponse = await fetch(`https://api.airtable.com/v0/${BASE_ID}/Client%20Inquiries`, {
-        headers: {
-          'Authorization': `Bearer ${AIRTABLE_API_KEY}`
-        }
-      })
-      const clientsData = await clientsResponse.json()
-
-      // Load Quick Inquiries
-      const quickResponse = await fetch(`https://api.airtable.com/v0/${BASE_ID}/Quick%20Inquiries`, {
-        headers: {
-          'Authorization': `Bearer ${AIRTABLE_API_KEY}`
-        }
-      })
-      const quickData = await quickResponse.json()
-
-      setAdminData({
-        speakerApplications: speakersData.records || [],
-        clientInquiries: clientsData.records || [],
-        quickInquiries: quickData.records || []
-      })
-
-      // Load Featured Speakers (Featured = Yes speakers only)
-      const featuredSpeakersData = speakersData.records?.filter(record => 
-        record.fields.Featured === 'Yes'
-      ) || []
-      setFeaturedSpeakers(featuredSpeakersData)
-
-      // Load Random Speakers (Status = 'Published on Site' AND Featured ≠ 'Yes')
-      // Fix 1: Fetch from Speakers table with proper filtering
-      const randomResp = await fetch(
-        `https://api.airtable.com/v0/${BASE_ID}/Speakers?view=Published%20Speakers`,
-        { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } }
-      )
-      const randomData = await randomResp.json()
-
-      // keep full list for Find page:
-      setPublishedSpeakers(randomData.records || [])
-
-      // Filter: Status = 'Published on Site' AND Featured ≠ 'Yes'
-      const randomSpeakersData = (randomData.records || [])
-        .filter(record => {
-          const { Status, Featured } = record.fields
-          if (Status !== 'Published on Site') return false
-          if (typeof Featured === 'string' && Featured.toLowerCase() === 'yes') return false
-          return true
-        })
-        .slice(0, 8)
-
-      console.log('✅ Final randomSpeakersData:', randomSpeakersData.length, randomSpeakersData.map(r => r.id))
-      setRandomSpeakers(randomSpeakersData)
+      const [a, c, q] = await Promise.all([
+        getSpeakerApplications(),
+        getClientInquiries(),
+        getQuickInquiries(),
+      ])
+      setApps(a); setClients(c); setQuick(q)
     } catch (error) {
-      console.error('Error loading admin data:', error)
+      console.error('Admin data load failed', error)
+      setApps([]); setClients([]); setQuick([])
       setSubmitStatus({ type: 'error', message: 'Error loading data. Please try again.' })
     }
     setLoading(false)
@@ -543,12 +513,13 @@ function App() {
   const exportToCSV = (data, filename) => {
     if (!data.length) return
 
-    const headers = Object.keys(data[0].fields)
+    const { id: _id, ...first } = data[0]
+    const headers = Object.keys(first)
     const csvContent = [
       headers.join(','),
-      ...data.map(record => 
-        headers.map(header => 
-          `"${(record.fields[header] || '').toString().replace(/"/g, '""')}"`
+      ...data.map(record =>
+        headers.map(header =>
+          `"${(record[header] || '').toString().replace(/"/g, '""')}"`
         ).join(',')
       )
     ].join('\n')
@@ -570,28 +541,33 @@ function App() {
       'Rejected': { color: 'bg-red-100 text-red-800', icon: XCircle },
       'New': { color: 'bg-purple-100 text-purple-800', icon: Clock }
     }
-    
-    const config = statusConfig[status] || statusConfig['Pending']
+
+    const value = Array.isArray(status) ? status[0] : status
+    const config = statusConfig[value] || statusConfig['Pending']
     const Icon = config.icon
-    
+
     return (
       <Badge className={`${config.color} flex items-center gap-1`}>
         <Icon className="w-3 h-3" />
-        {status}
+        {value}
       </Badge>
     )
   }
 
   const filteredData = (data) => {
     return data.filter(record => {
-      const matchesSearch = searchTerm === '' || 
-        Object.values(record.fields).some(value => 
+      const matchesSearch =
+        searchTerm === '' ||
+        Object.values(record).some(value =>
           value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
         )
-      
-      const matchesStatus = statusFilter === 'all' || 
-        record.fields.Status === statusFilter
-      
+
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (Array.isArray(record.Status)
+          ? record.Status.includes(statusFilter)
+          : record.Status === statusFilter)
+
       return matchesSearch && matchesStatus
     })
   }
@@ -840,9 +816,9 @@ function App() {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{adminData.speakerApplications.length}</div>
+                <div className="text-2xl font-bold">{apps.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  {adminData.speakerApplications.filter(r => r.fields.Status === 'Pending').length} pending review
+                  {apps.filter(r => Array.isArray(r.Status) ? r.Status.includes('Pending') : r.Status === 'Pending').length} pending review
                 </p>
               </CardContent>
             </Card>
@@ -852,9 +828,9 @@ function App() {
                 <Building className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{adminData.clientInquiries.length}</div>
+                <div className="text-2xl font-bold">{clients.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  {adminData.clientInquiries.filter(r => r.fields.Status === 'New').length} new inquiries
+                  {clients.filter(r => Array.isArray(r.Status) ? r.Status.includes('New') : r.Status === 'New').length} new inquiries
                 </p>
               </CardContent>
             </Card>
@@ -864,9 +840,9 @@ function App() {
                 <Mail className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{adminData.quickInquiries.length}</div>
+                <div className="text-2xl font-bold">{quick.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  {adminData.quickInquiries.filter(r => r.fields.Status === 'New').length} unread messages
+                  {quick.filter(r => Array.isArray(r.Status) ? r.Status.includes('New') : r.Status === 'New').length} unread messages
                 </p>
               </CardContent>
             </Card>
@@ -884,7 +860,7 @@ function App() {
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  Speaker Applications ({adminData.speakerApplications.length})
+                  Speaker Applications ({apps.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('clients')}
@@ -894,7 +870,7 @@ function App() {
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  Client Inquiries ({adminData.clientInquiries.length})
+                  Client Inquiries ({clients.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('quick')}
@@ -904,7 +880,7 @@ function App() {
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  Quick Inquiries ({adminData.quickInquiries.length})
+                  Quick Inquiries ({quick.length})
                 </button>
               </nav>
             </div>
@@ -938,9 +914,9 @@ function App() {
             </Select>
             <Button
               onClick={() => {
-                const data = activeTab === 'speakers' ? adminData.speakerApplications :
-                           activeTab === 'clients' ? adminData.clientInquiries :
-                           adminData.quickInquiries
+                const data = activeTab === 'speakers' ? apps :
+                           activeTab === 'clients' ? clients :
+                           quick
                 exportToCSV(filteredData(data), `${activeTab}_${new Date().toISOString().split('T')[0]}`)
               }}
               variant="outline"
@@ -999,33 +975,32 @@ function App() {
                     </TableHeader>
                     <TableBody>
                       {filteredData(
-                        activeTab === 'speakers' ? adminData.speakerApplications :
-                        activeTab === 'clients' ? adminData.clientInquiries :
-                        adminData.quickInquiries
+                        activeTab === 'speakers' ? apps :
+                        activeTab === 'clients' ? clients :
+                        quick
                       ).map((record) => (
                         <TableRow key={record.id}>
                           {activeTab === 'speakers' && (
                             <>
                               <TableCell className="font-medium">
-                                {record.fields['First Name']} {record.fields['Last Name']}
+                                {record['First Name']} {record['Last Name']}
                               </TableCell>
-                              <TableCell>{record.fields.Email}</TableCell>
-                              <TableCell>{record.fields['Professional Title']}</TableCell>
-                              <TableCell>{record.fields.Industry}</TableCell>
-                              <TableCell>{getStatusBadge(record.fields.Status)}</TableCell>
+                              <TableCell>{record.Email}</TableCell>
+                              <TableCell>{record['Professional Title']}</TableCell>
+                              <TableCell>{record.Industry}</TableCell>
+                              <TableCell>{getStatusBadge(record.Status)}</TableCell>
                               <TableCell>{record.createdTime ? new Date(record.createdTime).toLocaleDateString() : 'N/A'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                     onClick={() => {
                       // Only allow editing if on admin page and logged in and URL starts with /admin
                       if (currentPage === 'admin' && isAdminLoggedIn && window.location.pathname.startsWith('/admin')) {
                         console.log('Edit button clicked for speaker:', record);
-                        console.log('Setting editingRecord to:', {...record, type: 'speaker'});
-                        setEditingRecord({...record, type: 'speaker'});
-                        console.log('editingRecord should now be set');
+                        const { id, ...fields } = record;
+                        setEditingRecord({ id, fields, type: 'speaker' });
                       } else {
                         console.log('Edit not allowed - not on admin page or not logged in');
                         setSubmitStatus({ type: 'error', message: 'You must be logged in as admin to edit records' });
@@ -1042,23 +1017,24 @@ function App() {
                           {activeTab === 'clients' && (
                             <>
                               <TableCell className="font-medium">
-                                {record.fields['First Name']} {record.fields['Last Name']}
+                                {record['First Name']} {record['Last Name']}
                               </TableCell>
-                              <TableCell>{record.fields.Email}</TableCell>
-                              <TableCell>{record.fields['Company Name']}</TableCell>
-                              <TableCell>{record.fields['Event Name']}</TableCell>
-                              <TableCell>{record.fields['Budget Range']}</TableCell>
-                              <TableCell>{getStatusBadge(record.fields.Status)}</TableCell>
+                              <TableCell>{record.Email}</TableCell>
+                              <TableCell>{record['Company Name']}</TableCell>
+                              <TableCell>{record['Event Name']}</TableCell>
+                              <TableCell>{record['Budget Range']}</TableCell>
+                              <TableCell>{getStatusBadge(record.Status)}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => {
                                       // Only allow editing if on admin page and logged in and URL starts with /admin
                                       if (currentPage === 'admin' && isAdminLoggedIn && window.location.pathname.startsWith('/admin')) {
                                         console.log('Edit button clicked for client:', record);
-                                        setEditingRecord({...record, type: 'client'});
+                                        const { id, ...fields } = record;
+                                        setEditingRecord({ id, fields, type: 'client' });
                                       } else {
                                         console.log('Edit not allowed - not on admin page or not logged in');
                                         setSubmitStatus({ type: 'error', message: 'You must be logged in as admin to edit records' });
@@ -1074,21 +1050,22 @@ function App() {
                           )}
                           {activeTab === 'quick' && (
                             <>
-                              <TableCell className="font-medium">{`${record.fields['First Name'] || ''} ${record.fields['Last Name'] || ''}`.trim()}</TableCell>
-                              <TableCell>{record.fields.Email}</TableCell>
-                              <TableCell className="max-w-xs truncate">{record.fields.Message}</TableCell>
-                              <TableCell>{getStatusBadge(record.fields.Status)}</TableCell>
+                              <TableCell className="font-medium">{`${record['First Name'] || ''} ${record['Last Name'] || ''}`.trim()}</TableCell>
+                              <TableCell>{record.Email}</TableCell>
+                              <TableCell className="max-w-xs truncate">{record.Message}</TableCell>
+                              <TableCell>{getStatusBadge(record.Status)}</TableCell>
                               <TableCell>{record.createdTime ? new Date(record.createdTime).toLocaleDateString() : 'N/A'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => {
                                       // Only allow editing if on admin page and logged in and URL starts with /admin
                                       if (currentPage === 'admin' && isAdminLoggedIn && window.location.pathname.startsWith('/admin')) {
                                         console.log('Edit button clicked for quick inquiry:', record);
-                                        setEditingRecord({...record, type: 'quick'});
+                                        const { id, ...fields } = record;
+                                        setEditingRecord({ id, fields, type: 'quick' });
                                       } else {
                                         console.log('Edit not allowed - not on admin page or not logged in');
                                         setSubmitStatus({ type: 'error', message: 'You must be logged in as admin to edit records' });
