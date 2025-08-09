@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { toSlug } from '@/lib/airtable';
 
 export default function SpeakerCard({ speaker, variant = 'search' }) {
   const s = speaker || {};
@@ -12,7 +13,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
-  const slug = s.slug || s.Slug || s.id || s.recordId;
+  const slug = s.slug || s.Slug || (s.name ? toSlug(s.name) : '') || s.id || s.recordId;
   const to = `/speakers/${slug}`;
 
   // ===== Search page card (bigger, like your mockup) =====

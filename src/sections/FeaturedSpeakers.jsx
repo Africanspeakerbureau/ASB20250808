@@ -39,7 +39,7 @@ export default function FeaturedSpeakers() {
 
           <div className="mt-8">
             <Link
-              to="/find-speakers"
+              to="/find"
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
             >
               VIEW ALL SPEAKERS

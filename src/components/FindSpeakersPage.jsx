@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchAllPublishedSpeakers } from '../lib/airtable'
+import { fetchAllPublishedSpeakers, toSlug } from '../lib/airtable'
 import Footer from './Footer'
 
 // Compact, search-variant card (square image)
@@ -8,7 +8,7 @@ function SearchCard({ s }) {
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
   const langs = (s.spokenLanguages || []).join(', ')
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
-  const slug = s.slug || s.Slug || s.id || s.recordId
+  const slug = s.slug || s.Slug || (s.name ? toSlug(s.name) : '') || s.id || s.recordId
   const to = `/speakers/${slug}`
 
   return (

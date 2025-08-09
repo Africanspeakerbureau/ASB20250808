@@ -27,7 +27,7 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="/find-speakers" className="hover:text-white">Find Speakers</a></li>
+              <li><a href="/find" className="hover:text-white">Find Speakers</a></li>
               <li><a href="/about" className="hover:text-white">About</a></li>
               <li><a href="/contact" className="hover:text-white">Contact</a></li>
               <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
