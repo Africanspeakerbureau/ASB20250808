@@ -2155,7 +2155,7 @@ function App() {
   if (currentPage === 'find-speakers') {
     return (
       <>
-        <header className="bg-white/95 backdrop-blur border-b shadow-sm sticky top-0 z-50">
+        <header className="bg-white shadow-sm border-b sticky top-0 z-40">
           <Header />
         </header>
         <FindSpeakersPage />
