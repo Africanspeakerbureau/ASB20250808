@@ -248,7 +248,11 @@ function App() {
   }, []);
   const handleSearch = (e) => {
     e.preventDefault()
-    setCurrentPage('find-speakers')
+    goFind()
+  }
+
+  const goFind = () => {
+    window.location.href = '/find'
   }
 
   // Airtable configuration
@@ -1162,7 +1166,7 @@ function App() {
                 </div>
               </div>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
+                <Button variant="ghost" onClick={goFind}>Find Speakers</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
                 <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
@@ -1176,7 +1180,7 @@ function App() {
           {/* Breadcrumb / Nav */}
           <nav className="mb-8 text-sm">
             <button onClick={() => setCurrentPage('home')} className="mr-4 hover:underline text-blue-600">Home</button>
-            <button onClick={() => setCurrentPage('find-speakers')} className="hover:underline text-blue-600">Find Speakers</button>
+            <button onClick={goFind} className="hover:underline text-blue-600">Find Speakers</button>
           </nav>
 
           {/* Hero Banner */}
@@ -1276,7 +1280,7 @@ function App() {
                 </div>
               </div>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
+                <Button variant="ghost" onClick={goFind}>Find Speakers</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
                 <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
@@ -1951,7 +1955,7 @@ function App() {
                 </div>
               </div>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
+                <Button variant="ghost" onClick={goFind}>Find Speakers</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
                 <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
@@ -2137,7 +2141,7 @@ function App() {
     )
   }
 
-  if (currentPage === 'find-speakers') {
+  if (currentPage === 'find') {
     return (
       <div className="min-h-screen bg-white">
         <header className="bg-white shadow-sm border-b">
@@ -2158,7 +2162,7 @@ function App() {
               
               <nav className="hidden md:flex items-center space-x-8">
                 <Button variant="ghost" onClick={() => setCurrentPage('home')}>Home</Button>
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')} className="text-blue-600">Find Speakers</Button>
+                <Button variant="ghost" onClick={goFind} className="text-blue-600">Find Speakers</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('contact')}>Contact</Button>
@@ -2193,7 +2197,7 @@ function App() {
                 </div>
               </div>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
+                <Button variant="ghost" onClick={goFind}>Find Speakers</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
                 <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
@@ -2420,7 +2424,7 @@ function App() {
                 <div>
                   <h4 className="font-semibold mb-4">Quick Links</h4>
                   <ul className="space-y-2 text-gray-400">
-                    <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
+                    <li><a href="/find" className="hover:text-white">Find Speakers</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</a></li>
@@ -2593,7 +2597,7 @@ function App() {
                 </div>
               </div>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
+                <Button variant="ghost" onClick={goFind}>Find Speakers</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
                 <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
@@ -2690,7 +2694,7 @@ function App() {
               <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3">
                 Schedule Consultation
               </Button>
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3" onClick={() => setCurrentPage('find-speakers')}>
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3" onClick={goFind}>
                 Browse Our Speakers
               </Button>
             </div>
@@ -2719,7 +2723,7 @@ function App() {
               <div>
                 <h4 className="font-semibold mb-4">Quick Links</h4>
                 <ul className="space-y-2 text-gray-400">
-                  <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
+                  <li><a href="/find" className="hover:text-white">Find Speakers</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</a></li>
@@ -2774,7 +2778,7 @@ function App() {
                 </div>
               </div>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
+                <Button variant="ghost" onClick={goFind}>Find Speakers</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
                 <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
                 <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
@@ -2876,7 +2880,7 @@ function App() {
             </div>
             
             <nav className="hidden md:flex items-center space-x-8">
-              <Button variant="ghost" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</Button>
+              <Button variant="ghost" onClick={goFind}>Find Speakers</Button>
               <Button variant="ghost" onClick={() => setCurrentPage('services')}>Services</Button>
               <Button variant="ghost" onClick={() => setCurrentPage('about')}>About</Button>
               <Button variant="ghost" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</Button>
@@ -2915,7 +2919,7 @@ function App() {
               international conferences.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => setCurrentPage('find-speakers')}>
+              <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={goFind}>
                 Find Your Speaker
               </Button>
               <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900" onClick={() => setCurrentPage('speaker-application')}>
