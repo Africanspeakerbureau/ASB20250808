@@ -147,7 +147,7 @@ export default function FindSpeakersPage() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="h-12 flex items-center">
+            <a href="/" className="h-12 flex items-center">
               <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                 <span className="text-white font-bold text-lg">ASB</span>
               </div>
@@ -156,7 +156,7 @@ export default function FindSpeakersPage() {
                 <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                 <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
               </div>
-            </div>
+            </a>
 
             <div className="flex items-center">
               <div
