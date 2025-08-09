@@ -73,7 +73,9 @@ function mapSpeaker(r) {
     location: f['Location'] || '',
     country: f['Country'] || '',
     spokenLanguages: f['Spoken Languages'] || [],
+    industry: f['Industry'] || '',
     expertise: f['Expertise Areas'] || [],
+    bio: f['Professional Bio'] || '',
     keyMessage: f['Key Messages'] || '',
     feeRange: f['Fee Range'] || '',
     photoUrl: image || '',
@@ -117,6 +119,17 @@ export async function fetchAllPublishedSpeakers({ limit = 15 } = {}) {
     pageSize: limit
   });
   return records.map(mapSpeaker);
+}
+
+export async function getSpeakerById(id) {
+  ensureEnv();
+  const url = `${API}/${TBL_SPEAKERS}/${id}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${API_KEY}` },
+  });
+  if (!res.ok) throw new Error('Not found');
+  const json = await res.json();
+  return mapSpeaker(json);
 }
 
 async function query(table, params = {}) {

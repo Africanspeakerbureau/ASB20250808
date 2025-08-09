@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { fetchAllPublishedSpeakers, toSlug } from '../lib/airtable'
+import { fetchAllPublishedSpeakers } from '../lib/airtable'
 import Footer from './Footer'
 
 // Compact, search-variant card (square image)
@@ -8,8 +7,7 @@ function SearchCard({ s }) {
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
   const langs = (s.spokenLanguages || []).join(', ')
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
-  const slug = s.slug || s.Slug || (s.name ? toSlug(s.name) : '') || s.id || s.recordId
-  const to = `/speakers/${slug}`
+  const to = `/speaker/${s.id}`
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col items-center text-center">
@@ -42,13 +40,13 @@ function SearchCard({ s }) {
 
       {s.feeRange && <p className="mt-5 font-medium">{s.feeRange}</p>}
 
-      <Link
-        to={to}
+      <a
+        href={to}
         className="mt-6 inline-block px-5 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700"
         aria-label={`View ${s.name}'s profile`}
       >
         View Profile
-      </Link>
+      </a>
     </div>
   )
 }
