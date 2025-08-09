@@ -1,12 +1,10 @@
-const BASE_ID =
-  import.meta.env.VITE_AIRTABLE_BASE_ID ||
-  import.meta.env.AIRTABLE_BASE_ID;
-
 const API_KEY =
   import.meta.env.VITE_AIRTABLE_API_KEY ||
   import.meta.env.AIRTABLE_API_KEY;
-
-const API = 'https://api.airtable.com/v0';
+const BASE_ID =
+  import.meta.env.VITE_AIRTABLE_BASE_ID ||
+  import.meta.env.AIRTABLE_BASE_ID;
+const API = `https://api.airtable.com/v0/${BASE_ID}`;
 const TBL_SPEAKERS = encodeURIComponent('Speaker Applications');
 
 function ensureEnv() {
@@ -39,7 +37,7 @@ async function list(
     ...(sort ? { sort } : {}),
     ...(maxRecords ? { maxRecords } : {})
   };
-  const url = `${API}/${BASE_ID}/${table}?${toQuery(params)}`;
+  const url = `${API}/${table}?${toQuery(params)}`;
   const res = await fetch(url, { headers });
   if (!res.ok) {
     const t = await res.text().catch(() => '');
@@ -116,4 +114,21 @@ export async function fetchAllPublishedSpeakers({ limit = 15 } = {}) {
   });
   return records.map(mapSpeaker);
 }
+
+async function query(table, params = {}) {
+  const qs = new URLSearchParams(params).toString();
+  const res = await fetch(`${API}/${encodeURIComponent(table)}?${qs}`, {
+    headers: { Authorization: `Bearer ${API_KEY}` },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const json = await res.json();
+  return (json.records || []).map((r) => ({ id: r.id, createdTime: r.createdTime, ...r.fields }));
+}
+
+export const getSpeakerApplications = (opts = {}) =>
+  query('Speaker Applications', { view: 'Grid view', maxRecords: 200, ...opts });
+export const getClientInquiries = (opts = {}) =>
+  query('Client Inquiries', { view: 'Grid view', maxRecords: 200, ...opts });
+export const getQuickInquiries = (opts = {}) =>
+  query('Quick Inquiries', { view: 'Grid view', maxRecords: 200, ...opts });
 
