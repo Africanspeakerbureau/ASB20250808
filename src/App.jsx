@@ -173,30 +173,23 @@ function App() {
 
       // Path → state
       if (pathname === '/find') setCurrentPage('find-speakers')
+      else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
       else if (pathname === '/services') setCurrentPage('services')
       else if (pathname === '/about') setCurrentPage('about')
-      else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
+      else if (pathname === '/admin') setCurrentPage('admin')
       else setCurrentPage('home')
 
       if (pathname === '/services' && id && hashToService[id]) {
         setSelectedService(hashToService[id])
       }
 
-      // Smooth scroll to anchors after content is on screen
-      const doScroll = () => {
-        if (id) {
+      // Scroll after view mounts (for /#book on Home)
+      requestAnimationFrame(() => {
+        if (hash) {
           const el = document.getElementById(id)
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            return
-          }
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }
-        // default: go top
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-      }
-
-      // wait 1 frame to ensure Home sections mounted
-      requestAnimationFrame(() => requestAnimationFrame(doScroll))
+      })
     }
 
     syncAndScroll()
@@ -1241,8 +1234,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/#book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1355,8 +1348,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/#book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2029,8 +2022,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/#book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2237,8 +2230,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/#book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2636,8 +2629,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/#book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2816,8 +2809,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/#book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2919,8 +2912,8 @@ function App() {
               <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
               <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-              <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+              <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+              <Button asChild><a href="/#book">Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
@@ -3084,7 +3077,7 @@ function App() {
               </div>
             </div>
 
-            <Card>
+            <Card id="book">
               <CardHeader>
                 <CardTitle>Quick Inquiry</CardTitle>
               </CardHeader>

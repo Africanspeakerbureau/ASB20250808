@@ -176,8 +176,8 @@ export default function FindSpeakersPage() {
               <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
               <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-              <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+              <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+              <Button asChild><a href="/#book">Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
