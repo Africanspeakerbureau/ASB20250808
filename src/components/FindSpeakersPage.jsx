@@ -8,18 +8,25 @@ function SearchCard({ s }) {
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
   const langs = (s.spokenLanguages || []).join(', ')
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
-  const to = `/speaker/${s.id}`
+  const profilePath = `/speaker/${encodeURIComponent(s.id || s.slug)}`
+  const go = (e) => {
+    e.preventDefault()
+    window.history.pushState({}, '', profilePath)
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col items-center text-center">
-      <div className="w-40 h-40 rounded-xl overflow-hidden bg-gray-100 mb-6">
+      <a href={profilePath} onClick={go} className="w-40 h-40 rounded-xl overflow-hidden bg-gray-100 mb-6">
         {s.photoUrl
           ? <img src={s.photoUrl} alt={s.name} className="w-full h-full object-cover" />
           : <div className="w-full h-full grid place-items-center text-gray-400 text-sm">No Image</div>
         }
-      </div>
+      </a>
 
-      <h3 className="text-xl font-semibold">{s.name}</h3>
+      <h3 className="text-xl font-semibold">
+        <a href={profilePath} onClick={go}>{s.name}</a>
+      </h3>
       {s.title && <p className="text-gray-600 mt-1">{s.title}</p>}
       {locLang && <p className="text-gray-500 mt-1 text-sm">{locLang}</p>}
 
@@ -42,7 +49,8 @@ function SearchCard({ s }) {
       {s.feeRange && <p className="mt-5 font-medium">{s.feeRange}</p>}
 
       <a
-        href={to}
+        href={profilePath}
+        onClick={go}
         className="mt-6 inline-block px-5 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700"
         aria-label={`View ${s.name}'s profile`}
       >
