@@ -10,6 +10,7 @@ export default function PlanYourEvent({ onBookingInquiry }) {
           we have the expertise to make your event unforgettable.
         </p>
         <a
+          id="open-booking-form"
           href="#"
           onClick={(e) => {
             e.preventDefault();

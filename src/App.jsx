@@ -2846,14 +2846,29 @@ function App() {
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
                         <a
-                          href="/#book"
+                          href="/"
                           className="underline font-medium"
                           onClick={(e) => {
                             e.preventDefault();
-                            // update URL, then smooth-scroll to the form (works from any page)
-                            window.history.pushState({}, '', '/#book');
-                            const el = document.getElementById('book');
-                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                            // If we’re not on Home, navigate first, then click once the button exists.
+                            const goAndClick = () => {
+                              const btn = document.getElementById('open-booking-form');
+                              if (btn) {
+                                btn.click();
+                              } else {
+                                // try again on next frame (allows Home to render)
+                                requestAnimationFrame(goAndClick);
+                              }
+                            };
+
+                            if (window.location.pathname !== '/') {
+                              window.location.assign('/');
+                              // The first frame on Home will call goAndClick via a short timer:
+                              setTimeout(goAndClick, 60);
+                            } else {
+                              goAndClick();
+                            }
                           }}
                         >
                           Book a Speaker
