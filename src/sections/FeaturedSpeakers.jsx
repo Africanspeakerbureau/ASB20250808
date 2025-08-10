@@ -2,6 +2,25 @@ import { useEffect, useState } from 'react';
 import SpeakerCard from '@/components/SpeakerCard';
 import { fetchFeaturedSpeakers } from '@/lib/airtable';
 
+const toSlug = (s = '') =>
+  s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
+const shapeSpeaker = (r = {}) => {
+  const first = r.firstName || r.first_name || r.name?.split(' ')[0] || ''
+  const last =
+    r.lastName || r.last_name || r.name?.split(' ').slice(1).join(' ') || ''
+  const full = r.fullName || r.full_name || r.name || `${first} ${last}`.trim()
+  return {
+    ...r,
+    recordId: r.recordId || r.id || r.record_id,
+    id: r.id,
+    slug: r.slug || toSlug(full),
+    firstName: first,
+    lastName: last,
+    fullName: full,
+  }
+}
+
 export default function FeaturedSpeakers() {
   const [items, setItems] = useState([]);
 
@@ -10,7 +29,7 @@ export default function FeaturedSpeakers() {
     (async () => {
       try {
         const rows = await fetchFeaturedSpeakers(3);
-        if (alive) setItems(rows);
+        if (alive) setItems((rows || []).map(shapeSpeaker));
       } catch (e) {
         console.error('FeaturedSpeakers load failed', e);
       }

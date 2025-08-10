@@ -12,12 +12,33 @@ import {
   getSpeakerApplications,
   getClientInquiries,
   getQuickInquiries,
-  fetchPublishedSpeakers,
+  fetchAllPublishedSpeakers,
 } from '@/lib/airtable'
 import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
+
+// Normalize speaker objects so links can rely on recordId/id/slug
+const toSlug = (s = '') =>
+  s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
+const shapeSpeaker = (r = {}) => {
+  const first = r.firstName || r.first_name || r.name?.split(' ')[0] || ''
+  const last =
+    r.lastName || r.last_name || r.name?.split(' ').slice(1).join(' ') || ''
+  const full = r.fullName || r.full_name || r.name || `${first} ${last}`.trim()
+
+  return {
+    ...r,
+    recordId: r.recordId || r.id || r.record_id,
+    id: r.id,
+    slug: r.slug || toSlug(full),
+    firstName: first,
+    lastName: last,
+    fullName: full,
+  }
+}
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -261,8 +282,8 @@ function App() {
     let alive = true
     ;(async () => {
       try {
-        const rows = await fetchPublishedSpeakers({ limit: 8, excludeFeatured: true })
-        if (alive) setPublishedSpeakers(rows)
+        const rows = await fetchAllPublishedSpeakers({ limit: 50 })
+        if (alive) setPublishedSpeakers((rows || []).map(shapeSpeaker))
       } catch (e) {
         console.error('Fetch published speakers failed', e)
       }
@@ -1204,40 +1225,7 @@ function App() {
 
   // Speaker Profile Page
   if (currentPage === 'speaker-profile') {
-    const path = window.location.pathname;
-    const urlId = path.startsWith('/speaker/') ? decodeURIComponent(path.split('/speaker/')[1] || '') : '';
-    const theSpeaker = (publishedSpeakers || []).find(s => String(s.id) === String(urlId) || String(s.slug) === String(urlId));
-    return (
-      <div className="min-h-screen bg-white">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <a href="/" onClick={handleNav} className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book">Book a Speaker</a></Button>
-              </nav>
-            </div>
-          </div>
-        </header>
-        <SpeakerProfile speaker={theSpeaker} />
-        <Footer />
-      </div>
-    )
+    return <SpeakerProfile speakers={publishedSpeakers} />
   }
 
   if (currentPage === 'speaker-application') {

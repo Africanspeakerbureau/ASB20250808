@@ -11,7 +11,8 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
-  const to = `/speaker/${s.id}`;
+  const key = s?.recordId || s?.id || s?.slug;
+  const to = `/speaker/${key}`;
 
   // ===== Search page card (bigger, like your mockup) =====
   if (variant === 'search') {
