@@ -17,10 +17,6 @@ import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
-import { getAdminHref, adminLinkProps } from './lib/nav.js'
-const ADMIN_HREF = getAdminHref();
-const ADMIN_PROPS = adminLinkProps(ADMIN_HREF);
-
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -1239,8 +1235,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href={ADMIN_HREF} {...ADMIN_PROPS}>Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1353,8 +1349,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href={ADMIN_HREF} {...ADMIN_PROPS}>Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2027,8 +2023,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href={ADMIN_HREF} {...ADMIN_PROPS}>Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2235,8 +2231,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href={ADMIN_HREF} {...ADMIN_PROPS}>Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2461,7 +2457,7 @@ function App() {
                     <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
-                    <li><a href="/#book" className="hover:text-white">Book a Speaker</a></li>
+                    <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
                   </ul>
                 </div>
                 <div>
@@ -2634,8 +2630,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href={ADMIN_HREF} {...ADMIN_PROPS}>Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2759,7 +2755,7 @@ function App() {
                   <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
-                  <li><a href="/#book" className="hover:text-white">Book a Speaker</a></li>
+                  <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
                 </ul>
               </div>
               <div>
@@ -2814,8 +2810,8 @@ function App() {
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href={ADMIN_HREF} {...ADMIN_PROPS}>Admin</a></Button>
-                <Button asChild><a href="/#book">Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2917,8 +2913,8 @@ function App() {
               <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
               <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-              <Button asChild variant="ghost"><a href={ADMIN_HREF} {...ADMIN_PROPS}>Admin</a></Button>
-              <Button asChild><a href="/#book">Book a Speaker</a></Button>
+              <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
+              <Button asChild><a href="/book">Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
