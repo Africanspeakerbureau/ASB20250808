@@ -122,7 +122,10 @@ function App() {
   const [clientForm, setClientForm] = useState({})
   const [quickForm, setQuickForm] = useState({})
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' })
-  const [quickSubmitStatus, setQuickSubmitStatus] = useState({ type: '', message: '' })
+  const [bookingStatus, setBookingStatus] = useState('idle')
+  const [bookingError, setBookingError] = useState('')
+  const [quickStatus, setQuickStatus] = useState('idle')
+  const [quickError, setQuickError] = useState('')
   const [profileImageUrl, setProfileImageUrl] = useState('')
   const [attachments, setAttachments] = useState([])
   const [editImageFile, setEditImageFile] = useState(null)
@@ -769,6 +772,8 @@ function App() {
 
   const handleClientSubmit = async (e) => {
     e.preventDefault()
+    setBookingStatus('loading')
+    setBookingError('')
     const formData = new FormData(e.target)
     const data = {
       "First Name": formData.get('firstName'),
@@ -791,17 +796,21 @@ function App() {
       "Status": "New"
     }
 
-    const result = await submitToAirtable('Client%20Inquiries', data)
-    if (result.success) {
+    try {
+      await submitToAirtable('Client%20Inquiries', data)
+      setBookingStatus('success')
       e.target.reset()
-      setTimeout(() => setSubmitStatus({ type: '', message: '' }), 5000)
+    } catch (err) {
+      setBookingError(err?.message || 'Something went wrong. Please try again.')
+      setBookingStatus('error')
     }
   }
 
   const handleQuickSubmit = async (e) => {
     e.preventDefault()
-    setSubmitStatus({ type: 'loading', message: 'Sending your message...' })
-    
+    setQuickStatus('loading')
+    setQuickError('')
+
     const formData = new FormData(e.target)
     const data = {
       "First Name": formData.get('firstName'),
@@ -811,12 +820,13 @@ function App() {
       "Status": "New"
     }
 
-    console.log('Submitting Quick Inquiry data:', data)
-    const result = await submitToAirtable('Quick%20Inquiries', data)
-    if (result.success) {
-      setQuickSubmitStatus({ type: 'success', message: 'Thank you for your Inquiry. We will get back to you soon. In case you have a concrete inquiry for an event, please use our \'Book a Speaker\' form.' })
+    try {
+      await submitToAirtable('Quick%20Inquiries', data)
+      setQuickStatus('success')
       e.target.reset()
-      setTimeout(() => setQuickSubmitStatus({ type: '', message: '' }), 5000)
+    } catch (err) {
+      setQuickError(err?.message || 'Something went wrong. Please try again.')
+      setQuickStatus('error')
     }
   }
 
@@ -2041,19 +2051,15 @@ function App() {
               <p className="text-lg text-gray-600">Connect with Africa's most compelling voices for your next event</p>
             </div>
 
-            {submitStatus.message && (
-              <div className={`mb-6 p-4 rounded-lg ${
-                submitStatus.type === 'success' ? 'bg-green-100 text-green-800' :
-                submitStatus.type === 'error' ? 'bg-red-100 text-red-800' :
-                'bg-blue-100 text-blue-800'
-              }`}>
-                {submitStatus.message}
-              </div>
-            )}
-
-            <Card>
-              <CardContent className="p-8">
-                <form onSubmit={handleClientSubmit} className="space-y-8">
+              <Card>
+                <CardContent className="p-8">
+                  {bookingStatus === 'success' ? (
+                    <div className="rounded-xl bg-green-50 text-green-800 p-4 border border-green-200">
+                      <p className="font-medium">Thank you — we’ve received your booking request.</p>
+                      <p>We’ll get back to you within 24 hours.</p>
+                    </div>
+                  ) : (
+                  <form onSubmit={handleClientSubmit} className="space-y-8">
                   {/* Contact Information */}
                   <div>
                     <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
@@ -2197,12 +2203,16 @@ function App() {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={submitStatus.type === 'loading'}>
-                    {submitStatus.type === 'loading' ? 'Submitting...' : 'Submit Booking Request'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+                    <Button type="submit" className="w-full" disabled={bookingStatus === 'loading'}>
+                      {bookingStatus === 'loading' ? 'Submitting...' : 'Submit Booking Request'}
+                    </Button>
+                    {bookingStatus === 'error' && (
+                      <p className="mt-3 text-sm text-red-600">{bookingError}</p>
+                    )}
+                  </form>
+                  )}
+                </CardContent>
+              </Card>
           </div>
         </div>
       </div>
@@ -2828,19 +2838,18 @@ function App() {
               <p className="text-lg text-gray-600">Send us a quick message and we'll get back to you soon</p>
             </div>
 
-            {quickSubmitStatus.message && (
-              <div className={`mb-6 p-4 rounded-lg ${
-                quickSubmitStatus.type === 'success' ? 'bg-green-100 text-green-800' :
-                quickSubmitStatus.type === 'error' ? 'bg-red-100 text-red-800' :
-                'bg-blue-100 text-blue-800'
-              }`}>
-                {quickSubmitStatus.message}
-              </div>
-            )}
-
-            <Card>
-              <CardContent className="p-8">
-                <form onSubmit={handleQuickSubmit} className="space-y-6">
+              <Card>
+                <CardContent className="p-8">
+                  {quickStatus === 'success' ? (
+                    <div className="rounded-xl bg-green-50 text-green-800 p-4 border border-green-200">
+                      <p className="font-medium">Thank you for your inquiry.</p>
+                      <p>
+                        We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
+                        <a href="/#book" className="underline font-medium">Book a Speaker</a> form.
+                      </p>
+                    </div>
+                  ) : (
+                  <form onSubmit={handleQuickSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">First Name *</label>
@@ -2859,12 +2868,16 @@ function App() {
                     <label className="block text-sm font-medium mb-2">Message *</label>
                     <Textarea name="message" placeholder="Tell us how we can help you..." rows={6} required />
                   </div>
-                  <Button type="submit" className="w-full" disabled={submitStatus.type === 'loading'}>
-                    {submitStatus.type === 'loading' ? 'Sending...' : 'Send Message'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+                    <Button type="submit" className="w-full" disabled={quickStatus === 'loading'}>
+                      {quickStatus === 'loading' ? 'Sending...' : 'Send Message'}
+                    </Button>
+                    {quickStatus === 'error' && (
+                      <p className="mt-3 text-sm text-red-600">{quickError}</p>
+                    )}
+                  </form>
+                  )}
+                </CardContent>
+              </Card>
           </div>
         </div>
       </div>
@@ -3082,33 +3095,37 @@ function App() {
               </div>
             </div>
 
-            <Card id="book">
-              <CardHeader>
-                <CardTitle>Quick Inquiry</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {quickSubmitStatus.message && (
-                  <div className={`mb-4 p-4 rounded-lg ${
-                    quickSubmitStatus.type === 'success' ? 'bg-green-100 text-green-800' :
-                    quickSubmitStatus.type === 'error' ? 'bg-red-100 text-red-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {quickSubmitStatus.message}
-                  </div>
-                )}
-                <form onSubmit={handleQuickSubmit} className="space-y-4">
+              <Card id="book">
+                <CardHeader>
+                  <CardTitle>Quick Inquiry</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {quickStatus === 'success' ? (
+                    <div className="rounded-xl bg-green-50 text-green-800 p-4 border border-green-200">
+                      <p className="font-medium">Thank you for your inquiry.</p>
+                      <p>
+                        We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
+                        <a href="/#book" className="underline font-medium">Book a Speaker</a> form.
+                      </p>
+                    </div>
+                  ) : (
+                  <form onSubmit={handleQuickSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input name="firstName" placeholder="First name" required />
                     <Input name="lastName" placeholder="Last name" required />
                   </div>
                   <Input name="email" type="email" placeholder="Your email" required />
                   <Textarea name="message" placeholder="Your message" rows={4} required />
-                  <Button type="submit" className="w-full" disabled={submitStatus.type === 'loading'}>
-                    {submitStatus.type === 'loading' ? 'Sending...' : 'Send Message'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+                    <Button type="submit" className="w-full" disabled={quickStatus === 'loading'}>
+                      {quickStatus === 'loading' ? 'Sending...' : 'Send Message'}
+                    </Button>
+                    {quickStatus === 'error' && (
+                      <p className="mt-3 text-sm text-red-600">{quickError}</p>
+                    )}
+                  </form>
+                  )}
+                </CardContent>
+              </Card>
           </div>
         </div>
       </section>
