@@ -1191,7 +1191,7 @@ function App() {
             <h1 className="text-2xl font-bold mb-4">Speaker Not Found</h1>
             <Button onClick={() => setCurrentPage('home')}>Return Home</Button>
           </div>
-        </div>
+        </section>
       )
     }
 
@@ -2044,7 +2044,7 @@ function App() {
           </div>
         </header>
 
-        <div className="container mx-auto px-4 py-8">
+        <section id="book" className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">Book a Speaker</h1>
@@ -2214,7 +2214,7 @@ function App() {
                 </CardContent>
               </Card>
           </div>
-        </div>
+        </section>
       </div>
     )
   }
@@ -2845,7 +2845,20 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/#book" className="underline font-medium">Book a Speaker</a> form.
+                        <a
+                          href="/#book"
+                          className="underline font-medium"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            // update URL, then smooth-scroll to the form (works from any page)
+                            window.history.pushState({}, '', '/#book');
+                            const el = document.getElementById('book');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                        >
+                          Book a Speaker
+                        </a>{' '}
+                        form.
                       </p>
                     </div>
                   ) : (
@@ -3095,7 +3108,7 @@ function App() {
               </div>
             </div>
 
-              <Card id="book">
+              <Card>
                 <CardHeader>
                   <CardTitle>Quick Inquiry</CardTitle>
                 </CardHeader>
@@ -3105,7 +3118,20 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/#book" className="underline font-medium">Book a Speaker</a> form.
+                        <a
+                          href="/#book"
+                          className="underline font-medium"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            // update URL, then smooth-scroll to the form (works from any page)
+                            window.history.pushState({}, '', '/#book');
+                            const el = document.getElementById('book');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                        >
+                          Book a Speaker
+                        </a>{' '}
+                        form.
                       </p>
                     </div>
                   ) : (
