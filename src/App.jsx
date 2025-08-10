@@ -3,7 +3,6 @@ import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
 import PlanYourEvent from './sections/PlanYourEvent'
-import Footer from './components/Footer'
 import ReactDOM from 'react-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -101,8 +100,6 @@ import heroTechSummit from './assets/hero_tech_summit.jpg'
 import heroExecutiveAI from './assets/hero_executive_ai_training.jpg'
 import heroCorporateLeadership from './assets/hero_corporate_leadership_conference.jpg'
 import heroVirtualSeminars from './assets/hero_virtual_seminars_webinars.jpg'
-import Header from './components/Header'
-import SpeakerProfile from './components/SpeakerProfile'
 
 function syncFromPath({ setCurrentPage, setSelectedSpeakerId }) {
   const p = window.location.pathname || '/'
@@ -111,13 +108,49 @@ function syncFromPath({ setCurrentPage, setSelectedSpeakerId }) {
     return
   }
   if (p.startsWith('/speaker/')) {
-    const parts = p.split('/').filter(Boolean)
-    const id = parts[1]
+    const id = p.split('/').filter(Boolean)[1]
     if (id) setSelectedSpeakerId(id)
     setCurrentPage('speaker-profile')
     return
   }
   setCurrentPage('home')
+}
+
+function SpeakerProfileInline({ id }) {
+  const [data, setData] = React.useState(null)
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const mod = await import('./lib/airtable')
+        const rec = await mod.getSpeakerById(id)
+        if (alive) setData(rec)
+      } catch (e) {
+        console.error('Profile load failed:', e)
+      } finally {
+        if (alive) setLoading(false)
+      }
+    })()
+    return () => { alive = false }
+  }, [id])
+
+  if (loading) return <main className="max-w-5xl mx-auto px-4 py-12">Loading profile…</main>
+  if (!data) return <main className="max-w-5xl mx-auto px-4 py-12">Speaker not found.</main>
+
+  return (
+    <main className="max-w-5xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-semibold">{data.fullName || 'Speaker'}</h1>
+      {data.professionalTitle && <p className="text-gray-600 mt-1">{data.professionalTitle}</p>}
+      {data.professionalBio && (
+        <div className="mt-6">
+          <h2 className="font-semibold mb-2">About</h2>
+          <p className="whitespace-pre-line leading-7">{data.professionalBio}</p>
+        </div>
+      )}
+    </main>
+  )
 }
 
 function App() {
@@ -1206,7 +1239,7 @@ function App() {
 
   // Speaker Profile Page
   if (currentPage === 'speaker-profile') {
-    return <SpeakerProfile />
+    return <SpeakerProfileInline id={selectedSpeakerId} />
   }
 
   if (currentPage === 'speaker-application') {
@@ -2997,8 +3030,6 @@ function App() {
           </div>
         </div>
       </section>
-
-      <Footer />
 
       {/* Admin Login Modal */}
       {showAdminLogin && (
