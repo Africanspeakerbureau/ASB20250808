@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
+import SpeakerProfile from './components/SpeakerProfile'
+import Footer from './components/Footer'
 import PlanYourEvent from './sections/PlanYourEvent'
 import ReactDOM from 'react-dom'
 import { Button } from '@/components/ui/button.jsx'
@@ -114,43 +116,6 @@ function syncFromPath({ setCurrentPage, setSelectedSpeakerId }) {
     return
   }
   setCurrentPage('home')
-}
-
-function SpeakerProfileInline({ id }) {
-  const [data, setData] = React.useState(null)
-  const [loading, setLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    let alive = true
-    ;(async () => {
-      try {
-        const mod = await import('./lib/airtable')
-        const rec = await mod.getSpeakerById(id)
-        if (alive) setData(rec)
-      } catch (e) {
-        console.error('Profile load failed:', e)
-      } finally {
-        if (alive) setLoading(false)
-      }
-    })()
-    return () => { alive = false }
-  }, [id])
-
-  if (loading) return <main className="max-w-5xl mx-auto px-4 py-12">Loading profile…</main>
-  if (!data) return <main className="max-w-5xl mx-auto px-4 py-12">Speaker not found.</main>
-
-  return (
-    <main className="max-w-5xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-semibold">{data.fullName || 'Speaker'}</h1>
-      {data.professionalTitle && <p className="text-gray-600 mt-1">{data.professionalTitle}</p>}
-      {data.professionalBio && (
-        <div className="mt-6">
-          <h2 className="font-semibold mb-2">About</h2>
-          <p className="whitespace-pre-line leading-7">{data.professionalBio}</p>
-        </div>
-      )}
-    </main>
-  )
 }
 
 function App() {
@@ -1239,7 +1204,40 @@ function App() {
 
   // Speaker Profile Page
   if (currentPage === 'speaker-profile') {
-    return <SpeakerProfileInline id={selectedSpeakerId} />
+    const path = window.location.pathname;
+    const urlId = path.startsWith('/speaker/') ? decodeURIComponent(path.split('/speaker/')[1] || '') : '';
+    const theSpeaker = (publishedSpeakers || []).find(s => String(s.id) === String(urlId) || String(s.slug) === String(urlId));
+    return (
+      <div className="min-h-screen bg-white">
+        <header className="bg-white shadow-sm border-b">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between h-16">
+              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
+                  <span className="text-white font-bold text-lg">ASB</span>
+                </div>
+                <div className="ml-3">
+                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
+                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
+                </div>
+              </a>
+              <nav className="hidden md:flex items-center space-x-8">
+                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
+              </nav>
+            </div>
+          </div>
+        </header>
+        <SpeakerProfile speaker={theSpeaker} />
+        <Footer />
+      </div>
+    )
   }
 
   if (currentPage === 'speaker-application') {
