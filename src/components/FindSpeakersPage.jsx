@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { fetchAllPublishedSpeakers } from '../lib/airtable'
 import Footer from '../components/Footer'
 import { Button } from '@/components/ui/button.jsx'
+import { getAdminHref, adminLinkProps } from '../lib/nav.js'
+const ADMIN_HREF = getAdminHref();
+const ADMIN_PROPS = adminLinkProps(ADMIN_HREF);
+
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
@@ -176,8 +180,8 @@ export default function FindSpeakersPage() {
               <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
               <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-              <Button asChild variant="ghost"><a href="/admin">Admin</a></Button>
-              <Button asChild><a href="/book">Book a Speaker</a></Button>
+              <Button asChild variant="ghost"><a href={ADMIN_HREF} {...ADMIN_PROPS}>Admin</a></Button>
+              <Button asChild><a href="/#book">Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
