@@ -171,32 +171,30 @@ function App() {
       const { pathname, hash } = window.location
       const id = hash ? decodeURIComponent(hash.slice(1)) : ''
 
+      if (pathname === '/admin') {
+        setShowAdminLogin(true)
+        return
+      }
+
       // Path → state
       if (pathname === '/find') setCurrentPage('find-speakers')
+      else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
       else if (pathname === '/services') setCurrentPage('services')
       else if (pathname === '/about') setCurrentPage('about')
-      else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
+      else if (pathname === '/book') setCurrentPage('client-booking')
       else setCurrentPage('home')
 
       if (pathname === '/services' && id && hashToService[id]) {
         setSelectedService(hashToService[id])
       }
 
-      // Smooth scroll to anchors after content is on screen
-      const doScroll = () => {
-        if (id) {
+      // Scroll after view mounts for hash anchors
+      requestAnimationFrame(() => {
+        if (hash) {
           const el = document.getElementById(id)
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            return
-          }
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }
-        // default: go top
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-      }
-
-      // wait 1 frame to ensure Home sections mounted
-      requestAnimationFrame(() => requestAnimationFrame(doScroll))
+      })
     }
 
     syncAndScroll()
@@ -1242,7 +1240,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1356,7 +1354,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2030,7 +2028,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2238,7 +2236,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2463,7 +2461,7 @@ function App() {
                     <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
-                    <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</a></li>
+                    <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
                   </ul>
                 </div>
                 <div>
@@ -2637,7 +2635,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2761,7 +2759,7 @@ function App() {
                   <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
-                  <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('client-booking')}>Book a Speaker</a></li>
+                  <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
                 </ul>
               </div>
               <div>
@@ -2817,7 +2815,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+                <Button asChild><a href="/book">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2920,7 +2918,7 @@ function App() {
               <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
               <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><a href="/#book" onClick={handleNav}>Book a Speaker</a></Button>
+              <Button asChild><a href="/book">Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
@@ -3084,7 +3082,7 @@ function App() {
               </div>
             </div>
 
-            <Card>
+            <Card id="book">
               <CardHeader>
                 <CardTitle>Quick Inquiry</CardTitle>
               </CardHeader>
@@ -3160,6 +3158,9 @@ function App() {
                 onClick={() => {
                   setShowAdminLogin(false)
                   setSubmitStatus({ type: '', message: '' })
+                  if (window.location.pathname === '/admin') {
+                    window.history.replaceState({}, '', '/')
+                  }
                 }}
               >
                 Close
