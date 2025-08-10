@@ -1,7 +1,5 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
-import Header from './Header'
-import Footer from './Footer'
 
 const toSlug = (s = '') =>
   s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
@@ -19,20 +17,16 @@ export default function SpeakerProfile({ speakers = [] }) {
 
   if (!speaker) {
     return (
-      <>
-        <Header />
-        <main className="container mx-auto px-4 py-16">
-          <h1>Speaker not found</h1>
-          <p>
-            We couldn’t locate that profile. Please return to{' '}
-            <a href="/find" className="text-blue-600 underline">
-              Find Speakers
-            </a>
-            .
-          </p>
-        </main>
-        <Footer />
-      </>
+      <main className="container mx-auto px-4 py-16">
+        <h1>Speaker not found</h1>
+        <p>
+          We couldn’t locate that profile. Please return to{' '}
+          <a href="/find" className="text-blue-600 underline">
+            Find Speakers
+          </a>
+          .
+        </p>
+      </main>
     )
   }
 
@@ -58,13 +52,11 @@ export default function SpeakerProfile({ speakers = [] }) {
     'inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-sm text-gray-700'
 
   return (
-    <>
-      <Header />
-      <main className="max-w-6xl mx-auto px-4 py-16">
-        <h1 className="text-3xl font-semibold">{speaker.fullName}</h1>
-        {speaker.professionalTitle && (
-          <p className="text-neutral-600 mt-1">{speaker.professionalTitle}</p>
-        )}
+    <main className="max-w-6xl mx-auto px-4 py-16">
+      <h1 className="text-3xl font-semibold">{speaker.fullName}</h1>
+      {speaker.professionalTitle && (
+        <p className="text-neutral-600 mt-1">{speaker.professionalTitle}</p>
+      )}
 
         <ul className="flex flex-wrap gap-2 mt-4">
           {speaker.spokenLanguages && (
@@ -125,8 +117,6 @@ export default function SpeakerProfile({ speakers = [] }) {
           )}
         </section>
       </main>
-      <Footer />
-    </>
   )
 }
 
