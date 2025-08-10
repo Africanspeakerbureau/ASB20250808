@@ -2845,7 +2845,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/#book" className="underline font-medium">Book a Speaker</a> form.
+                        <a href="/book" className="underline font-medium">Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
@@ -3105,7 +3105,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/#book" className="underline font-medium">Book a Speaker</a> form.
+                        <a href="/book" className="underline font-medium">Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
