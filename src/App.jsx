@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
-import PlanYourEvent from './sections/PlanYourEvent'
+import SpeakerProfile from './components/SpeakerProfile'
 import Footer from './components/Footer'
+import PlanYourEvent from './sections/PlanYourEvent'
 import ReactDOM from 'react-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -11,12 +12,33 @@ import {
   getSpeakerApplications,
   getClientInquiries,
   getQuickInquiries,
-  fetchPublishedSpeakers,
+  fetchAllPublishedSpeakers,
 } from '@/lib/airtable'
 import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
+
+// Normalize speaker objects so links can rely on recordId/id/slug
+const toSlug = (s = '') =>
+  s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
+const shapeSpeaker = (r = {}) => {
+  const first = r.firstName || r.first_name || r.name?.split(' ')[0] || ''
+  const last =
+    r.lastName || r.last_name || r.name?.split(' ').slice(1).join(' ') || ''
+  const full = r.fullName || r.full_name || r.name || `${first} ${last}`.trim()
+
+  return {
+    ...r,
+    recordId: r.recordId || r.id || r.record_id,
+    id: r.id,
+    slug: r.slug || toSlug(full),
+    firstName: first,
+    lastName: last,
+    fullName: full,
+  }
+}
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -102,6 +124,21 @@ import heroExecutiveAI from './assets/hero_executive_ai_training.jpg'
 import heroCorporateLeadership from './assets/hero_corporate_leadership_conference.jpg'
 import heroVirtualSeminars from './assets/hero_virtual_seminars_webinars.jpg'
 
+function syncFromPath({ setCurrentPage, setSelectedSpeakerId }) {
+  const p = window.location.pathname || '/'
+  if (p === '/find') {
+    setCurrentPage('find-speakers')
+    return
+  }
+  if (p.startsWith('/speaker/')) {
+    const id = p.split('/').filter(Boolean)[1]
+    if (id) setSelectedSpeakerId(id)
+    setCurrentPage('speaker-profile')
+    return
+  }
+  setCurrentPage('home')
+}
+
 function App() {
   // Cloudinary configuration
   const cld = new Cloudinary({
@@ -169,6 +206,18 @@ function App() {
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
+  const goToFind = () => {
+    window.history.pushState({}, '', '/find')
+    setCurrentPage('find-speakers')
+  }
+
+  useEffect(() => {
+    syncFromPath({ setCurrentPage, setSelectedSpeakerId })
+    const onPop = () => syncFromPath({ setCurrentPage, setSelectedSpeakerId })
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
   useEffect(() => {
     const syncAndScroll = () => {
       const { pathname, hash } = window.location
@@ -179,13 +228,10 @@ function App() {
         return
       }
 
-      // Path → state
-      if (pathname === '/find') setCurrentPage('find-speakers')
-      else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
-      else if (pathname === '/services') setCurrentPage('services')
+      // Path → state (other routes)
+      if (pathname === '/services') setCurrentPage('services')
       else if (pathname === '/about') setCurrentPage('about')
       else if (pathname === '/book') setCurrentPage('client-booking')
-      else setCurrentPage('home')
 
       if (pathname === '/services' && id && hashToService[id]) {
         setSelectedService(hashToService[id])
@@ -236,8 +282,8 @@ function App() {
     let alive = true
     ;(async () => {
       try {
-        const rows = await fetchPublishedSpeakers({ limit: 8, excludeFeatured: true })
-        if (alive) setPublishedSpeakers(rows)
+        const rows = await fetchAllPublishedSpeakers({ limit: 50 })
+        if (alive) setPublishedSpeakers((rows || []).map(shapeSpeaker))
       } catch (e) {
         console.error('Fetch published speakers failed', e)
       }
@@ -325,7 +371,7 @@ function App() {
   }, []);
   const handleSearch = (e) => {
     e.preventDefault()
-    setCurrentPage('find-speakers')
+    goToFind()
   }
 
   // Airtable configuration
@@ -1177,168 +1223,9 @@ function App() {
     )
   }
 
-  // Rest of the original component code for other pages...
-  // [The rest of the component remains the same as the original, including speaker-application, client-booking, quick-inquiry, and home pages]
-
   // Speaker Profile Page
-  if (currentPage === 'speaker-profile' && selectedSpeakerId) {
-    const speaker = [...featuredSpeakers, ...randomSpeakers].find(s => s.id === selectedSpeakerId)
-    
-    if (!speaker) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Speaker Not Found</h1>
-            <Button onClick={() => setCurrentPage('home')}>Return Home</Button>
-          </div>
-        </div>
-      )
-    }
-
-    const fields = speaker.fields
-    const titlePrefix = fields['Title Prefix'] || ''
-    const firstName = fields['First Name'] || ''
-    const lastName = fields['Last Name'] || ''
-    const professionalTitle = fields['Professional Title'] || ''
-    const keyMessages = fields['Key Messages'] || ''
-    const country = fields['Country'] || ''
-    const spokenLanguages = fields['Spoken Languages'] || ''
-    const industry = fields['Industry'] || ''
-    const expertiseAreas = fields['Expertise Areas'] || []
-    const achievements = fields['Achievements'] || ''
-    const speakingTopics = fields['Speaking Topics'] || ''
-    const professionalBio = fields['Professional Bio'] || ''
-    const videoLink1 = fields['Video Link 1'] || ''
-    const videoLink2 = fields['Video Link 2'] || ''
-    const videoLink3 = fields['Video Link 3'] || ''
-    const profileImage = fields['Profile Image']?.[0]?.url || 'https://via.placeholder.com/200x200/3b82f6/ffffff?text=Speaker'
-    const secondImage = fields['Second Image']?.[0]?.url || 'https://via.placeholder.com/1200x400/6366f1/ffffff?text=Speaker+Banner'
-
-    const Detail = ({ label, value }) => {
-      if (!value) return null
-      const items = Array.isArray(value) ? value : [value]
-      return (
-        <div className="mb-4">
-          <h4 className="font-semibold text-gray-900 mb-2">{label}</h4>
-          <ul className="list-disc list-inside text-gray-700 space-y-1">
-            {items.map((v, i) => <li key={i}>{v}</li>)}
-          </ul>
-        </div>
-      )
-    }
-
-    return (
-      <div className="min-h-screen bg-white">
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <a href="/" onClick={handleNav} className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book">Book a Speaker</a></Button>
-              </nav>
-            </div>
-          </div>
-        </header>
-
-        <main className="container mx-auto px-4 py-12">
-          {/* Breadcrumb / Nav */}
-          <nav className="mb-8 text-sm">
-            <button onClick={() => setCurrentPage('home')} className="mr-4 hover:underline text-blue-600">Home</button>
-            <button onClick={() => setCurrentPage('find-speakers')} className="hover:underline text-blue-600">Find Speakers</button>
-          </nav>
-
-          {/* Hero Banner */}
-          <section className="relative mb-12">
-            <img
-              src={secondImage}
-              alt={`${firstName} ${lastName}`}
-              className="w-full h-64 object-cover rounded-lg shadow"
-            />
-            <div className="absolute bottom-0 left-0 p-6 bg-gradient-to-t from-black/70 to-transparent w-full rounded-b-lg">
-              <div className="flex items-center space-x-4">
-                <img
-                  src={profileImage}
-                  alt={`${firstName} ${lastName}`}
-                  className="w-24 h-24 rounded-full border-4 border-white object-cover"
-                />
-                <div className="text-white">
-                  <h1 className="text-3xl font-bold">
-                    {titlePrefix && `${titlePrefix} `}{firstName} {lastName}
-                  </h1>
-                  <p className="text-xl">{professionalTitle}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Key Details */}
-          <section className="grid md:grid-cols-2 gap-8 mb-12">
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">About {firstName}</h2>
-              <p className="text-gray-700 leading-relaxed">{professionalBio}</p>
-            </div>
-            <aside className="space-y-4">
-              <Detail label="Key Messages" value={keyMessages} />
-              <Detail label="Country" value={country} />
-              <Detail label="Spoken Languages" value={spokenLanguages} />
-              <Detail label="Industry" value={industry} />
-              <Detail label="Expertise Areas" value={expertiseAreas} />
-              <Detail label="Achievements" value={achievements} />
-              <Detail label="Speaking Topics" value={speakingTopics} />
-            </aside>
-          </section>
-
-          {/* Videos & Articles */}
-          {(videoLink1 || videoLink2 || videoLink3) && (
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-4">Media</h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                {[videoLink1, videoLink2, videoLink3].map((link, i) =>
-                  link ? (
-                    <div key={i} className="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow">
-                      <iframe
-                        src={link}
-                        title={`Video ${i + 1}`}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
-                  ) : null
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Contact Button */}
-          <section className="text-center">
-            <Button 
-              onClick={() => setCurrentPage('client-booking')}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-8 rounded-lg"
-            >
-              Contact {firstName}
-            </Button>
-          </section>
-        </main>
-      </div>
-    )
+  if (currentPage === 'speaker-profile') {
+    return <SpeakerProfile speakers={publishedSpeakers} />
   }
 
   if (currentPage === 'speaker-application') {
@@ -2468,7 +2355,7 @@ function App() {
                 <div>
                   <h4 className="font-semibold mb-4">Quick Links</h4>
                   <ul className="space-y-2 text-gray-400">
-                    <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
+                    <li><a href="/find" className="hover:text-white" onClick={handleNav}>Find Speakers</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                     <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
                     <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
@@ -2737,7 +2624,7 @@ function App() {
               <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3">
                 Schedule Consultation
               </Button>
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3" onClick={() => setCurrentPage('find-speakers')}>
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3" onClick={goToFind}>
                 Browse Our Speakers
               </Button>
             </div>
@@ -2766,7 +2653,7 @@ function App() {
               <div>
                 <h4 className="font-semibold mb-4">Quick Links</h4>
                 <ul className="space-y-2 text-gray-400">
-                  <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
+                  <li><a href="/find" className="hover:text-white" onClick={handleNav}>Find Speakers</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
                   <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
                   <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
@@ -2965,7 +2852,7 @@ function App() {
               international conferences.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => setCurrentPage('find-speakers')}>
+              <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={goToFind}>
                 Find Your Speaker
               </Button>
               <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900" onClick={() => setCurrentPage('speaker-application')}>
@@ -3129,8 +3016,6 @@ function App() {
           </div>
         </div>
       </section>
-
-      <Footer />
 
       {/* Admin Login Modal */}
       {showAdminLogin && (

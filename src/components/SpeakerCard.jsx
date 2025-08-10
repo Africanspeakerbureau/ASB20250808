@@ -11,22 +11,29 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
-  const to = `/speaker/${s.id}`;
+  const key = s?.recordId || s?.id || s?.slug;
+  const to = `/speaker/${key}`;
 
   // ===== Search page card (bigger, like your mockup) =====
   if (variant === 'search') {
     return (
       <div className="bg-white rounded-2xl shadow p-6 h-full flex flex-col">
         <div className="w-full flex justify-center">
-          <img
-            src={img}
-            alt={s.name}
-            loading="lazy"
-            className="w-40 h-40 object-cover rounded-xl"
-          />
+          <a href={to} className="block">
+            <img
+              src={img}
+              alt={s.name}
+              loading="lazy"
+              className="w-40 h-40 object-cover rounded-xl"
+            />
+          </a>
         </div>
 
-        <h3 className="text-lg font-semibold text-center mt-4">{s.name}</h3>
+        <h3 className="text-lg font-semibold text-center mt-4">
+          <a href={to} className="hover:underline">
+            {s.name}
+          </a>
+        </h3>
         {locLang && <p className="text-sm text-center text-gray-600">{locLang}</p>}
         {professionalTitle && (
           <p className="text-base text-center text-gray-800 mt-1">{professionalTitle}</p>
