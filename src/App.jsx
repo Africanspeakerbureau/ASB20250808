@@ -102,7 +102,7 @@ import heroExecutiveAI from './assets/hero_executive_ai_training.jpg'
 import heroCorporateLeadership from './assets/hero_corporate_leadership_conference.jpg'
 import heroVirtualSeminars from './assets/hero_virtual_seminars_webinars.jpg'
 import Header from './components/Header'
-import SpeakerProfile from './pages/SpeakerProfile'
+import SpeakerProfile from './components/SpeakerProfile'
 
 function syncFromPath({ setCurrentPage, setSelectedSpeakerId }) {
   const p = window.location.pathname || '/'
@@ -1206,13 +1206,7 @@ function App() {
 
   // Speaker Profile Page
   if (currentPage === 'speaker-profile') {
-    return (
-      <>
-        <Header />
-        <SpeakerProfile />
-        <Footer />
-      </>
-    )
+    return <SpeakerProfile />
   }
 
   if (currentPage === 'speaker-application') {
