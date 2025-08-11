@@ -5,7 +5,6 @@ import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import Footer from './components/Footer'
-import ReactDOM from 'react-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
 import {
@@ -20,6 +19,8 @@ import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
 import AdminLoginModal from "./components/AdminLoginModal"
+import EditSpeakerDialog from "./admin/EditSpeakerDialog"
+import { toast } from "./lib/toast"
 import { validateAdmin } from "./utils/auth"
 
 // Field presets mapping for dropdowns
@@ -131,8 +132,6 @@ function App() {
   const [quickError, setQuickError] = useState('')
   const [profileImageUrl, setProfileImageUrl] = useState('')
   const [attachments, setAttachments] = useState([])
-  const [editImageFile, setEditImageFile] = useState(null)
-  const [editImagePreview, setEditImagePreview] = useState(null)
   
   // Admin Dashboard State
   const [apps, setApps] = useState([])
@@ -164,7 +163,35 @@ function App() {
   const serviceToHash = Object.fromEntries(
     Object.entries(hashToService).map(([k, v]) => [v, k])
   )
-  const [editingRecord, setEditingRecord] = useState(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editing, setEditing] = useState(null)
+
+  const openEdit = (record) => {
+    try {
+      if (!record) {
+        toast('No record to edit')
+        return
+      }
+      console.log('[ASB] Edit click', { id: record.id, name: record.name || record['First Name'] })
+      toast(`Opening editor for ${record.name || record['First Name'] || record.id}`)
+      setEditing(record)
+      setEditOpen(true)
+    } catch (err) {
+      console.error('[ASB] openEdit error', err)
+      toast('Could not open editor')
+    }
+  }
+
+  const data = activeTab === 'speakers' ? apps : activeTab === 'clients' ? clients : quick
+
+  useEffect(() => {
+    window.__asbOpenEdit = (id) => {
+      const r = (Array.isArray(data) ? data : []).find(x => x.id === id)
+      if (r) openEdit(r)
+      else toast(`Record not found: ${id}`)
+    }
+    return () => { try { delete window.__asbOpenEdit } catch {} }
+  }, [data])
 
   const handleNav = (e) => {
     e.preventDefault()
@@ -596,7 +623,6 @@ function App() {
       if (response.ok) {
         setSubmitStatus({ type: 'success', message: 'Record updated successfully!' })
         loadAdminData() // Reload data
-        setEditingRecord(null)
         return true
       } else {
         throw new Error('Update failed')
@@ -693,40 +719,6 @@ function App() {
     })
   }
 
-  const handleEditImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setEditImageFile(file)
-      // Create preview URL
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setEditImagePreview(e.target.result)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const uploadImageToImgBB = async (file) => {
-    const formData = new FormData()
-    formData.append('image', file)
-    
-    try {
-      // Using ImgBB free API - no API key required for basic usage
-      const response = await fetch('https://api.imgbb.com/1/upload?key=demo', {
-        method: 'POST',
-        body: formData
-      })
-      const data = await response.json()
-      if (data.success) {
-        return data.data.url
-      } else {
-        throw new Error('Upload failed')
-      }
-    } catch (error) {
-      console.error('Image upload failed:', error)
-      return null
-    }
-  }
 
   const handleSpeakerSubmit = async (e) => {
     e.preventDefault()
@@ -1118,24 +1110,18 @@ function App() {
                               <TableCell>{record.createdTime ? new Date(record.createdTime).toLocaleDateString() : 'N/A'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                    onClick={() => {
-                      // Only allow editing if on admin page and logged in and URL starts with /admin
-                      if (currentPage === 'admin' && isAuthed && window.location.pathname.startsWith('/admin')) {
-                        console.log('Edit button clicked for speaker:', record);
-                        const { id, ...fields } = record;
-                        setEditingRecord({ id, fields, type: 'speaker' });
-                      } else {
-                        console.log('Edit not allowed - not on admin page or not logged in');
-                        setSubmitStatus({ type: 'error', message: 'You must be logged in as admin to edit records' });
-                      }
-                    }}
-                                    title="View & Edit"
+                                  <button
+                                    type="button"
+                                    className="asb-edit-btn"
+                                    aria-label={`View & Edit ${record['First Name'] || record.name || 'record'}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      openEdit(record);
+                                    }}
                                   >
                                     <Edit className="w-4 h-4" />
-                                  </Button>
+                                  </button>
                                 </div>
                               </TableCell>
                             </>
@@ -1152,24 +1138,18 @@ function App() {
                               <TableCell>{getStatusBadge(record.Status)}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                      // Only allow editing if on admin page and logged in and URL starts with /admin
-                                      if (currentPage === 'admin' && isAuthed && window.location.pathname.startsWith('/admin')) {
-                                        console.log('Edit button clicked for client:', record);
-                                        const { id, ...fields } = record;
-                                        setEditingRecord({ id, fields, type: 'client' });
-                                      } else {
-                                        console.log('Edit not allowed - not on admin page or not logged in');
-                                        setSubmitStatus({ type: 'error', message: 'You must be logged in as admin to edit records' });
-                                      }
+                                  <button
+                                    type="button"
+                                    className="asb-edit-btn"
+                                    aria-label={`View & Edit ${record['First Name'] || record.name || 'record'}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      openEdit(record);
                                     }}
-                                    title="View & Edit"
                                   >
                                     <Edit className="w-4 h-4" />
-                                  </Button>
+                                  </button>
                                 </div>
                               </TableCell>
                             </>
@@ -1183,24 +1163,18 @@ function App() {
                               <TableCell>{record.createdTime ? new Date(record.createdTime).toLocaleDateString() : 'N/A'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                      // Only allow editing if on admin page and logged in and URL starts with /admin
-                                      if (currentPage === 'admin' && isAuthed && window.location.pathname.startsWith('/admin')) {
-                                        console.log('Edit button clicked for quick inquiry:', record);
-                                        const { id, ...fields } = record;
-                                        setEditingRecord({ id, fields, type: 'quick' });
-                                      } else {
-                                        console.log('Edit not allowed - not on admin page or not logged in');
-                                        setSubmitStatus({ type: 'error', message: 'You must be logged in as admin to edit records' });
-                                      }
+                                  <button
+                                    type="button"
+                                    className="asb-edit-btn"
+                                    aria-label={`View & Edit ${record['First Name'] || record.name || 'record'}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      openEdit(record);
                                     }}
-                                    title="View & Edit"
                                   >
                                     <Edit className="w-4 h-4" />
-                                  </Button>
+                                  </button>
                                 </div>
                               </TableCell>
                             </>
@@ -1214,6 +1188,11 @@ function App() {
             </Card>
           )}
         </div>
+        <EditSpeakerDialog
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          record={editing}
+        />
       </div>
     )
   }
@@ -3054,277 +3033,6 @@ function App() {
         onClose={closeAdminModal}
         onSubmit={handleAdminSubmit}
       />
-
-      {/* Edit Record Dialog */}
-      {console.log('editingRecord state:', editingRecord)}
-      {(() => {
-        const rec = editingRecord ?? null;
-        const id = rec?.id ?? null;
-        const fields = rec?.fields ?? {};
-        if (!rec || currentPage !== 'admin' || !isAuthed || !window.location.pathname.startsWith('/admin')) return null;
-        return ReactDOM.createPortal(
-        <div
-          className="modal-overlay"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 1000,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {console.log('Rendering edit dialog for:', rec)}
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              Edit {rec.type === 'speaker' ? 'Speaker' : rec.type === 'client' ? 'Client' : 'Quick Inquiry'}
-            </h2>
-
-            <div className="space-y-4">
-              {Object.entries(fields).map(([key, value]) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{key}</label>
-                  {key === 'Status' ? (
-                    <select
-                      className="w-full p-2 border border-gray-300 rounded"
-                      defaultValue={value}
-                      onChange={(e) => {
-                        fields[key] = e.target.value;
-                      }}
-                    >
-                      {rec.type === 'speaker' ? (
-                        <>
-                          <option value="Pending">Pending</option>
-                          <option value="Under Review">Under Review</option>
-                          <option value="Approved">Approved</option>
-                          <option value="Rejected">Rejected</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="New">New</option>
-                          <option value="Under Review">Under Review</option>
-                          <option value="Contacted">Contacted</option>
-                          <option value="Closed">Closed</option>
-                        </>
-                      )}
-                    </select>
-                  ) : key === 'Profile Image' ? (
-                    <div className="space-y-3">
-                      {/* Show current image if exists */}
-                      {value && Array.isArray(value) && value.length > 0 && (
-                        <div>
-                          <p className="text-sm text-gray-600 mb-2">Current Image:</p>
-                          <img 
-                            src={value[0].url} 
-                            alt="Current profile" 
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                          />
-                        </div>
-                      )}
-                      {/* File input for new image */}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleEditImageChange}
-                        className="w-full p-2 border border-gray-300 rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                      />
-                      {/* Preview new image */}
-                      {editImagePreview && (
-                        <div>
-                          <p className="text-sm text-gray-600 mb-2">New Image Preview:</p>
-                          <img 
-                            src={editImagePreview} 
-                            alt="New profile preview" 
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                          />
-                        </div>
-                      )}
-                      <p className="text-xs text-gray-500">
-                        Upload a new professional headshot to replace the current image.
-                      </p>
-                    </div>
-                  ) : (() => {
-                    // Get table name for fieldPresets lookup
-                    const tableName = rec.type === 'speaker' ? 'Speaker Applications' :
-                                     rec.type === 'client' ? 'Client Inquiries' : 'Quick Inquiries';
-                    const presets = fieldPresets[tableName]?.[key];
-                    const fieldValue = value || "";
-
-                    // Single-select → dropdown
-                    if (presets?.type === "singleSelect") {
-                      return (
-                        <select
-                          className="w-full p-2 border border-gray-300 rounded"
-                          value={fieldValue}
-                          onChange={e => {
-                            fields[key] = e.target.value;
-                          }}
-                        >
-                          <option value="">Select…</option>
-                          {presets.options.map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      );
-                    }
-
-                    // Multiple-select → checkboxes
-                    if (presets?.type === "multipleSelects") {
-                      const selected = Array.isArray(fieldValue) ? fieldValue : [];
-                      return (
-                        <div className="checkbox-group space-y-2 max-h-40 overflow-y-auto">
-                          {presets.options.map(opt => (
-                            <label key={opt} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={selected.includes(opt)}
-                                onChange={e => {
-                                  const next = e.target.checked
-                                    ? [...selected, opt]
-                                    : selected.filter(v => v !== opt);
-                                  fields[key] = next;
-                                }}
-                              />
-                              <span className="text-sm">{opt}</span>
-                            </label>
-                          ))}
-                        </div>
-                      );
-                    }
-
-                    // Text areas for long text fields
-                    if (key.toLowerCase().includes('message') || key.toLowerCase().includes('bio') || 
-                        key.toLowerCase().includes('description') || key.toLowerCase().includes('requirements') ||
-                        key.toLowerCase().includes('achievements') || key.toLowerCase().includes('education') ||
-                        key.toLowerCase().includes('banking') || key.toLowerCase().includes('references') ||
-                        key.toLowerCase().includes('topics') || key.toLowerCase().includes('notes')) {
-                      return (
-                        <textarea
-                          className="w-full p-2 border border-gray-300 rounded min-h-[100px]"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // URL inputs
-                    if (key.toLowerCase().includes('website') || key.toLowerCase().includes('linkedin') || 
-                        key.toLowerCase().includes('twitter') || key.toLowerCase().includes('video')) {
-                      return (
-                        <input
-                          type="url"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // Date inputs
-                    if (key.toLowerCase().includes('date')) {
-                      return (
-                        <input
-                          type="date"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // Email inputs
-                    if (key.toLowerCase().includes('email')) {
-                      return (
-                        <input
-                          type="email"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // Phone inputs
-                    if (key.toLowerCase().includes('phone')) {
-                      return (
-                        <input
-                          type="tel"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // Fallback: text input
-                    return (
-                      <input
-                        type="text"
-                        className="w-full p-2 border border-gray-300 rounded"
-                        defaultValue={fieldValue || ''}
-                        onChange={(e) => {
-                          fields[key] = e.target.value;
-                        }}
-                      />
-                    );
-                  })()}
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                onClick={() => setEditingRecord(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={async () => {
-                  try {
-                    // Handle image upload if new image is selected
-                      if (editImageFile) {
-                        const imageUrl = await uploadImageToImgBB(editImageFile)
-                        if (imageUrl) {
-                          fields['Profile Image'] = [{ url: imageUrl }]
-                        }
-                      }
-                    
-                    const tableName = rec.type === 'speaker' ? 'Speaker%20Applications' :
-                                     rec.type === 'client' ? 'Client%20Inquiries' : 'Quick%20Inquiries';
-                    await updateRecord(tableName, id, fields);
-                    setEditingRecord(null);
-                    setEditImageFile(null);
-                    setEditImagePreview(null);
-                  } catch (error) {
-                    console.error('Error saving record:', error);
-                    alert('Error saving changes. Please try again.');
-                  }
-                }}
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-        );
-      })()}
     </div>
   )
 }
