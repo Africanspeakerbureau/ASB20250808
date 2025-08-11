@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ReactDOM from "react-dom";
 import {
   INDUSTRIES, YEARS_EXPERIENCE, SPEAKING_EXPERIENCE, NUMBER_OF_EVENTS, LARGEST_AUDIENCE,
@@ -7,11 +7,71 @@ import {
 } from "../../edit/options";
 import UploadWidget from "@/components/UploadWidget";
 import { useToast } from "@/components/Toast";
-import { buildFields } from "../../shapeSpeakerPayload";
-import { F } from "../../fieldMap";
 import { useAirtableRecord } from "../../hooks/useAirtableRecord";
-import { updateRecord } from "../../api/airtable";
+import { airtablePatchRecord } from "../../api/airtable";
 import "./editDialog.css";
+
+// Read-only and unsupported fields we don't send back
+const READ_ONLY_FIELDS = new Set<string>([
+  "Experience Score",
+  "Total Events",
+  "Total Events (calc)",
+  "Potential Revenue",
+  "Created Date",
+]);
+
+const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
+const LINKED_RECORD_FIELDS = new Set<string>(["Client Inquiries"]);
+
+const MULTI_SELECT_FIELDS = new Set<string>([
+  "Expertise Areas",
+  "Spoken Languages",
+  "Status",
+]);
+
+const SINGLE_SELECT_FIELDS = new Set<string>([
+  "Industry",
+  "Years Experience",
+  "Expertise Level",
+  "Speaking Experience",
+  "Number of Events",
+  "Largest Audience",
+  "Virtual Experience",
+  "Fee Range",
+  "Travel Willingness",
+  "Country",
+  "Featured",
+  "Display Fee",
+]);
+
+function buildSpeakerPayload(form: Record<string, any>) {
+  const out: Record<string, any> = {};
+  for (const [key, raw] of Object.entries(form)) {
+    if (
+      READ_ONLY_FIELDS.has(key) ||
+      ATTACHMENT_FIELDS.has(key) ||
+      LINKED_RECORD_FIELDS.has(key)
+    ) {
+      continue;
+    }
+    if (raw === "" || raw === undefined || raw === null) continue;
+    if (MULTI_SELECT_FIELDS.has(key)) {
+      out[key] = Array.isArray(raw)
+        ? raw.map(String)
+        : String(raw)
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
+      continue;
+    }
+    if (SINGLE_SELECT_FIELDS.has(key)) {
+      out[key] = String(raw);
+      continue;
+    }
+    out[key] = raw;
+  }
+  return out;
+}
 
 type Props = {
   recordId: string;
@@ -34,169 +94,38 @@ type TabKey = typeof ALL_TABS[number];
 const TABS: TabKey[] = isAdmin ? [...ALL_TABS] : ALL_TABS.filter(t => t !== "Internal");
 
 export default function SpeakerEditDialog({ recordId, onClose }: Props) {
-  const { push } = useToast();
-  const [saving, setSaving] = useState(false);
-  const [tab, setTab] = useState<TabKey>("Identity");
-  const { record, loading } = useAirtableRecord<any>('Speaker Applications', recordId);
+const { push } = useToast();
+const [saving, setSaving] = useState(false);
+const [tab, setTab] = useState<TabKey>("Identity");
+const { record, loading } = useAirtableRecord<any>('Speaker Applications', recordId);
+  const [form, setForm] = useState<Record<string, any>>({});
+  useEffect(() => {
+    if (record) {
+      setForm({ ...(record.fields || {}) });
+    }
+  }, [record?.id]);
 
-  const initial = useMemo(() => {
-    const f = record?.fields ?? {};
-    return {
-      // Identity
-      "First Name": f["First Name"] ?? "",
-      "Last Name": f["Last Name"] ?? "",
-      "Title": f["Title"] ?? "",
-      "Professional Title": f["Professional Title"] ?? "",
-      "Company": f["Company"] ?? "",
-      "Location": f["Location"] ?? "",
-      "Country": f["Country"] ?? "",
-      "Profile Image": f["Profile Image"] ?? [],
-      profileImageUrls: Array.isArray(f["Profile Image"]) ? f["Profile Image"].map((x:any) => x.url ?? x) : [],
+  const setField = useCallback((name: string, value: any) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-      // Background
-      "Industry": f["Industry"] ?? "",
-      "Expertise Level": f["Expertise Level"] ?? "",
-      "Years Experience": f["Years Experience"] ?? "",
-      "Notable Achievements": f["Notable Achievements"] ?? "",
-      "Achievements": f["Achievements"] ?? "",
-      "Education": f["Education"] ?? "",
-
-      // Experience
-      "Speaking Experience": f["Speaking Experience"] ?? "",
-      "Number of Events": f["Number of Events"] ?? "",
-      "Largest Audience": f["Largest Audience"] ?? "",
-      "Virtual Experience": f["Virtual Experience"] ?? "",
-
-      // Expertise & Content
-      "Expertise Areas": f["Expertise Areas"] ?? [],
-      "Speaking Topics": f["Speaking Topics"] ?? "",
-      "Key Messages": f["Key Messages"] ?? "",
-      "Professional Bio": f["Professional Bio"] ?? "",
-
-      // Why booking
-      "Speakers Delivery Style": f["Speakers Delivery Style"] ?? "",
-      "Why the audience should listen to these topics": f["Why the audience should listen to these topics"] ?? "",
-      "What the speeches will address": f["What the speeches will address"] ?? "",
-      "What participants will learn": f["What participants will learn"] ?? "",
-      "What the audience will take home": f["What the audience will take home"] ?? "",
-      "Benefits for the individual": f["Benefits for the individual"] ?? "",
-      "Benefits for the organisation": f["Benefits for the organisation"] ?? "",
-
-      // Media & Languages
-      "Header Image": f["Header Image"] ?? [],
-      headerImageUrls: Array.isArray(f["Header Image"]) ? f["Header Image"].map((x:any) => x.url ?? x) : [],
-      "Video Link 1": f["Video Link 1"] ?? "",
-      "Video Link 2": f["Video Link 2"] ?? "",
-      "Video Link 3": f["Video Link 3"] ?? "",
-      "Spoken Languages": f["Spoken Languages"] ?? [],
-
-      // Logistics & Fees
-      "Fee Range": f["Fee Range"] ?? "",
-      "Display Fee": f["Display Fee"] ?? "",
-      "Travel Willingness": f["Travel Willingness"] ?? "",
-      "Travel Requirements": f["Travel Requirements"] ?? "",
-
-      // Contact & Admin
-      "Website": f["Website"] ?? "",
-      "LinkedIn": f["LinkedIn"] ?? "",
-      "Twitter": f["Twitter"] ?? "",
-      "References": f["References"] ?? "",
-      "PA Name": f["PA Name"] ?? "",
-      "PA Email": f["PA Email"] ?? "",
-      "PA Phone": f["PA Phone"] ?? "",
-      "Banking Details": f["Banking Details"] ?? "",
-      "Special Requirements": f["Special Requirements"] ?? "",
-      "Additional Info": f["Additional Info"] ?? "",
-
-      // Internal
-      "Status": f["Status"] ?? [],
-      "Featured": f["Featured"] ?? "",
-      "Created Date": f["Created Date"] ?? "",
-      "Client Inquiries": Array.isArray(f["Client Inquiries"]) ? f["Client Inquiries"].length : (f["Client Inquiries"] ?? 0),
-      "Experience Score": f["Experience Score"] ?? "",
-      "Total Events (calc)": f["Total Events"] ?? "",
-      "Potential Revenue": f["Potential Revenue"] ?? "",
-      "Internal Notes": f["Internal Notes"] ?? "",
-    };
-  }, [record]);
-
-  const [draft, setDraft] = useState(initial);
-  useEffect(() => setDraft(initial), [initial]);
-
-  async function onSave(closeAfter = true) {
+  async function handleSave(closeAfter = true) {
+    if (!record) return;
     try {
       setSaving(true);
-      const state = {
-        firstName: draft[F.FirstName],
-        lastName: draft[F.LastName],
-        title: draft[F.Title],
-        professionalTitle: draft[F.ProfessionalTitle],
-        company: draft[F.Company],
-        location: draft[F.Location],
-        country: draft[F.Country],
-        industry: draft[F.Industry],
-        expertiseLevel: draft[F.ExpertiseLevel],
-        yearsExperience: draft[F.YearsExperience],
-        notableAchievements: draft[F.NotableAchievements],
-        achievements: draft[F.Achievements],
-        education: draft[F.Education],
-
-        speakingExperience: draft[F.SpeakingExperience],
-        numberEvents: draft[F.NumberEvents],
-        largestAudience: draft[F.LargestAudience],
-        virtualExperience: draft[F.VirtualExperience],
-
-        expertiseAreas: draft[F.ExpertiseAreas],
-        speakingTopics: draft[F.SpeakingTopics],
-        keyMessages: draft[F.KeyMessages],
-        professionalBio: draft[F.ProfessionalBio],
-
-        deliveryStyle: draft[F.DeliveryStyle],
-        whyListen: draft[F.WhyListen],
-        willAddress: draft[F.WillAddress],
-        willLearn: draft[F.WillLearn],
-        takeHome: draft[F.TakeHome],
-        benefitIndividual: draft[F.BenefitIndividual],
-        benefitOrg: draft[F.BenefitOrg],
-
-        video1: draft[F.Video1],
-        video2: draft[F.Video2],
-        video3: draft[F.Video3],
-        spokenLanguages: draft[F.SpokenLanguages],
-
-        feeRange: draft[F.FeeRange],
-        displayFee: draft[F.DisplayFee],
-        travelWillingness: draft[F.TravelWillingness],
-        travelRequirements: draft[F.TravelRequirements],
-
-        website: draft[F.Website],
-        linkedin: draft[F.LinkedIn],
-        twitter: draft[F.Twitter] || draft["Twitter"],
-        references: draft[F.References],
-        paName: draft[F.PAName],
-        paEmail: draft[F.PAEmail],
-        paPhone: draft[F.PAPhone],
-        banking: draft[F.Banking],
-        additionalInfo: draft[F.AdditionalInfo],
-
-        status: draft[F.Status],
-        featured: draft[F.Featured],
-        internalNotes: draft[F.InternalNotes],
-        profileImageUrls: Array.isArray(draft[F.ProfileImage])
-          ? draft[F.ProfileImage].map((f: any) => f.url ?? f)
-          : draft.profileImageUrls || [],
-        headerImageUrls: Array.isArray(draft[F.HeaderImage])
-          ? draft[F.HeaderImage].map((f: any) => f.url ?? f)
-          : draft.headerImageUrls || [],
-      };
-      const fields = buildFields(state);
-      delete fields[F.ProfileImage];
-      delete fields[F.HeaderImage];
-      await updateRecord('Speaker Applications', record.id, fields);
+      const fields = buildSpeakerPayload(form);
+      if (!Object.keys(fields).length) {
+        push({ text: 'Nothing to save.', type: 'info' });
+        setSaving(false);
+        if (closeAfter) onClose();
+        return;
+      }
+      await airtablePatchRecord('Speaker Applications', record.id, fields);
       push({ text: 'Saved ✔︎', type: 'success' });
       if (closeAfter) onClose();
     } catch (e: any) {
       push({ text: e?.message || 'Could not save', type: 'error' });
+      console.error('[Save error]', e);
     } finally {
       setSaving(false);
     }
@@ -319,9 +248,9 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
               <Select id="Featured" options={FEATURED} />
               <Readonly id="Created Date" />
               <Readonly id="Client Inquiries" />
-              <Badge label="Experience Score" value={draft["Experience Score"]} />
-              <Badge label="Total Events" value={draft["Total Events (calc)"]} />
-              <Badge label="Potential Revenue" value={draft["Potential Revenue"]} />
+              <Badge label="Experience Score" value={form["Experience Score"]} />
+              <Badge label="Total Events" value={form["Total Events (calc)"]} />
+              <Badge label="Potential Revenue" value={form["Potential Revenue"]} />
               <Upload id="Header Image" label="Header Image" hint="This is the wide banner image" />
               <TextArea id="Internal Notes" />
             </Grid>
@@ -330,10 +259,10 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
         <div className="modal__footer">
           <button className="btn" disabled={saving} onClick={onClose}>Close</button>
-          <button className="btn" disabled={saving} onClick={() => onSave(false)}>
+          <button className="btn" disabled={saving} onClick={() => handleSave(false)}>
             {saving ? "Saving…" : "Save"}
           </button>
-          <button className="btn btn--primary" disabled={saving} onClick={() => onSave(true)}>
+          <button className="btn btn--primary" disabled={saving} onClick={() => handleSave(true)}>
             {saving ? "Saving…" : "Save & Close"}
           </button>
         </div>
@@ -343,16 +272,13 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   );
 
   // ————— helpers —————
-  function set(id: string, val: any) {
-    setDraft(d => ({ ...d, [id]: val }));
-  }
   function Text({ id, label }: { id: string; label?: string }) {
     return (
       <Field label={label ?? id}>
         <input
           className="input"
-          value={draft[id] ?? ""}
-          onChange={e => set(id, e.target.value)}
+          value={form[id] ?? ""}
+          onChange={e => setField(id, e.target.value)}
           placeholder={label ?? id}
         />
       </Field>
@@ -363,8 +289,8 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       <Field label={label ?? id}>
         <textarea
           className="textarea"
-          value={draft[id] ?? ""}
-          onChange={e => set(id, e.target.value)}
+          value={form[id] ?? ""}
+          onChange={e => setField(id, e.target.value)}
           rows={4}
         />
       </Field>
@@ -375,8 +301,8 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       <Field label={label ?? id}>
         <select
           className="select"
-          value={draft[id] ?? ""}
-          onChange={e => set(id, e.target.value)}
+          value={form[id] ?? ""}
+          onChange={e => setField(id, e.target.value)}
         >
           <option value="">— Select —</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -385,13 +311,13 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     );
   }
   function Chips({ id, options, allowMulti = true }: { id: string; options: string[]; allowMulti?: boolean }) {
-    const value: string[] = Array.isArray(draft[id]) ? draft[id] : (draft[id] ? String(draft[id]).split(",").map(s => s.trim()) : []);
+    const value: string[] = Array.isArray(form[id]) ? form[id] : (form[id] ? String(form[id]).split(",").map(s => s.trim()) : []);
     const toggle = (v: string) => {
       if (allowMulti) {
         const next = value.includes(v) ? value.filter(x => x !== v) : [...value, v];
-        set(id, next);
+        setField(id, next);
       } else {
-        set(id, value.includes(v) ? "" : v);
+        setField(id, value.includes(v) ? "" : v);
       }
     };
     return (
@@ -407,7 +333,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     );
   }
   function Upload({ id, label, hint }: { id: string; label: string; hint?: string }) {
-    const files = draft[id] as any[];
+    const files = form[id] as any[];
     return (
       <Field label={label} hint={hint}>
         <div className="upload-row">
@@ -418,13 +344,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           </div>
           <UploadWidget
             onUpload={(uploaded) => {
-              set(id, uploaded);
-              if (id === F.ProfileImage) {
-                set("profileImageUrls", uploaded.map((f: any) => f.url));
-              }
-              if (id === F.HeaderImage) {
-                set("headerImageUrls", uploaded.map((f: any) => f.url));
-              }
+              setField(id, uploaded);
             }}
           >
             <button className="btn btn--dark">Upload</button>
@@ -436,7 +356,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   function Readonly({ id }: { id: string }) {
     return (
       <Field label={id}>
-        <input className="input" readOnly value={draft[id] ?? ""} />
+        <input className="input" readOnly value={form[id] ?? ""} />
       </Field>
     );
   }

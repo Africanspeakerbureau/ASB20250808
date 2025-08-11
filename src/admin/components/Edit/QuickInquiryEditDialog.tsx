@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { getRecord, readSingleSelect, updateRecord } from '../../api/airtable';
+import { getRecord, readSingleSelect, airtablePatchRecord } from '../../api/airtable';
 import { useToast } from '@/components/Toast';
 import './editDialog.css';
 
@@ -55,7 +55,7 @@ export default function QuickInquiryEditDialog({ recordId, onClose }: { recordId
       if (form.clientInquiry) {
         fields['Client Inquiries'] = form.clientInquiry.split(',').map((s: string) => s.trim()).filter(Boolean);
       }
-      await updateRecord('Quick Inquiries', recordId, fields);
+      await airtablePatchRecord('Quick Inquiries', recordId, fields);
       push({ text: 'Saved ✔︎', type: 'success' });
       if (closeAfter) onClose();
     } catch (e: any) {

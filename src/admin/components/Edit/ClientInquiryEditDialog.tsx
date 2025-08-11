@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { getRecord, readSingleSelect, updateRecord } from '../../api/airtable';
+import { getRecord, readSingleSelect, airtablePatchRecord } from '../../api/airtable';
 import { useToast } from '@/components/Toast';
 import './editDialog.css';
 
@@ -86,7 +86,7 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
         'Created Date': form.createdDate ? new Date(form.createdDate).toISOString().slice(0,10) : '',
         'Notes': form.notes,
       };
-      await updateRecord('Client Inquiries', recordId, fields);
+      await airtablePatchRecord('Client Inquiries', recordId, fields);
       push({ text: 'Saved ✔︎', type: 'success' });
       if (closeAfter) onClose();
     } catch (e: any) {
