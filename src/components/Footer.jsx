@@ -55,27 +55,30 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <a href="mailto:info@africanspeakerbureau.com" className="hover:underline">
-                  info@africanspeakerbureau.com
-                </a>
-              </li>
-              <li>New York • London • Lagos • Cape Town</li>
-            </ul>
-            <ul className="mt-4 space-y-2">
-              <li>
-                <a href="/quick-inquiry" className="hover:underline">
-                  Message us
-                </a>
-              </li>
-              <li>
-                <a href="/book-a-speaker" className="hover:underline">
-                  Request Consultation
-                </a>
-              </li>
-            </ul>
+            <h4 className="text-lg font-semibold mb-3">Contact</h4>
+
+            <a
+              href="mailto:info@africanspeakerbureau.com"
+              className="block text-gray-300 hover:text-white transition"
+            >
+              info@africanspeakerbureau.com
+            </a>
+
+            <div className="mt-4 space-y-2">
+              <a
+                href="/#quick-inquiry"
+                className="block text-white hover:underline"
+              >
+                Message us
+              </a>
+
+              <a
+                href="/book"
+                className="block text-white hover:underline"
+              >
+                Request Consultation
+              </a>
+            </div>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 flex justify-between items-end text-gray-400 text-sm relative">

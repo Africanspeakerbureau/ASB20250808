@@ -95,7 +95,7 @@ import { Badge } from '@/components/ui/badge.jsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.jsx'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog.jsx'
-import { Star, MapPin, Users, Calendar, Award, Globe, ChevronRight, Search, Phone, Mail, Building, Edit, Trash2, Download, Filter, RefreshCw, Eye, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
+import { Star, MapPin, Users, Calendar, Award, Globe, ChevronRight, Search, Mail, Building, Edit, Trash2, Download, Filter, RefreshCw, Eye, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
 import './App.css'
 import heroImage from './assets/hero_background_professional.webp'
 import heroBg1 from './assets/hero-bg-1.jpg'
@@ -2335,59 +2335,7 @@ function App() {
           </div>
 
           {/* Footer */}
-          <footer className="bg-gray-900 text-white py-16">
-            <div className="container mx-auto px-4">
-              <div className="grid md:grid-cols-4 gap-8">
-                <div>
-                  <div className="h-12 flex items-center mb-6">
-                    <div className="bg-blue-600 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                      <span className="text-white font-bold text-lg">ASB</span>
-                    </div>
-                    <div className="ml-3">
-                      <span className="text-sm font-medium leading-tight block">AFRICAN</span>
-                      <span className="text-sm font-medium leading-tight block">SPEAKER</span>
-                      <span className="text-sm font-medium leading-tight block">BUREAU</span>
-                    </div>
-                  </div>
-                  <p className="text-gray-400">
-                    Connecting authentic African voices with global audiences since 2008.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-4">Quick Links</h4>
-                  <ul className="space-y-2 text-gray-400">
-                    <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
-                    <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
-                    <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
-                    <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-4">Services</h4>
-                  <ul className="space-y-2 text-gray-400">
-                    <li><a href="/services#keynote" onClick={handleNav} className="hover:text-white text-green-400">Keynote Speakers</a></li>
-                    <li><a href="/services#panel" onClick={handleNav} className="hover:text-white text-blue-400">Panel Discussions</a></li>
-                    <li><a href="/services#boardroom" onClick={handleNav} className="hover:text-white text-orange-400">Boardroom Consulting</a></li>
-                    <li><a href="/services#workshops" onClick={handleNav} className="hover:text-white text-blue-400">Workshop Facilitators</a></li>
-                    <li><a href="/services#virtual" onClick={handleNav} className="hover:text-white text-teal-400">Virtual Events</a></li>
-                    <li><a href="/services#coaching" onClick={handleNav} className="hover:text-white text-pink-400">Leadership Coaching</a></li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-4">Contact</h4>
-                  <ul className="space-y-2 text-gray-400">
-                    <li>+1 (555) 123-4567</li>
-                    <li>info@africanspeakerbureau.com</li>
-                    <li>New York • London • Lagos •</li>
-                    <li>Cape Town</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>© 2025 African Speaker Bureau. All rights reserved.</p>
-              </div>
-            </div>
-          </footer>
+          <Footer />
         </div>
       )
     }
@@ -2633,59 +2581,7 @@ function App() {
         </div>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-white py-16">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-4 gap-8">
-              <div>
-                <div className="h-12 flex items-center mb-6">
-                  <div className="bg-blue-600 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                    <span className="text-white font-bold text-lg">ASB</span>
-                  </div>
-                  <div className="ml-3">
-                    <span className="text-sm font-medium leading-tight block">AFRICAN</span>
-                    <span className="text-sm font-medium leading-tight block">SPEAKER</span>
-                    <span className="text-sm font-medium leading-tight block">BUREAU</span>
-                  </div>
-                </div>
-                <p className="text-gray-400">
-                  Connecting authentic African voices with global audiences since 2008.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Quick Links</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('find-speakers')}>Find Speakers</a></li>
-                  <li><a href="#" className="hover:text-white" onClick={() => setCurrentPage('about')}>About</a></li>
-                  <li><a href="#" className="hover:text-white" onClick={() => {setCurrentPage('home'); setTimeout(() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}), 100);}}>Contact</a></li>
-                  <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Services</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li><a href="/services#keynote" onClick={handleNav} className="hover:text-white text-green-400">Keynote Speakers</a></li>
-                  <li><a href="/services#panel" onClick={handleNav} className="hover:text-white text-blue-400">Panel Discussions</a></li>
-                  <li><a href="/services#boardroom" onClick={handleNav} className="hover:text-white text-orange-400">Boardroom Consulting</a></li>
-                  <li><a href="/services#workshops" onClick={handleNav} className="hover:text-white text-blue-400">Workshop Facilitators</a></li>
-                  <li><a href="/services#virtual" onClick={handleNav} className="hover:text-white text-teal-400">Virtual Events</a></li>
-                  <li><a href="/services#coaching" onClick={handleNav} className="hover:text-white text-pink-400">Leadership Coaching</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Contact</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li>+1 (555) 123-4567</li>
-                  <li>info@africanspeakerbureau.com</li>
-                  <li>New York • London • Lagos •</li>
-                  <li>Cape Town</li>
-                </ul>
-              </div>
-            </div>
-            <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-              <p>© 2025 African Speaker Bureau. All rights reserved.</p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     )
   }
@@ -2961,29 +2857,29 @@ function App() {
 
           <div className="grid md:grid-cols-2 gap-12">
             <div>
-              <h3 className="text-2xl font-semibold mb-6">Contact Information</h3>
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <Phone className="w-5 h-5 text-blue-600 mr-3" />
-                  <span>+1 (555) 123-4567</span>
+              <h3 className="text-3xl font-bold">Contact Information</h3>
+
+              <div className="mt-6 space-y-4">
+                <a
+                  href="mailto:info@africanspeakerbureau.com"
+                  className="flex items-center gap-3 text-lg"
+                >
+                  <Mail className="w-5 h-5 text-blue-600" />
+                  info@africanspeakerbureau.com
+                </a>
+
+                <div className="flex flex-col gap-2 pt-2">
+                  <a href="/#quick-inquiry" className="text-primary hover:underline">
+                    Message us
+                  </a>
+                  <a href="/book" className="text-primary hover:underline">
+                    Request Consultation
+                  </a>
                 </div>
-                <div className="flex items-center">
-                  <Mail className="w-5 h-5 text-blue-600 mr-3" />
-                  <span>info@africanspeakerbureau.com</span>
-                </div>
-                <div className="flex items-center">
-                  <Building className="w-5 h-5 text-blue-600 mr-3" />
-                  <span>Global Offices: New York, London, Lagos, Cape Town</span>
-                </div>
-              </div>
-              <div className="mt-8">
-                <Button onClick={() => setCurrentPage('client-booking')}>
-                  Request Speaker Consultation
-                </Button>
               </div>
             </div>
 
-              <Card id="book">
+              <Card id="quick-inquiry">
                 <CardHeader>
                   <CardTitle>Quick Inquiry</CardTitle>
                 </CardHeader>
