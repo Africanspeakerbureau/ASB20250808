@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export default function PlanYourEvent() {
   return (
@@ -9,12 +10,12 @@ export default function PlanYourEvent() {
           Let us help you find the perfect speaker to elevate your next event. From keynotes to workshops,
           we have the expertise to make your event unforgettable.
         </p>
-        <a
-          href="/book-a-speaker"
+        <Link
+          to="/book-a-speaker"
           className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
         >
           Booking Inquiry
-        </a>
+        </Link>
       </div>
     </section>
   );

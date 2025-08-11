@@ -24,6 +24,7 @@ import QuickInquiryEditDialog from "./admin/components/Edit/QuickInquiryEditDial
 import ClientInquiryEditDialog from "./admin/components/Edit/ClientInquiryEditDialog"
 import { toast } from "./lib/toast"
 import { validateAdmin } from "./utils/auth"
+import { Link } from 'react-router-dom'
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -1217,7 +1218,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book-a-speaker">Book a Speaker</a></Button>
+                <Button asChild><Link to="/book-a-speaker">Book a Speaker</Link></Button>
               </nav>
             </div>
           </div>

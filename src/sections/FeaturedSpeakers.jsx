@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import SpeakerCard from '@/components/SpeakerCard';
 import { fetchFeaturedSpeakers } from '@/lib/airtable';
 
@@ -41,12 +42,12 @@ export default function FeaturedSpeakers() {
           </div>
 
           <div className="mt-8">
-            <a
-              href="/find-speakers"
+            <Link
+              to="/find-speakers"
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
             >
               View all speakers
-            </a>
+            </Link>
           </div>
         </div>
       </div>
