@@ -4,21 +4,16 @@ import {
   INDUSTRIES, YEARS_EXPERIENCE, SPEAKING_EXPERIENCE, NUMBER_OF_EVENTS, LARGEST_AUDIENCE,
   VIRTUAL_EXPERIENCE, EXPERTISE_AREAS, SPOKEN_LANGUAGES, COUNTRIES, FEE_RANGE,
   TRAVEL_WILLINGNESS, FEATURED, STATUS, EXPERTISE_LEVEL, DISPLAY_FEE
-} from "./edit/options";
+} from "../../edit/options";
 import UploadWidget from "@/components/UploadWidget";
 import { useToast } from "@/components/Toast";
-import { buildFields } from "./shapeSpeakerPayload";
-import { F } from "./fieldMap";
+import { buildFields } from "../../shapeSpeakerPayload";
+import { F } from "../../fieldMap";
+import { useAirtableRecord } from "../../hooks/useAirtableRecord";
 import "./editDialog.css";
 
-type RecordLike = {
-  id: string;
-  fields: Record<string, any>;
-};
-
 type Props = {
-  open: boolean;
-  record: RecordLike | null;
+  recordId: string;
   onClose: () => void;
 };
 
@@ -37,10 +32,11 @@ const ALL_TABS = [
 type TabKey = typeof ALL_TABS[number];
 const TABS: TabKey[] = isAdmin ? [...ALL_TABS] : ALL_TABS.filter(t => t !== "Internal");
 
-export default function EditDialog({ open, record, onClose }: Props) {
+export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const { push } = useToast();
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<TabKey>("Identity");
+  const { record, loading } = useAirtableRecord<any>('Speaker Applications', recordId);
 
   const initial = useMemo(() => {
     const f = record?.fields ?? {};
@@ -209,7 +205,7 @@ export default function EditDialog({ open, record, onClose }: Props) {
     }
   }
 
-  if (!open || !record) return null;
+  if (!record && !loading) return null;
 
   return ReactDOM.createPortal(
     <div className="modal">
@@ -218,7 +214,7 @@ export default function EditDialog({ open, record, onClose }: Props) {
           <h2>Edit</h2>
           <button className="icon-btn" aria-label="Close" onClick={onClose}>✕</button>
         </div>
-
+        {loading && <div className="loading-bar">Loading record…</div>}
         <div className="tabs">
           {TABS.map(t => (
             <button
