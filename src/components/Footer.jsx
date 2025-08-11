@@ -38,12 +38,12 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-semibold">Services</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
-              <li>Keynote Speakers</li>
-              <li>Panel Discussions</li>
-              <li>Boardroom Consulting</li>
-              <li>Workshop Facilitators</li>
-              <li>Virtual Events</li>
-              <li>Leadership Coaching</li>
+              <li><a href="/services#keynotes" className="hover:text-white">Keynote Speakers</a></li>
+              <li><a href="/services#panels" className="hover:text-white">Panel Discussions</a></li>
+              <li><a href="/services#boardroom" className="hover:text-white">Boardroom Consulting</a></li>
+              <li><a href="/services#workshops" className="hover:text-white">Workshop Facilitators</a></li>
+              <li><a href="/services#virtual-events" className="hover:text-white">Virtual Events</a></li>
+              <li><a href="/services#leadership-coaching" className="hover:text-white">Leadership Coaching</a></li>
             </ul>
           </div>
 
