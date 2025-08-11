@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect } from 'react'
 
 const placeholderAvatar = 'https://via.placeholder.com/160?text=ASB'
 
@@ -35,6 +35,10 @@ function videoEmbed(url = '') {
 }
 
 export default function SpeakerProfile({ id, speakers = [] }) {
+  useEffect(() => {
+    setTimeout(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }), 0)
+  }, [])
+
   const speaker = useMemo(() => {
     if (!id) return null
     const needle = decodeURIComponent(id).toLowerCase()
@@ -64,7 +68,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
     )
   }
 
-  const name = [speaker.titlePrefix, speaker.firstName, speaker.lastName].filter(Boolean).join(' ')
+  const fullName = [speaker.titlePrefix, speaker.firstName, speaker.lastName].filter(Boolean).join(' ')
   const topics = asList(speaker.speakingTopics)
   const hasBulletTopics = topics.length > 1
   const videos = speaker.videos || []
@@ -76,48 +80,48 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           <img src={speaker.headerImage} alt="" className="w-full h-full object-cover" />
         </div>
       )}
+      <div className="max-w-6xl mx-auto mt-8 md:mt-12">
+        <div className="flex flex-col md:flex-row gap-4">
+          <img
+            className="w-32 h-32 rounded-2xl object-cover"
+            src={speaker.profileImage || placeholderAvatar}
+            alt={fullName}
+          />
+          <div className="flex-1">
+            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">{fullName}</h1>
+            {speaker.professionalTitle && (
+              <p className="mt-1 text-base md:text-lg text-slate-600">{speaker.professionalTitle}</p>
+            )}
 
-      <div className="mt-6 flex flex-col md:flex-row gap-4">
-        <img
-          className="h-24 w-24 md:h-32 md:w-32 rounded-xl object-cover border"
-          src={speaker.profileImage || placeholderAvatar}
-          alt={name}
-        />
-        <div className="flex-1">
-          <h1 className="text-2xl md:text-3xl font-semibold">{name}</h1>
-          {speaker.professionalTitle && (
-            <p className="text-gray-600 mt-1">{speaker.professionalTitle}</p>
-          )}
+            <div className="flex flex-wrap gap-2 mt-3">
+              {speaker.languages?.length > 0 && <Chip>{speaker.languages.join(', ')}</Chip>}
+              {speaker.country && <Chip>{speaker.country}</Chip>}
+              {speaker.travelWillingness && <Chip>{speaker.travelWillingness}</Chip>}
+              {speaker.feeRange && <Chip>{speaker.feeRange}</Chip>}
+            </div>
 
-          <div className="flex flex-wrap gap-2 mt-3">
-            {speaker.languages?.length > 0 && <Chip>{speaker.languages.join(', ')}</Chip>}
-            {speaker.country && <Chip>{speaker.country}</Chip>}
-            {speaker.travelWillingness && <Chip>{speaker.travelWillingness}</Chip>}
-            {speaker.feeRange && <Chip>{speaker.feeRange}</Chip>}
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-3">
-            <a
-              href="#book"
-              onClick={(e)=>{e.preventDefault(); const anchor=document.getElementById('book'); if(anchor) anchor.scrollIntoView({behavior:'smooth'});}}
-              className="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
-            >
-              Contact {speaker.firstName}
-            </a>
-            <button
-              type="button"
-              className="inline-flex items-center rounded-xl border px-4 py-2 text-gray-800 bg-white shadow-sm"
-              onClick={()=>{navigator.clipboard?.writeText(window.location.href);}}
-            >
-              Share profile
-            </button>
-            <a
-              href="/find"
-              onClick={(e)=>{e.preventDefault(); window.history.pushState({}, '', '/find'); window.dispatchEvent(new PopStateEvent('popstate'));}}
-              className="inline-flex items-center rounded-xl border px-4 py-2 text-gray-800 bg-white shadow-sm"
-            >
-              Back to search
-            </a>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <a
+                href="/book"
+                className="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
+              >
+                Contact {speaker.firstName}
+              </a>
+              <button
+                type="button"
+                className="inline-flex items-center rounded-xl border px-4 py-2 text-gray-800 bg-white shadow-sm"
+                onClick={()=>{navigator.clipboard?.writeText(window.location.href);}}
+              >
+                Share profile
+              </button>
+              <a
+                href="/find"
+                onClick={(e)=>{e.preventDefault(); window.history.pushState({}, '', '/find'); window.dispatchEvent(new PopStateEvent('popstate'));}}
+                className="inline-flex items-center rounded-xl border px-4 py-2 text-gray-800 bg-white shadow-sm"
+              >
+                Back to search
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -281,8 +285,6 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           <div className="rounded-xl border p-6">Card placeholder</div>
         </div>
       </section>
-
-      <div id="book" className="pt-24" />
     </main>
   )
 }
