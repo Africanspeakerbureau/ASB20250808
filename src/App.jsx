@@ -5,6 +5,7 @@ import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import Footer from './components/Footer'
+import BookingForm from './components/BookingForm'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
 import {
@@ -24,7 +25,6 @@ import QuickInquiryEditDialog from "./admin/components/Edit/QuickInquiryEditDial
 import ClientInquiryEditDialog from "./admin/components/Edit/ClientInquiryEditDialog"
 import { toast } from "./lib/toast"
 import { validateAdmin } from "./utils/auth"
-import { Link } from 'react-router-dom'
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -125,6 +125,7 @@ function App() {
   const [isAuthed, setIsAuthed] = useState(() => sessionStorage.getItem('asb_admin') === '1')
   const [currentPage, setCurrentPage] = useState('home')
   const [selectedSpeakerId, setSelectedSpeakerId] = useState(null)
+  const [showBookingForm, setShowBookingForm] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [clientForm, setClientForm] = useState({})
   const [quickForm, setQuickForm] = useState({})
@@ -195,11 +196,25 @@ function App() {
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
+  function openBooking() {
+    window.history.pushState({}, '', '/book-a-speaker')
+    setCurrentPage('home')
+    setShowBookingForm(true)
+    window.scrollTo(0, 0)
+  }
+
+  function closeBooking() {
+    setShowBookingForm(false)
+    window.history.replaceState({}, '', '/')
+  }
+
   function closeAdminModal() {
     window.history.replaceState({}, '', '/')
     setRoute('/')
     setCurrentPage('home')
   }
+
+  const appActions = { openBooking, closeBooking }
 
   useEffect(() => {
     const syncAndScroll = () => {
@@ -216,22 +231,29 @@ function App() {
       if (pathname === '/find-speakers') {
         setCurrentPage('find-speakers')
         setSelectedSpeakerId(null)
+        setShowBookingForm(false)
       } else if (pathname.startsWith('/speaker/')) {
         const sid = decodeURIComponent(pathname.split('/speaker/')[1] || '')
         setSelectedSpeakerId(sid)
         setCurrentPage('speaker-profile')
+        setShowBookingForm(false)
       } else if (pathname === '/services') {
         setCurrentPage('services')
         setSelectedSpeakerId(null)
+        setShowBookingForm(false)
       } else if (pathname === '/about') {
         setCurrentPage('about')
         setSelectedSpeakerId(null)
+        setShowBookingForm(false)
       } else if (pathname === '/book-a-speaker') {
-        setCurrentPage('client-booking')
+        setCurrentPage('home')
         setSelectedSpeakerId(null)
+        setShowBookingForm(true)
+        window.scrollTo(0, 0)
       } else {
         setCurrentPage('home')
         setSelectedSpeakerId(null)
+        setShowBookingForm(false)
       }
 
       if (pathname === '/services' && id && hashToService[id]) {
@@ -1218,13 +1240,13 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><Link to="/book-a-speaker">Book a Speaker</Link></Button>
+                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
         </header>
         <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
-        <Footer />
+        <Footer appActions={appActions} />
       </>
     )
   }
@@ -1253,7 +1275,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><Link to="/book-a-speaker">Book a Speaker</Link></Button>
+                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1904,210 +1926,6 @@ function App() {
     )
   }
 
-  if (currentPage === 'client-booking') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <a href="/" onClick={handleNav} className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><Link to="/book-a-speaker">Book a Speaker</Link></Button>
-              </nav>
-            </div>
-          </div>
-        </header>
-
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Book a Speaker</h1>
-              <p className="text-lg text-gray-600">Connect with Africa's most compelling voices for your next event</p>
-            </div>
-
-              <Card>
-                <CardContent className="p-8">
-                  {bookingStatus === 'success' ? (
-                    <div className="rounded-xl bg-green-50 text-green-800 p-4 border border-green-200">
-                      <p className="font-medium">Thank you — we’ve received your booking request.</p>
-                      <p>We’ll get back to you within 24 hours.</p>
-                    </div>
-                  ) : (
-                  <form onSubmit={handleClientSubmit} className="space-y-8">
-                  {/* Contact Information */}
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">First Name *</label>
-                        <Input name="firstName" placeholder="Your first name" required />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Last Name *</label>
-                        <Input name="lastName" placeholder="Your last name" required />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Email Address *</label>
-                        <Input name="email" type="email" placeholder="your.email@example.com" required />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Phone Number *</label>
-                        <Input name="phone" placeholder="+1 (555) 123-4567" required />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Company Information */}
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4">Company Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Company Name *</label>
-                        <Input name="companyName" placeholder="Your company name" required />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Job Title *</label>
-                        <Input name="jobTitle" placeholder="Your job title" required />
-                      </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Company Size</label>
-                          <select name="companySize" className="w-full p-2 border border-gray-300 rounded-md">
-                            <option value="">Select company size</option>
-                            <option value="1 - 10 employees">1 - 10 employees</option>
-                            <option value="11 - 50 employees">11 - 50 employees</option>
-                            <option value="51 - 250 employees">51 - 250 employees</option>
-                            <option value="251 - 500 employees">251 - 500 employees</option>
-                            <option value="501 - 1000 employees">501 - 1000 employees</option>
-                            <option value="1000 + employees">1000 + employees</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Industry</label>
-                          <select name="industry" className="w-full p-2 border border-gray-300 rounded-md">
-                            <option value="">Select industry</option>
-                            <option value="Technology">Technology</option>
-                            <option value="Finance & Banking">Finance & Banking</option>
-                            <option value="Healthcare & Medical">Healthcare & Medical</option>
-                            <option value="Education">Education</option>
-                            <option value="Government & Public Policy">Government & Public Policy</option>
-                            <option value="Non Profit and NGO">Non Profit and NGO</option>
-                            <option value="Energy and Mining">Energy and Mining</option>
-                            <option value="Agriculture & Food">Agriculture & Food</option>
-                            <option value="Manufacturing">Manufacturing</option>
-                            <option value="Telecommunications">Telecommunications</option>
-                            <option value="Transport & Logistics">Transport & Logistics</option>
-                            <option value="Real Estate & Construction">Real Estate & Construction</option>
-                            <option value="Media & Entertainment">Media & Entertainment</option>
-                            <option value="Tourism & Hospitality">Tourism & Hospitality</option>
-                            <option value="Retail and Consumer Goods">Retail and Consumer Goods</option>
-                            <option value="Legal Services">Legal Services</option>
-                            <option value="Consulting">Consulting</option>
-                            <option value="Research and Development">Research and Development</option>
-                            <option value="Arts and Cultures">Arts and Cultures</option>
-                            <option value="IT & AI">IT & AI</option>
-                            <option value="Others">Others</option>
-                          </select>
-                        </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium mb-2">Company Website</label>
-                        <Input name="website" placeholder="https://yourcompany.com" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Event Details */}
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4">Event Details</h3>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Event Name *</label>
-                          <Input name="eventName" placeholder="Name of your event" required />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Event Date</label>
-                          <Input name="eventDate" type="date" />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Event Location *</label>
-                          <Input name="eventLocation" placeholder="e.g. New York, USA or Virtual Event" required />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Expected Audience Size</label>
-                          <select name="audienceSize" className="w-full p-2 border border-gray-300 rounded-md">
-                            <option value="">Select audience size</option>
-                            <option value="Less than 50">Less than 50</option>
-                            <option value="50-100">50-100</option>
-                            <option value="100-500">100-500</option>
-                            <option value="500-1000">500-1000</option>
-                            <option value="More than 1000">More than 1000</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Speaking Topic/Theme *</label>
-                        <Textarea name="topic" placeholder="Describe the topic or theme you'd like the speaker to address" required />
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Budget Range (USD)</label>
-                          <select name="budget" className="w-full p-2 border border-gray-300 rounded-md">
-                            <option value="">Select budget range</option>
-                            <option value="Less than $1 000 / R20 000">Less than $1 000 / R20 000</option>
-                            <option value="$1 000-$2 500 / R20 000 - R50 000">$1 000-$2 500 / R20 000 - R50 000</option>
-                            <option value="$2 500-$5 000 / R50000 - R100 000">$2 500-$5 000 / R50000 - R100 000</option>
-                            <option value="$5 000 - $10 000 / R100 000 - R200 000">$5 000 - $10 000 / R100 000 - R200 000</option>
-                            <option value="More than $10 000 / R200 000">More than $10 000 / R200 000</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Presentation Format</label>
-                          <select name="format" className="w-full p-2 border border-gray-300 rounded-md">
-                            <option value="">Select format</option>
-                            <option value="Virtual">Virtual</option>
-                            <option value="In-Person">In-Person</option>
-                            <option value="Hybrid">Hybrid</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Additional Requirements</label>
-                        <Textarea name="requirements" placeholder="Any specific requirements, preferences, or additional information" />
-                      </div>
-                    </div>
-                  </div>
-
-                    <Button type="submit" className="w-full" disabled={bookingStatus === 'loading'}>
-                      {bookingStatus === 'loading' ? 'Submitting...' : 'Submit Booking Request'}
-                    </Button>
-                    {bookingStatus === 'error' && (
-                      <p className="mt-3 text-sm text-red-600">{bookingError}</p>
-                    )}
-                  </form>
-                  )}
-                </CardContent>
-              </Card>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   if (currentPage === 'find-speakers') {
     return <FindSpeakersPage />
   }
@@ -2135,7 +1953,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><Link to="/book-a-speaker">Book a Speaker</Link></Button>
+                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2336,7 +2154,7 @@ function App() {
           </div>
 
           {/* Footer */}
-          <Footer />
+          <Footer appActions={appActions} />
         </div>
       )
     }
@@ -2482,7 +2300,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><Link to="/book-a-speaker">Book a Speaker</Link></Button>
+                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2582,7 +2400,7 @@ function App() {
         </div>
 
         {/* Footer */}
-        <Footer />
+        <Footer appActions={appActions} />
       </div>
     )
   }
@@ -2610,7 +2428,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><Link to="/book-a-speaker">Book a Speaker</Link></Button>
+                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2630,7 +2448,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/book-a-speaker" className="underline font-medium">Book a Speaker</a> form.
+                        <a href="/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
@@ -2716,7 +2534,7 @@ function App() {
               <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
               <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><Link to="/book-a-speaker">Book a Speaker</Link></Button>
+              <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
@@ -2800,7 +2618,7 @@ function App() {
         <FeaturedSpeakers speakers={publishedSpeakers} />
         <MeetOurSpeakers speakers={publishedSpeakers} />
       </div>
-      <PlanYourEvent />
+      <PlanYourEvent appActions={appActions} />
 
       {/* ======== INSIGHTS FROM OUR SPEAKERS ======== */}
       <section className="py-16 bg-white">
@@ -2873,7 +2691,11 @@ function App() {
                   <a href="/#quick-inquiry" className="text-primary hover:underline">
                     Message us
                   </a>
-                  <a href="/book-a-speaker" className="text-primary hover:underline">
+                  <a
+                    href="/book-a-speaker"
+                    className="text-primary hover:underline"
+                    onClick={(e) => { e.preventDefault(); openBooking(); }}
+                  >
                     Request Consultation
                   </a>
                 </div>
@@ -2891,7 +2713,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/book-a-speaker" className="underline font-medium">Book a Speaker</a> form.
+                        <a href="/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
@@ -2917,7 +2739,15 @@ function App() {
         </div>
       </section>
 
-      <Footer />
+      <Footer appActions={appActions} />
+
+      <BookingForm
+        open={showBookingForm}
+        onClose={closeBooking}
+        bookingStatus={bookingStatus}
+        bookingError={bookingError}
+        handleClientSubmit={handleClientSubmit}
+      />
 
       {/* Admin Login Modal */}
       <AdminLoginModal

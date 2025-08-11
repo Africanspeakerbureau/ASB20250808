@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Footer() {
+export default function Footer({ appActions }) {
   return (
     <footer className="bg-slate-900 text-slate-200">
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -65,7 +65,11 @@ export default function Footer() {
                 </a>
               </div>
               <div>
-                <a className="hover:text-white underline" href="/book-a-speaker">
+                <a
+                  className="hover:text-white underline"
+                  href="/book-a-speaker"
+                  onClick={(e) => { e.preventDefault(); appActions.openBooking(); }}
+                >
                   Request Consultation
                 </a>
               </div>
