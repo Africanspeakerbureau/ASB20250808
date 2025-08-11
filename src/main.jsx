@@ -13,7 +13,8 @@ createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <Routes>
           <Route path="/speakers/:slug" element={<SpeakerProfile />} />
-          <Route path="/find" element={<FindSpeakersPage />} />
+          <Route path="/find-speakers" element={<FindSpeakersPage />} />
+          <Route path="/book-a-speaker" element={<App />} />
           <Route path="/*" element={<App />} />
         </Routes>
       </BrowserRouter>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function PlanYourEvent({ onBookingInquiry }) {
+export default function PlanYourEvent() {
   return (
     <section id="services" className="scroll-mt-24 py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 text-center">
@@ -10,11 +10,7 @@ export default function PlanYourEvent({ onBookingInquiry }) {
           we have the expertise to make your event unforgettable.
         </p>
         <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            onBookingInquiry && onBookingInquiry();
-          }}
+          href="/book-a-speaker"
           className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
         >
           Booking Inquiry
@@ -23,4 +19,3 @@ export default function PlanYourEvent({ onBookingInquiry }) {
     </section>
   );
 }
-

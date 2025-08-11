@@ -33,6 +33,7 @@ export default function FeaturedSpeakers() {
           </p>
         </div>
         <div>
+          <h3 className="text-3xl font-semibold mb-4">Featured Speakers</h3>
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {items.slice(0, 3).map((s) => (
               <SpeakerCard key={s.id} speaker={s} variant="compact" />
@@ -41,7 +42,7 @@ export default function FeaturedSpeakers() {
 
           <div className="mt-8">
             <a
-              href="/find"
+              href="/find-speakers"
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
             >
               View all speakers

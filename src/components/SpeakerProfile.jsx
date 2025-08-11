@@ -58,8 +58,8 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           We couldn’t locate that profile.{' '}
           <a
             className="text-blue-600 underline"
-            href="/find"
-            onClick={(e)=>{e.preventDefault(); window.history.pushState({}, '', '/find'); window.dispatchEvent(new PopStateEvent('popstate'));}}
+            href="/find-speakers"
+            onClick={(e)=>{e.preventDefault(); window.history.pushState({}, '', '/find-speakers'); window.dispatchEvent(new PopStateEvent('popstate'));}}
           >
             Return to Find Speakers
           </a>.
@@ -115,8 +115,8 @@ export default function SpeakerProfile({ id, speakers = [] }) {
                 Share profile
               </button>
               <a
-                href="/find"
-                onClick={(e)=>{e.preventDefault(); window.history.pushState({}, '', '/find'); window.dispatchEvent(new PopStateEvent('popstate'));}}
+                href="/find-speakers"
+                onClick={(e)=>{e.preventDefault(); window.history.pushState({}, '', '/find-speakers'); window.dispatchEvent(new PopStateEvent('popstate'));}}
                 className="inline-flex items-center rounded-xl border px-4 py-2 text-gray-800 bg-white shadow-sm"
               >
                 Back to search

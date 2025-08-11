@@ -212,7 +212,7 @@ function App() {
       }
 
       // Path → state
-      if (pathname === '/find') {
+      if (pathname === '/find-speakers') {
         setCurrentPage('find-speakers')
         setSelectedSpeakerId(null)
       } else if (pathname.startsWith('/speaker/')) {
@@ -1212,7 +1212,7 @@ function App() {
               </a>
               <nav className="hidden md:flex items-center space-x-8">
                 <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
@@ -1222,7 +1222,7 @@ function App() {
             </div>
           </div>
         </header>
-        <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find')} />
+        <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
         <Footer />
       </>
     )
@@ -1247,7 +1247,7 @@ function App() {
               </a>
               <nav className="hidden md:flex items-center space-x-8">
                 <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
@@ -1921,7 +1921,7 @@ function App() {
               </a>
               <nav className="hidden md:flex items-center space-x-8">
                 <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
@@ -2129,7 +2129,7 @@ function App() {
               </a>
               <nav className="hidden md:flex items-center space-x-8">
                 <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
@@ -2476,7 +2476,7 @@ function App() {
               </a>
               <nav className="hidden md:flex items-center space-x-8">
                 <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
@@ -2604,7 +2604,7 @@ function App() {
               </a>
               <nav className="hidden md:flex items-center space-x-8">
                 <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
@@ -2710,7 +2710,7 @@ function App() {
             
             <nav className="hidden md:flex items-center space-x-8">
               <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-              <Button asChild variant="ghost"><a href="/find" onClick={handleNav}>Find Speakers</a></Button>
+              <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
               <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
               <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
@@ -2799,7 +2799,7 @@ function App() {
         <FeaturedSpeakers speakers={publishedSpeakers} />
         <MeetOurSpeakers speakers={publishedSpeakers} />
       </div>
-      <PlanYourEvent onBookingInquiry={() => setCurrentPage('client-booking')} />
+      <PlanYourEvent />
 
       {/* ======== INSIGHTS FROM OUR SPEAKERS ======== */}
       <section className="py-16 bg-white">
