@@ -57,10 +57,24 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-gray-400">
-              <li>+1 (555) 123-4567</li>
-              <li>info@africanspeakerbureau.com</li>
-              <li>New York • London • Lagos •</li>
-              <li>Cape Town</li>
+              <li>
+                <a href="mailto:info@africanspeakerbureau.com" className="hover:underline">
+                  info@africanspeakerbureau.com
+                </a>
+              </li>
+              <li>New York • London • Lagos • Cape Town</li>
+            </ul>
+            <ul className="mt-4 space-y-2">
+              <li>
+                <a href="/quick-inquiry" className="hover:underline">
+                  Message us
+                </a>
+              </li>
+              <li>
+                <a href="/book-a-speaker" className="hover:underline">
+                  Request Consultation
+                </a>
+              </li>
             </ul>
           </div>
         </div>
