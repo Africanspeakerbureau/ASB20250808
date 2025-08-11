@@ -19,7 +19,9 @@ import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
 import AdminLoginModal from "./components/AdminLoginModal"
-import EditDialog from "./admin/EditDialog"
+import SpeakerEditDialog from "./admin/components/Edit/SpeakerEditDialog"
+import QuickInquiryEditDialog from "./admin/components/Edit/QuickInquiryEditDialog"
+import ClientInquiryEditDialog from "./admin/components/Edit/ClientInquiryEditDialog"
 import { toast } from "./lib/toast"
 import { validateAdmin } from "./utils/auth"
 
@@ -163,35 +165,22 @@ function App() {
   const serviceToHash = Object.fromEntries(
     Object.entries(hashToService).map(([k, v]) => [v, k])
   )
-  const [editOpen, setEditOpen] = useState(false)
-  const [editing, setEditing] = useState(null)
+  const [editCtx, setEditCtx] = useState({ open: false, table: '', recordId: '' })
 
-  const openEdit = (record) => {
-    try {
-      if (!record) {
-        toast('No record to edit')
-        return
-      }
-      console.log('[ASB] Edit click', { id: record.id, name: record.name || record['First Name'] })
-      toast(`Opening editor for ${record.name || record['First Name'] || record.id}`)
-      setEditing(record)
-      setEditOpen(true)
-    } catch (err) {
-      console.error('[ASB] openEdit error', err)
-      toast('Could not open editor')
-    }
+  const handleEdit = (table, recordId) => {
+    setEditCtx({ open: true, table, recordId })
+    toast('Edit opened')
   }
+  const closeEdit = () => setEditCtx({ open: false, table: '', recordId: '' })
 
   const data = activeTab === 'speakers' ? apps : activeTab === 'clients' ? clients : quick
 
   useEffect(() => {
-    window.__asbOpenEdit = (id) => {
-      const r = (Array.isArray(data) ? data : []).find(x => x.id === id)
-      if (r) openEdit(r)
-      else toast(`Record not found: ${id}`)
+    window.__asbOpenEdit = (id, table = 'Speaker Applications') => {
+      handleEdit(table, id)
     }
     return () => { try { delete window.__asbOpenEdit } catch {} }
-  }, [data])
+  }, [])
 
   const handleNav = (e) => {
     e.preventDefault()
@@ -1117,7 +1106,7 @@ function App() {
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      openEdit(record);
+                                      handleEdit('Speaker Applications', record.id);
                                     }}
                                   >
                                     <Edit className="w-4 h-4" />
@@ -1145,7 +1134,7 @@ function App() {
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      openEdit(record);
+                                      handleEdit('Client Inquiries', record.id);
                                     }}
                                   >
                                     <Edit className="w-4 h-4" />
@@ -1170,7 +1159,7 @@ function App() {
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      openEdit(record);
+                                      handleEdit('Quick Inquiries', record.id);
                                     }}
                                   >
                                     <Edit className="w-4 h-4" />
@@ -1188,11 +1177,15 @@ function App() {
             </Card>
           )}
         </div>
-        <EditDialog
-          open={editOpen}
-          onClose={() => setEditOpen(false)}
-          record={editing}
-        />
+        {editCtx.open && editCtx.table === 'Speaker Applications' && (
+          <SpeakerEditDialog recordId={editCtx.recordId} onClose={closeEdit} />
+        )}
+        {editCtx.open && editCtx.table === 'Quick Inquiries' && (
+          <QuickInquiryEditDialog recordId={editCtx.recordId} onClose={closeEdit} />
+        )}
+        {editCtx.open && editCtx.table === 'Client Inquiries' && (
+          <ClientInquiryEditDialog recordId={editCtx.recordId} onClose={closeEdit} />
+        )}
       </div>
     )
   }
