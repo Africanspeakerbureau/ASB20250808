@@ -19,7 +19,8 @@ import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
-import ModalPortal from "./components/ModalPortal"
+import AdminLoginModal from "./components/AdminLoginModal"
+import { validateAdmin } from "./utils/auth"
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -116,13 +117,11 @@ function App() {
   const widgetRef = useRef()
   
   // State variables
+  const [route, setRoute] = useState(window.location.pathname)
+  const [isAuthed, setIsAuthed] = useState(() => sessionStorage.getItem('asb_admin') === '1')
   const [currentPage, setCurrentPage] = useState('home')
   const [selectedSpeakerId, setSelectedSpeakerId] = useState(null)
-  const [showAdminLogin, setShowAdminLogin] = useState(false)
-  const [showAdminEdit, setShowAdminEdit] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [adminCredentials, setAdminCredentials] = useState({ username: '', password: '' })
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
   const [clientForm, setClientForm] = useState({})
   const [quickForm, setQuickForm] = useState({})
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' })
@@ -179,25 +178,21 @@ function App() {
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
-  function closeAdminOverlays() {
-    setShowAdminLogin(false)
-    setShowAdminEdit(false)
+  function closeAdminModal() {
     window.history.replaceState({}, '', '/')
+    setRoute('/')
+    setCurrentPage('home')
   }
 
   useEffect(() => {
     const syncAndScroll = () => {
-      const { pathname, search, hash } = window.location
+      const { pathname, hash } = window.location
       const id = hash ? decodeURIComponent(hash.slice(1)) : ''
+      setRoute(pathname)
 
       if (pathname === '/admin') {
-        const q = new URLSearchParams(search)
-        if (q.has('edit')) { setShowAdminEdit(true); setShowAdminLogin(false) }
-        else { setShowAdminLogin(true); setShowAdminEdit(false) }
+        setCurrentPage('admin')
         return
-      } else {
-        setShowAdminLogin(false)
-        setShowAdminEdit(false)
       }
 
       // Path → state
@@ -878,21 +873,18 @@ function App() {
     }
   }
 
-  const handleAdminLogin = (e) => {
-    e.preventDefault()
-    if (adminCredentials.username === 'admin' && adminCredentials.password === 'admin123') {
-      setIsAdminLoggedIn(true)
-      setAdminCredentials({ username: '', password: '' })
+  const handleAdminSubmit = async (username, password) => {
+    if (await validateAdmin(username, password)) {
+      sessionStorage.setItem('asb_admin', '1')
+      setIsAuthed(true)
       setSubmitStatus({ type: '', message: '' })
-      window.history.replaceState({}, '', '/admin?edit=1')
-      window.dispatchEvent(new PopStateEvent('popstate'))
-    } else {
-      setSubmitStatus({ type: 'error', message: 'Invalid credentials. Please try again.' })
+      return true
     }
+    return false
   }
 
   // Admin Dashboard Component
-  if (currentPage === 'admin' && isAdminLoggedIn) {
+  if (route === '/admin' && isAuthed) {
     return (
       <div className="min-h-screen bg-gray-50">
         <header className="bg-white shadow-sm border-b">
@@ -919,8 +911,9 @@ function App() {
                   Refresh
                 </Button>
                 <Button variant="outline" onClick={() => {
-                  setCurrentPage('home')
-                  setIsAdminLoggedIn(false)
+                  sessionStorage.removeItem('asb_admin')
+                  setIsAuthed(false)
+                  closeAdminModal()
                 }}>
                   Back to Site
                 </Button>
@@ -1130,7 +1123,7 @@ function App() {
                                     size="sm"
                     onClick={() => {
                       // Only allow editing if on admin page and logged in and URL starts with /admin
-                      if (currentPage === 'admin' && isAdminLoggedIn && window.location.pathname.startsWith('/admin')) {
+                      if (currentPage === 'admin' && isAuthed && window.location.pathname.startsWith('/admin')) {
                         console.log('Edit button clicked for speaker:', record);
                         const { id, ...fields } = record;
                         setEditingRecord({ id, fields, type: 'speaker' });
@@ -1164,7 +1157,7 @@ function App() {
                                     size="sm"
                                     onClick={() => {
                                       // Only allow editing if on admin page and logged in and URL starts with /admin
-                                      if (currentPage === 'admin' && isAdminLoggedIn && window.location.pathname.startsWith('/admin')) {
+                                      if (currentPage === 'admin' && isAuthed && window.location.pathname.startsWith('/admin')) {
                                         console.log('Edit button clicked for client:', record);
                                         const { id, ...fields } = record;
                                         setEditingRecord({ id, fields, type: 'client' });
@@ -1195,7 +1188,7 @@ function App() {
                                     size="sm"
                                     onClick={() => {
                                       // Only allow editing if on admin page and logged in and URL starts with /admin
-                                      if (currentPage === 'admin' && isAdminLoggedIn && window.location.pathname.startsWith('/admin')) {
+                                      if (currentPage === 'admin' && isAuthed && window.location.pathname.startsWith('/admin')) {
                                         console.log('Edit button clicked for quick inquiry:', record);
                                         const { id, ...fields } = record;
                                         setEditingRecord({ id, fields, type: 'quick' });
@@ -3056,52 +3049,11 @@ function App() {
       <Footer />
 
       {/* Admin Login Modal */}
-      {showAdminLogin && (
-        <ModalPortal onClose={closeAdminOverlays}>
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Admin Login</CardTitle>
-              <CardDescription>Access the African Speaker Bureau admin panel</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {submitStatus.message && submitStatus.type === 'error' && (
-                <div className="mb-4 p-3 rounded bg-red-100 text-red-800">
-                  {submitStatus.message}
-                </div>
-              )}
-              <form onSubmit={handleAdminLogin} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Username</label>
-                  <Input
-                    type="text"
-                    placeholder="Enter username"
-                    value={adminCredentials.username}
-                    onChange={(e) => setAdminCredentials({ ...adminCredentials, username: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Password</label>
-                  <Input
-                    type="password"
-                    placeholder="Enter password"
-                    value={adminCredentials.password}
-                    onChange={(e) => setAdminCredentials({ ...adminCredentials, password: e.target.value })}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full">Login</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </ModalPortal>
-      )}
-
-      {showAdminEdit && (
-        <ModalPortal onClose={closeAdminOverlays}>
-          <div>Admin Editor goes here</div>
-        </ModalPortal>
-      )}
+      <AdminLoginModal
+        open={route === '/admin' && !isAuthed}
+        onClose={closeAdminModal}
+        onSubmit={handleAdminSubmit}
+      />
 
       {/* Edit Record Dialog */}
       {console.log('editingRecord state:', editingRecord)}
@@ -3109,7 +3061,7 @@ function App() {
         const rec = editingRecord ?? null;
         const id = rec?.id ?? null;
         const fields = rec?.fields ?? {};
-        if (!rec || currentPage !== 'admin' || !isAdminLoggedIn || !window.location.pathname.startsWith('/admin')) return null;
+        if (!rec || currentPage !== 'admin' || !isAuthed || !window.location.pathname.startsWith('/admin')) return null;
         return ReactDOM.createPortal(
         <div
           className="modal-overlay"

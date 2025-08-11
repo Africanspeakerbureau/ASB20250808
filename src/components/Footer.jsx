@@ -40,7 +40,7 @@ export default function Footer() {
               <li><a href="/about" onClick={handleNav} className="hover:text-white">About</a></li>
               <li><a href="/#contact" onClick={handleNav} className="hover:text-white">Contact</a></li>
               <li><a href="/book" className="hover:text-white">Book a Speaker</a></li>
-              <li><a href="/admin" className="hover:text-white">Admin</a></li>
+              <li><a href="/admin" onClick={handleNav} className="hover:text-white">Admin</a></li>
             </ul>
           </div>
           <div>
