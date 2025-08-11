@@ -5,15 +5,18 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App.jsx'
 import FindSpeakersPage from './components/FindSpeakersPage.jsx'
 import SpeakerProfile from './components/SpeakerProfile.jsx'
+import { ToastProvider } from './components/Toast'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/speakers/:slug" element={<SpeakerProfile />} />
-        <Route path="/find" element={<FindSpeakersPage />} />
-        <Route path="/*" element={<App />} />
-      </Routes>
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/speakers/:slug" element={<SpeakerProfile />} />
+          <Route path="/find" element={<FindSpeakersPage />} />
+          <Route path="/*" element={<App />} />
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
   </StrictMode>,
 )
