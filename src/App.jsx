@@ -19,6 +19,7 @@ import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
+import ModalPortal from "./components/ModalPortal"
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -118,6 +119,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [selectedSpeakerId, setSelectedSpeakerId] = useState(null)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
+  const [showAdminEdit, setShowAdminEdit] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [adminCredentials, setAdminCredentials] = useState({ username: '', password: '' })
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
@@ -177,14 +179,25 @@ function App() {
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
+  function closeAdminOverlays() {
+    setShowAdminLogin(false)
+    setShowAdminEdit(false)
+    window.history.replaceState({}, '', '/')
+  }
+
   useEffect(() => {
     const syncAndScroll = () => {
-      const { pathname, hash } = window.location
+      const { pathname, search, hash } = window.location
       const id = hash ? decodeURIComponent(hash.slice(1)) : ''
 
       if (pathname === '/admin') {
-        setShowAdminLogin(true)
+        const q = new URLSearchParams(search)
+        if (q.has('edit')) { setShowAdminEdit(true); setShowAdminLogin(false) }
+        else { setShowAdminLogin(true); setShowAdminEdit(false) }
         return
+      } else {
+        setShowAdminLogin(false)
+        setShowAdminEdit(false)
       }
 
       // Path → state
@@ -868,11 +881,11 @@ function App() {
   const handleAdminLogin = (e) => {
     e.preventDefault()
     if (adminCredentials.username === 'admin' && adminCredentials.password === 'admin123') {
-      setShowAdminLogin(false)
       setIsAdminLoggedIn(true)
-      setCurrentPage('admin')
       setAdminCredentials({ username: '', password: '' })
       setSubmitStatus({ type: '', message: '' })
+      window.history.replaceState({}, '', '/admin?edit=1')
+      window.dispatchEvent(new PopStateEvent('popstate'))
     } else {
       setSubmitStatus({ type: 'error', message: 'Invalid credentials. Please try again.' })
     }
@@ -3044,7 +3057,7 @@ function App() {
 
       {/* Admin Login Modal */}
       {showAdminLogin && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <ModalPortal onClose={closeAdminOverlays}>
           <Card className="w-full max-w-md mx-4">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Admin Login</CardTitle>
@@ -3059,42 +3072,35 @@ function App() {
               <form onSubmit={handleAdminLogin} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Username</label>
-                  <Input 
-                    type="text" 
-                    placeholder="Enter username" 
+                  <Input
+                    type="text"
+                    placeholder="Enter username"
                     value={adminCredentials.username}
-                    onChange={(e) => setAdminCredentials({...adminCredentials, username: e.target.value})}
-                    required 
+                    onChange={(e) => setAdminCredentials({ ...adminCredentials, username: e.target.value })}
+                    required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Password</label>
-                  <Input 
-                    type="password" 
-                    placeholder="Enter password" 
+                  <Input
+                    type="password"
+                    placeholder="Enter password"
                     value={adminCredentials.password}
-                    onChange={(e) => setAdminCredentials({...adminCredentials, password: e.target.value})}
-                    required 
+                    onChange={(e) => setAdminCredentials({ ...adminCredentials, password: e.target.value })}
+                    required
                   />
                 </div>
                 <Button type="submit" className="w-full">Login</Button>
               </form>
-              <Button 
-                variant="ghost" 
-                className="w-full mt-4" 
-                onClick={() => {
-                  setShowAdminLogin(false)
-                  setSubmitStatus({ type: '', message: '' })
-                  if (window.location.pathname === '/admin') {
-                    window.history.replaceState({}, '', '/')
-                  }
-                }}
-              >
-                Close
-              </Button>
             </CardContent>
           </Card>
-        </div>
+        </ModalPortal>
+      )}
+
+      {showAdminEdit && (
+        <ModalPortal onClose={closeAdminOverlays}>
+          <div>Admin Editor goes here</div>
+        </ModalPortal>
       )}
 
       {/* Edit Record Dialog */}
