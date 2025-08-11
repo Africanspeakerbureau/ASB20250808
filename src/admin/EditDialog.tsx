@@ -6,6 +6,9 @@ import {
   TRAVEL_WILLINGNESS, FEATURED, STATUS, EXPERTISE_LEVEL, DISPLAY_FEE
 } from "./edit/options";
 import UploadWidget from "@/components/UploadWidget";
+import { useToast } from "@/components/Toast";
+import { buildFields } from "./shapeSpeakerPayload";
+import { F } from "./fieldMap";
 import "./editDialog.css";
 
 type RecordLike = {
@@ -19,7 +22,8 @@ type Props = {
   onClose: () => void;
 };
 
-const TABS = [
+const isAdmin = true; // from your session
+const ALL_TABS = [
   "Identity",
   "Background",
   "Experience",
@@ -30,9 +34,12 @@ const TABS = [
   "Contact & Admin",
   "Internal",
 ] as const;
-type TabKey = typeof TABS[number];
+type TabKey = typeof ALL_TABS[number];
+const TABS: TabKey[] = isAdmin ? [...ALL_TABS] : ALL_TABS.filter(t => t !== "Internal");
 
 export default function EditDialog({ open, record, onClose }: Props) {
+  const { push } = useToast();
+  const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<TabKey>("Identity");
 
   const initial = useMemo(() => {
@@ -47,6 +54,7 @@ export default function EditDialog({ open, record, onClose }: Props) {
       "Location": f["Location"] ?? "",
       "Country": f["Country"] ?? "",
       "Profile Image": f["Profile Image"] ?? [],
+      profileImageUrls: Array.isArray(f["Profile Image"]) ? f["Profile Image"].map((x:any) => x.url ?? x) : [],
 
       // Background
       "Industry": f["Industry"] ?? "",
@@ -79,6 +87,7 @@ export default function EditDialog({ open, record, onClose }: Props) {
 
       // Media & Languages
       "Header Image": f["Header Image"] ?? [],
+      headerImageUrls: Array.isArray(f["Header Image"]) ? f["Header Image"].map((x:any) => x.url ?? x) : [],
       "Video Link 1": f["Video Link 1"] ?? "",
       "Video Link 2": f["Video Link 2"] ?? "",
       "Video Link 3": f["Video Link 3"] ?? "",
@@ -116,6 +125,89 @@ export default function EditDialog({ open, record, onClose }: Props) {
 
   const [draft, setDraft] = useState(initial);
   useEffect(() => setDraft(initial), [initial]);
+
+  async function onSave(closeAfter = true) {
+    try {
+      setSaving(true);
+      const state = {
+        firstName: draft[F.FirstName],
+        lastName: draft[F.LastName],
+        title: draft[F.Title],
+        professionalTitle: draft[F.ProfessionalTitle],
+        company: draft[F.Company],
+        location: draft[F.Location],
+        country: draft[F.Country],
+        industry: draft[F.Industry],
+        expertiseLevel: draft[F.ExpertiseLevel],
+        yearsExperience: draft[F.YearsExperience],
+        notableAchievements: draft[F.NotableAchievements],
+        achievements: draft[F.Achievements],
+        education: draft[F.Education],
+
+        speakingExperience: draft[F.SpeakingExperience],
+        numberEvents: draft[F.NumberEvents],
+        largestAudience: draft[F.LargestAudience],
+        virtualExperience: draft[F.VirtualExperience],
+
+        expertiseAreas: draft[F.ExpertiseAreas],
+        speakingTopics: draft[F.SpeakingTopics],
+        keyMessages: draft[F.KeyMessages],
+        professionalBio: draft[F.ProfessionalBio],
+
+        deliveryStyle: draft[F.DeliveryStyle],
+        whyListen: draft[F.WhyListen],
+        willAddress: draft[F.WillAddress],
+        willLearn: draft[F.WillLearn],
+        takeHome: draft[F.TakeHome],
+        benefitIndividual: draft[F.BenefitIndividual],
+        benefitOrg: draft[F.BenefitOrg],
+
+        video1: draft[F.Video1],
+        video2: draft[F.Video2],
+        video3: draft[F.Video3],
+        spokenLanguages: draft[F.SpokenLanguages],
+
+        feeRange: draft[F.FeeRange],
+        displayFee: draft[F.DisplayFee],
+        travelWillingness: draft[F.TravelWillingness],
+        travelRequirements: draft[F.TravelRequirements],
+
+        website: draft[F.Website],
+        linkedin: draft[F.LinkedIn],
+        twitter: draft[F.Twitter] || draft["Twitter"],
+        references: draft[F.References],
+        paName: draft[F.PAName],
+        paEmail: draft[F.PAEmail],
+        paPhone: draft[F.PAPhone],
+        banking: draft[F.Banking],
+        additionalInfo: draft[F.AdditionalInfo],
+
+        status: draft[F.Status],
+        featured: draft[F.Featured],
+        internalNotes: draft[F.InternalNotes],
+        profileImageUrls: Array.isArray(draft[F.ProfileImage])
+          ? draft[F.ProfileImage].map((f: any) => f.url ?? f)
+          : draft.profileImageUrls || [],
+        headerImageUrls: Array.isArray(draft[F.HeaderImage])
+          ? draft[F.HeaderImage].map((f: any) => f.url ?? f)
+          : draft.headerImageUrls || [],
+      };
+      const fields = buildFields(state);
+      const res = await fetch("/api/admin/speakers/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recordId: record.id, fields }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Save failed");
+      push({ text: "Saved ✔︎", type: "success" });
+      if (closeAfter) onClose();
+    } catch (e: any) {
+      push({ text: e?.message || "Could not save", type: "error" });
+    } finally {
+      setSaving(false);
+    }
+  }
 
   if (!open || !record) return null;
 
@@ -244,8 +336,13 @@ export default function EditDialog({ open, record, onClose }: Props) {
         </div>
 
         <div className="modal__footer">
-          <button className="btn" onClick={onClose}>Close</button>
-          <button className="btn btn--primary" disabled title="Saving comes next patch">Save (next patch)</button>
+          <button className="btn" disabled={saving} onClick={onClose}>Close</button>
+          <button className="btn" disabled={saving} onClick={() => onSave(false)}>
+            {saving ? "Saving…" : "Save"}
+          </button>
+          <button className="btn btn--primary" disabled={saving} onClick={() => onSave(true)}>
+            {saving ? "Saving…" : "Save & Close"}
+          </button>
         </div>
       </div>
     </div>,
@@ -329,6 +426,12 @@ export default function EditDialog({ open, record, onClose }: Props) {
           <UploadWidget
             onUpload={(uploaded) => {
               set(id, uploaded);
+              if (id === F.ProfileImage) {
+                set("profileImageUrls", uploaded.map((f: any) => f.url));
+              }
+              if (id === F.HeaderImage) {
+                set("headerImageUrls", uploaded.map((f: any) => f.url));
+              }
             }}
           >
             <button className="btn btn--dark">Upload</button>
