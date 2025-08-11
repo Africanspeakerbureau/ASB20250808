@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import {
   INDUSTRIES, YEARS_EXPERIENCE, SPEAKING_EXPERIENCE, NUMBER_OF_EVENTS, LARGEST_AUDIENCE,
@@ -11,71 +11,35 @@ import { useAirtableRecord } from "../../hooks/useAirtableRecord";
 import { airtablePatchRecord } from "../../api/airtable";
 import "./editDialog.css";
 
-// Read-only and unsupported fields we don't send back
+// Computed/linked fields we never send back to Airtable
 const READ_ONLY_FIELDS = new Set<string>([
+  "Full Name",
   "Experience Score",
   "Total Events",
-  "Total Events (calc)",
   "Potential Revenue",
   "Created Date",
-  "Full Name",
-  "Days Until Event",
-  "Total Inquiries",
-  "Response Time",
-  "Speaker Status",
+  "Client Inquiries",
 ]);
 
+// Attachment placeholders (handled later)
 const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
-const LINKED_RECORD_FIELDS = new Set<string>(["Client Inquiries"]);
 
-const MULTI_SELECT_FIELDS = new Set<string>([
-  "Expertise Areas",
-  "Spoken Languages",
-  "Status",
-]);
+function isEqualShallow(a: any, b: any) {
+  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+}
 
-const SINGLE_SELECT_FIELDS = new Set<string>([
-  "Industry",
-  "Years Experience",
-  "Expertise Level",
-  "Speaking Experience",
-  "Number of Events",
-  "Largest Audience",
-  "Virtual Experience",
-  "Fee Range",
-  "Travel Willingness",
-  "Country",
-  "Featured",
-  "Display Fee",
-]);
-
-function buildSpeakerPayload(form: Record<string, any>) {
+function buildSpeakerPayload(
+  form: Record<string, any>,
+  original: { fields?: Record<string, any> } | undefined
+) {
   const out: Record<string, any> = {};
-  for (const [key, raw] of Object.entries(form)) {
-    if (
-      READ_ONLY_FIELDS.has(key) ||
-      ATTACHMENT_FIELDS.has(key) ||
-      LINKED_RECORD_FIELDS.has(key)
-    ) {
-      continue;
-    }
-    if (raw === "" || raw === undefined || raw === null) continue;
-    if (MULTI_SELECT_FIELDS.has(key)) {
-      out[key] = Array.isArray(raw)
-        ? raw.map(String)
-        : String(raw)
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean);
-      continue;
-    }
-    if (SINGLE_SELECT_FIELDS.has(key)) {
-      out[key] = String(raw);
-      continue;
-    }
-    out[key] = raw;
+  for (const [key, val] of Object.entries(form)) {
+    if (READ_ONLY_FIELDS.has(key)) continue;
+    if (ATTACHMENT_FIELDS.has(key)) continue;
+    const prev = original?.fields?.[key];
+    if (!isEqualShallow(val, prev)) out[key] = val;
   }
-  return out;
+  return { fields: out };
 }
 
 type Props = {
@@ -99,38 +63,40 @@ type TabKey = typeof ALL_TABS[number];
 const TABS: TabKey[] = isAdmin ? [...ALL_TABS] : ALL_TABS.filter(t => t !== "Internal");
 
 export default function SpeakerEditDialog({ recordId, onClose }: Props) {
-const { push } = useToast();
-const [saving, setSaving] = useState(false);
-const [tab, setTab] = useState<TabKey>("Identity");
-const { record, loading } = useAirtableRecord<any>('Speaker Applications', recordId);
-  const [form, setForm] = useState<Record<string, any>>({});
-  useEffect(() => {
-    if (record) {
-      setForm({ ...(record.fields || {}) });
-    }
-  }, [record?.id]);
+  const { push } = useToast();
+  const [saving, setSaving] = React.useState(false);
+  const [tab, setTab] = React.useState<TabKey>("Identity");
+  const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
+  const [form, setForm] = React.useState<Record<string, any>>({});
+  const hydratedRef = React.useRef(false);
 
-  const setField = useCallback((name: string, value: any) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }, []);
+  React.useEffect(() => {
+    if (!record?.id) return;
+    if (hydratedRef.current) return;
+    setForm({ ...(record.fields || {}) });
+    hydratedRef.current = true;
+  }, [record?.id, record]);
 
-  async function handleSave(closeAfter = true) {
+  function setField(name: string, value: any) {
+    setForm((f) => ({ ...f, [name]: value }));
+  }
+
+  async function handleSave(closeAfter = false) {
     if (!record) return;
     try {
       setSaving(true);
-      const fields = buildSpeakerPayload(form);
-      if (!Object.keys(fields).length) {
-        push({ text: 'Nothing to save.', type: 'info' });
-        setSaving(false);
+      const payload = buildSpeakerPayload(form, record);
+      if (Object.keys(payload.fields).length === 0) {
+        push({ text: "No changes to save", type: "info" });
         if (closeAfter) onClose();
         return;
       }
-      await airtablePatchRecord('Speaker Applications', record.id, fields);
-      push({ text: 'Saved ✔︎', type: 'success' });
+      await airtablePatchRecord("Speaker Applications", record.id, payload.fields);
+      push({ text: "Saved ✔︎", type: "success" });
       if (closeAfter) onClose();
     } catch (e: any) {
-      push({ text: e?.message || 'Could not save', type: 'error' });
-      console.error('[Save error]', e);
+      push({ text: e?.message || "Could not save", type: "error" });
+      console.error("[Save error]", e);
     } finally {
       setSaving(false);
     }
