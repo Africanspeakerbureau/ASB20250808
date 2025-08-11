@@ -18,6 +18,11 @@ const READ_ONLY_FIELDS = new Set<string>([
   "Total Events (calc)",
   "Potential Revenue",
   "Created Date",
+  "Full Name",
+  "Days Until Event",
+  "Total Inquiries",
+  "Response Time",
+  "Speaker Status",
 ]);
 
 const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
