@@ -25,12 +25,15 @@ export default function FeaturedSpeakers() {
       <div className="mx-auto max-w-7xl px-4 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
         <div>
           <h2 className="text-3xl font-semibold mb-4">Why African Speaker Bureau?</h2>
-          <p className="text-gray-600 leading-7">
-            We are the exclusive gateway to authentic African expertise, connecting global audiences with the continent's most compelling voices who bring unparalleled insights and transformative perspectives.
+          <p className="text-gray-700">
+            We are the exclusive gateway to authentic African expertise, connecting global audiences with the continent’s most compelling voices who bring unparalleled insights and transformative perspectives.
+          </p>
+          <p className="mt-3 text-gray-500 italic">
+            Please note: This website is still in development — be part of the beta launch of ASB’s new virtual home.
           </p>
         </div>
         <div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {items.slice(0, 3).map((s) => (
               <SpeakerCard key={s.id} speaker={s} variant="compact" />
             ))}

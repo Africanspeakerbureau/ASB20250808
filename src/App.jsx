@@ -225,7 +225,7 @@ function App() {
       } else if (pathname === '/about') {
         setCurrentPage('about')
         setSelectedSpeakerId(null)
-      } else if (pathname === '/book') {
+      } else if (pathname === '/book-a-speaker') {
         setCurrentPage('client-booking')
         setSelectedSpeakerId(null)
       } else {
@@ -1217,7 +1217,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book-a-speaker">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1252,7 +1252,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book-a-speaker">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1926,7 +1926,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book-a-speaker">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2134,7 +2134,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book-a-speaker">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2481,7 +2481,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book-a-speaker">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2609,7 +2609,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
                 <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book">Book a Speaker</a></Button>
+                <Button asChild><a href="/book-a-speaker">Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2629,7 +2629,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/book" className="underline font-medium">Book a Speaker</a> form.
+                        <a href="/book-a-speaker" className="underline font-medium">Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
@@ -2715,7 +2715,7 @@ function App() {
               <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
               <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
               <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><a href="/book">Book a Speaker</a></Button>
+              <Button asChild><a href="/book-a-speaker">Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
@@ -2857,7 +2857,7 @@ function App() {
 
           <div className="grid md:grid-cols-2 gap-12">
             <div>
-              <h3 className="text-3xl font-bold">Contact Information</h3>
+              <h3 className="text-3xl font-bold">Contact</h3>
 
               <div className="mt-6 space-y-4">
                 <a
@@ -2872,14 +2872,15 @@ function App() {
                   <a href="/#quick-inquiry" className="text-primary hover:underline">
                     Message us
                   </a>
-                  <a href="/book" className="text-primary hover:underline">
+                  <a href="/book-a-speaker" className="text-primary hover:underline">
                     Request Consultation
                   </a>
                 </div>
               </div>
             </div>
 
-              <Card id="quick-inquiry">
+            <section id="quick-inquiry">
+              <Card>
                 <CardHeader>
                   <CardTitle>Quick Inquiry</CardTitle>
                 </CardHeader>
@@ -2889,7 +2890,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/book" className="underline font-medium">Book a Speaker</a> form.
+                        <a href="/book-a-speaker" className="underline font-medium">Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
@@ -2910,6 +2911,7 @@ function App() {
                   )}
                 </CardContent>
               </Card>
+            </section>
           </div>
         </div>
       </section>

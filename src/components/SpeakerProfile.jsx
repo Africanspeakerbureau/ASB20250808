@@ -102,7 +102,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
 
             <div className="mt-4 flex flex-wrap gap-3">
               <a
-                href="/book"
+                href="/book-a-speaker"
                 className="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
               >
                 Contact {speaker.firstName}
