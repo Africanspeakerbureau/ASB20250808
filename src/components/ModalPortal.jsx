@@ -22,19 +22,24 @@ export default function ModalPortal({ children, onClose }) {
   const contentRef = useRef(null);
   const previouslyFocused = useRef(null);
 
-  // Lock background scroll + remember focus
+  // Lock background scroll, make app inert, remember focus
   useEffect(() => {
     previouslyFocused.current = document.activeElement;
-    document.body.classList.add("modal-open");
+    const appRoot = document.getElementById("__next") || document.getElementById("root");
+    document.body.style.overflow = "hidden";
+    document.body.classList.add("modal-open", "asb-modal-open");
+    appRoot?.setAttribute("inert", "");
     return () => {
-      document.body.classList.remove("modal-open");
+      document.body.style.overflow = "";
+      document.body.classList.remove("modal-open", "asb-modal-open");
+      appRoot?.removeAttribute("inert");
       if (previouslyFocused.current instanceof HTMLElement) {
         previouslyFocused.current.focus({ preventScroll: true });
       }
     };
   }, []);
 
-  // Esc to close + initial focus
+  // Esc to close
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
@@ -43,13 +48,8 @@ export default function ModalPortal({ children, onClose }) {
       }
     };
     window.addEventListener("keydown", onKey, { capture: true });
-    const t = setTimeout(() => {
-      const focusables = getFocusable(contentRef.current);
-      (focusables[0] || contentRef.current)?.focus();
-    }, 0);
     return () => {
       window.removeEventListener("keydown", onKey, { capture: true });
-      clearTimeout(t);
     };
   }, [onClose]);
 
