@@ -5,7 +5,6 @@ import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import Footer from './components/Footer'
-import ReactDOM from 'react-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
 import {
@@ -20,6 +19,7 @@ import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
 import AdminLoginModal from "./components/AdminLoginModal"
+import EditRecordModal from "./components/admin/EditRecordModal"
 import { validateAdmin } from "./utils/auth"
 
 // Field presets mapping for dropdowns
@@ -131,8 +131,6 @@ function App() {
   const [quickError, setQuickError] = useState('')
   const [profileImageUrl, setProfileImageUrl] = useState('')
   const [attachments, setAttachments] = useState([])
-  const [editImageFile, setEditImageFile] = useState(null)
-  const [editImagePreview, setEditImagePreview] = useState(null)
   
   // Admin Dashboard State
   const [apps, setApps] = useState([])
@@ -693,40 +691,6 @@ function App() {
     })
   }
 
-  const handleEditImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setEditImageFile(file)
-      // Create preview URL
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setEditImagePreview(e.target.result)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const uploadImageToImgBB = async (file) => {
-    const formData = new FormData()
-    formData.append('image', file)
-    
-    try {
-      // Using ImgBB free API - no API key required for basic usage
-      const response = await fetch('https://api.imgbb.com/1/upload?key=demo', {
-        method: 'POST',
-        body: formData
-      })
-      const data = await response.json()
-      if (data.success) {
-        return data.data.url
-      } else {
-        throw new Error('Upload failed')
-      }
-    } catch (error) {
-      console.error('Image upload failed:', error)
-      return null
-    }
-  }
 
   const handleSpeakerSubmit = async (e) => {
     e.preventDefault()
@@ -3055,276 +3019,31 @@ function App() {
         onSubmit={handleAdminSubmit}
       />
 
-      {/* Edit Record Dialog */}
-      {console.log('editingRecord state:', editingRecord)}
-      {(() => {
-        const rec = editingRecord ?? null;
-        const id = rec?.id ?? null;
-        const fields = rec?.fields ?? {};
-        if (!rec || currentPage !== 'admin' || !isAuthed || !window.location.pathname.startsWith('/admin')) return null;
-        return ReactDOM.createPortal(
-        <div
-          className="modal-overlay"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 1000,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {console.log('Rendering edit dialog for:', rec)}
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              Edit {rec.type === 'speaker' ? 'Speaker' : rec.type === 'client' ? 'Client' : 'Quick Inquiry'}
-            </h2>
-
-            <div className="space-y-4">
-              {Object.entries(fields).map(([key, value]) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{key}</label>
-                  {key === 'Status' ? (
-                    <select
-                      className="w-full p-2 border border-gray-300 rounded"
-                      defaultValue={value}
-                      onChange={(e) => {
-                        fields[key] = e.target.value;
-                      }}
-                    >
-                      {rec.type === 'speaker' ? (
-                        <>
-                          <option value="Pending">Pending</option>
-                          <option value="Under Review">Under Review</option>
-                          <option value="Approved">Approved</option>
-                          <option value="Rejected">Rejected</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="New">New</option>
-                          <option value="Under Review">Under Review</option>
-                          <option value="Contacted">Contacted</option>
-                          <option value="Closed">Closed</option>
-                        </>
-                      )}
-                    </select>
-                  ) : key === 'Profile Image' ? (
-                    <div className="space-y-3">
-                      {/* Show current image if exists */}
-                      {value && Array.isArray(value) && value.length > 0 && (
-                        <div>
-                          <p className="text-sm text-gray-600 mb-2">Current Image:</p>
-                          <img 
-                            src={value[0].url} 
-                            alt="Current profile" 
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                          />
-                        </div>
-                      )}
-                      {/* File input for new image */}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleEditImageChange}
-                        className="w-full p-2 border border-gray-300 rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                      />
-                      {/* Preview new image */}
-                      {editImagePreview && (
-                        <div>
-                          <p className="text-sm text-gray-600 mb-2">New Image Preview:</p>
-                          <img 
-                            src={editImagePreview} 
-                            alt="New profile preview" 
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                          />
-                        </div>
-                      )}
-                      <p className="text-xs text-gray-500">
-                        Upload a new professional headshot to replace the current image.
-                      </p>
-                    </div>
-                  ) : (() => {
-                    // Get table name for fieldPresets lookup
-                    const tableName = rec.type === 'speaker' ? 'Speaker Applications' :
-                                     rec.type === 'client' ? 'Client Inquiries' : 'Quick Inquiries';
-                    const presets = fieldPresets[tableName]?.[key];
-                    const fieldValue = value || "";
-
-                    // Single-select → dropdown
-                    if (presets?.type === "singleSelect") {
-                      return (
-                        <select
-                          className="w-full p-2 border border-gray-300 rounded"
-                          value={fieldValue}
-                          onChange={e => {
-                            fields[key] = e.target.value;
-                          }}
-                        >
-                          <option value="">Select…</option>
-                          {presets.options.map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      );
-                    }
-
-                    // Multiple-select → checkboxes
-                    if (presets?.type === "multipleSelects") {
-                      const selected = Array.isArray(fieldValue) ? fieldValue : [];
-                      return (
-                        <div className="checkbox-group space-y-2 max-h-40 overflow-y-auto">
-                          {presets.options.map(opt => (
-                            <label key={opt} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={selected.includes(opt)}
-                                onChange={e => {
-                                  const next = e.target.checked
-                                    ? [...selected, opt]
-                                    : selected.filter(v => v !== opt);
-                                  fields[key] = next;
-                                }}
-                              />
-                              <span className="text-sm">{opt}</span>
-                            </label>
-                          ))}
-                        </div>
-                      );
-                    }
-
-                    // Text areas for long text fields
-                    if (key.toLowerCase().includes('message') || key.toLowerCase().includes('bio') || 
-                        key.toLowerCase().includes('description') || key.toLowerCase().includes('requirements') ||
-                        key.toLowerCase().includes('achievements') || key.toLowerCase().includes('education') ||
-                        key.toLowerCase().includes('banking') || key.toLowerCase().includes('references') ||
-                        key.toLowerCase().includes('topics') || key.toLowerCase().includes('notes')) {
-                      return (
-                        <textarea
-                          className="w-full p-2 border border-gray-300 rounded min-h-[100px]"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // URL inputs
-                    if (key.toLowerCase().includes('website') || key.toLowerCase().includes('linkedin') || 
-                        key.toLowerCase().includes('twitter') || key.toLowerCase().includes('video')) {
-                      return (
-                        <input
-                          type="url"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // Date inputs
-                    if (key.toLowerCase().includes('date')) {
-                      return (
-                        <input
-                          type="date"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // Email inputs
-                    if (key.toLowerCase().includes('email')) {
-                      return (
-                        <input
-                          type="email"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // Phone inputs
-                    if (key.toLowerCase().includes('phone')) {
-                      return (
-                        <input
-                          type="tel"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          defaultValue={fieldValue || ''}
-                          onChange={(e) => {
-                            fields[key] = e.target.value;
-                          }}
-                        />
-                      );
-                    }
-
-                    // Fallback: text input
-                    return (
-                      <input
-                        type="text"
-                        className="w-full p-2 border border-gray-300 rounded"
-                        defaultValue={fieldValue || ''}
-                        onChange={(e) => {
-                          fields[key] = e.target.value;
-                        }}
-                      />
-                    );
-                  })()}
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                onClick={() => setEditingRecord(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={async () => {
-                  try {
-                    // Handle image upload if new image is selected
-                      if (editImageFile) {
-                        const imageUrl = await uploadImageToImgBB(editImageFile)
-                        if (imageUrl) {
-                          fields['Profile Image'] = [{ url: imageUrl }]
-                        }
-                      }
-                    
-                    const tableName = rec.type === 'speaker' ? 'Speaker%20Applications' :
-                                     rec.type === 'client' ? 'Client%20Inquiries' : 'Quick%20Inquiries';
-                    await updateRecord(tableName, id, fields);
-                    setEditingRecord(null);
-                    setEditImageFile(null);
-                    setEditImagePreview(null);
-                  } catch (error) {
-                    console.error('Error saving record:', error);
-                    alert('Error saving changes. Please try again.');
-                  }
-                }}
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-        );
-      })()}
+      <EditRecordModal
+        open={
+          !!editingRecord &&
+          currentPage === 'admin' &&
+          isAuthed &&
+          window.location.pathname.startsWith('/admin')
+        }
+        record={editingRecord}
+        onClose={() => setEditingRecord(null)}
+        onSave={async (record, payload) => {
+          try {
+            const tableName =
+              record.type === 'speaker'
+                ? 'Speaker%20Applications'
+                : record.type === 'client'
+                ? 'Client%20Inquiries'
+                : 'Quick%20Inquiries';
+            await updateRecord(tableName, record.id, payload);
+            setEditingRecord(null);
+          } catch (error) {
+            console.error('Error saving record:', error);
+            alert('Error saving changes. Please try again.');
+          }
+        }}
+      />
     </div>
   )
 }
