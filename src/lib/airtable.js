@@ -102,3 +102,26 @@ export const getClientInquiries = (opts = {}) =>
 export const getQuickInquiries = (opts = {}) =>
   query('Quick Inquiries', { view: 'Grid view', maxRecords: 200, ...opts });
 
+
+export async function getSpeakerById(recordId) {
+  ensureEnv();
+  const res = await fetch(`${API}/${TBL_SPEAKERS}/${recordId}`, {
+    headers: { Authorization: `Bearer ${API_KEY}` }
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function updateSpeaker(recordId, fields) {
+  ensureEnv();
+  const res = await fetch(`${API}/${TBL_SPEAKERS}/${recordId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ fields })
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}

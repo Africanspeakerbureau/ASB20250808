@@ -19,7 +19,7 @@ import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
 import AdminLoginModal from "./components/AdminLoginModal"
-import EditSpeakerDialog from "./admin/EditSpeakerDialog"
+import EditSpeakerModal from "./admin/EditSpeakerModal"
 import { toast } from "./lib/toast"
 import { validateAdmin } from "./utils/auth"
 
@@ -1188,10 +1188,10 @@ function App() {
             </Card>
           )}
         </div>
-        <EditSpeakerDialog
+        <EditSpeakerModal
           open={editOpen}
           onClose={() => setEditOpen(false)}
-          record={editing}
+          recordId={editing?.id}
         />
       </div>
     )
