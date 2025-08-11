@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
@@ -19,7 +19,8 @@ import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
 import AdminLoginModal from "./components/AdminLoginModal"
-import EditRecordModal from "./components/admin/EditRecordModal"
+import AdminEditModal from "./admin/AdminEditModal"
+import Toast from "./components/Toast"
 import { validateAdmin } from "./utils/auth"
 
 // Field presets mapping for dropdowns
@@ -162,7 +163,37 @@ function App() {
   const serviceToHash = Object.fromEntries(
     Object.entries(hashToService).map(([k, v]) => [v, k])
   )
-  const [editingRecord, setEditingRecord] = useState(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [activeId, setActiveId] = useState(null)
+  const [toast, setToast] = useState({ open: false, msg: '' })
+
+  const openEdit = useCallback((id) => {
+    setActiveId(id)
+    setEditOpen(true)
+    setToast({ open: true, msg: `Edit clicked: ${id}` })
+    console.debug('[admin] edit click:', id)
+  }, [])
+
+  const closeEdit = useCallback(() => {
+    setEditOpen(false)
+    setActiveId(null)
+  }, [])
+
+  useEffect(() => {
+    window.__asbDebug = window.__asbDebug || {}
+    window.__asbDebug.openEdit = (id) => openEdit(id || 'debug-id')
+  }, [openEdit])
+
+  useEffect(() => {
+    const handler = (e) => {
+      const btn = e.target.closest('.js-edit-btn[data-edit-id]')
+      if (!btn) return
+      const id = btn.getAttribute('data-edit-id')
+      if (id) openEdit(id)
+    }
+    document.addEventListener('click', handler)
+    return () => document.removeEventListener('click', handler)
+  }, [openEdit])
 
   const handleNav = (e) => {
     e.preventDefault()
@@ -594,7 +625,6 @@ function App() {
       if (response.ok) {
         setSubmitStatus({ type: 'success', message: 'Record updated successfully!' })
         loadAdminData() // Reload data
-        setEditingRecord(null)
         return true
       } else {
         throw new Error('Update failed')
@@ -1083,20 +1113,13 @@ function App() {
                               <TableCell>
                                 <div className="flex items-center gap-2">
                                   <Button
+                                    className="js-edit-btn"
+                                    data-edit-id={record.id}
                                     variant="ghost"
                                     size="sm"
-                    onClick={() => {
-                      // Only allow editing if on admin page and logged in and URL starts with /admin
-                      if (currentPage === 'admin' && isAuthed && window.location.pathname.startsWith('/admin')) {
-                        console.log('Edit button clicked for speaker:', record);
-                        const { id, ...fields } = record;
-                        setEditingRecord({ id, fields, type: 'speaker' });
-                      } else {
-                        console.log('Edit not allowed - not on admin page or not logged in');
-                        setSubmitStatus({ type: 'error', message: 'You must be logged in as admin to edit records' });
-                      }
-                    }}
+                                    onClick={() => openEdit(record.id)}
                                     title="View & Edit"
+                                    aria-label={`Edit ${record.firstName || record.name || record.id}`}
                                   >
                                     <Edit className="w-4 h-4" />
                                   </Button>
@@ -1119,18 +1142,11 @@ function App() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => {
-                                      // Only allow editing if on admin page and logged in and URL starts with /admin
-                                      if (currentPage === 'admin' && isAuthed && window.location.pathname.startsWith('/admin')) {
-                                        console.log('Edit button clicked for client:', record);
-                                        const { id, ...fields } = record;
-                                        setEditingRecord({ id, fields, type: 'client' });
-                                      } else {
-                                        console.log('Edit not allowed - not on admin page or not logged in');
-                                        setSubmitStatus({ type: 'error', message: 'You must be logged in as admin to edit records' });
-                                      }
-                                    }}
+                                    className="js-edit-btn"
+                                    data-edit-id={record.id}
+                                    onClick={() => openEdit(record.id)}
                                     title="View & Edit"
+                                    aria-label={`Edit ${record.firstName || record.name || record.id}`}
                                   >
                                     <Edit className="w-4 h-4" />
                                   </Button>
@@ -1150,18 +1166,11 @@ function App() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => {
-                                      // Only allow editing if on admin page and logged in and URL starts with /admin
-                                      if (currentPage === 'admin' && isAuthed && window.location.pathname.startsWith('/admin')) {
-                                        console.log('Edit button clicked for quick inquiry:', record);
-                                        const { id, ...fields } = record;
-                                        setEditingRecord({ id, fields, type: 'quick' });
-                                      } else {
-                                        console.log('Edit not allowed - not on admin page or not logged in');
-                                        setSubmitStatus({ type: 'error', message: 'You must be logged in as admin to edit records' });
-                                      }
-                                    }}
+                                    className="js-edit-btn"
+                                    data-edit-id={record.id}
+                                    onClick={() => openEdit(record.id)}
                                     title="View & Edit"
+                                    aria-label={`Edit ${record.firstName || record.name || record.id}`}
                                   >
                                     <Edit className="w-4 h-4" />
                                   </Button>
@@ -3018,31 +3027,11 @@ function App() {
         onClose={closeAdminModal}
         onSubmit={handleAdminSubmit}
       />
-
-      <EditRecordModal
-        open={
-          !!editingRecord &&
-          currentPage === 'admin' &&
-          isAuthed &&
-          window.location.pathname.startsWith('/admin')
-        }
-        record={editingRecord}
-        onClose={() => setEditingRecord(null)}
-        onSave={async (record, payload) => {
-          try {
-            const tableName =
-              record.type === 'speaker'
-                ? 'Speaker%20Applications'
-                : record.type === 'client'
-                ? 'Client%20Inquiries'
-                : 'Quick%20Inquiries';
-            await updateRecord(tableName, record.id, payload);
-            setEditingRecord(null);
-          } catch (error) {
-            console.error('Error saving record:', error);
-            alert('Error saving changes. Please try again.');
-          }
-        }}
+      <AdminEditModal open={editOpen} recordId={activeId} onClose={closeEdit} />
+      <Toast
+        open={toast.open}
+        message={toast.msg}
+        onClose={() => setToast({ open: false, msg: '' })}
       />
     </div>
   )
