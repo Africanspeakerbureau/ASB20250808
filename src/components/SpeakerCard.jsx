@@ -11,22 +11,31 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
-  const to = `/speaker/${s.id}`;
+  const profilePath = `/speaker/${encodeURIComponent(s.id || s.slug)}`;
+  const go = (e) => {
+    e.preventDefault();
+    window.history.pushState({}, '', profilePath);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
 
   // ===== Search page card (bigger, like your mockup) =====
   if (variant === 'search') {
     return (
       <div className="bg-white rounded-2xl shadow p-6 h-full flex flex-col">
         <div className="w-full flex justify-center">
-          <img
-            src={img}
-            alt={s.name}
-            loading="lazy"
-            className="w-40 h-40 object-cover rounded-xl"
-          />
+          <a href={profilePath} onClick={go}>
+            <img
+              src={img}
+              alt={s.name}
+              loading="lazy"
+              className="w-40 h-40 object-cover rounded-xl"
+            />
+          </a>
         </div>
 
-        <h3 className="text-lg font-semibold text-center mt-4">{s.name}</h3>
+        <h3 className="text-lg font-semibold text-center mt-4">
+          <a href={profilePath} onClick={go}>{s.name}</a>
+        </h3>
         {locLang && <p className="text-sm text-center text-gray-600">{locLang}</p>}
         {professionalTitle && (
           <p className="text-base text-center text-gray-800 mt-1">{professionalTitle}</p>
@@ -50,7 +59,8 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
 
         <div className="flex justify-center mt-4">
           <a
-            href={to}
+            href={profilePath}
+            onClick={go}
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-5 rounded-lg"
             aria-label={`View ${s.name}'s profile`}
           >
@@ -65,7 +75,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   if (variant === 'compact') {
     return (
       <div className="bg-white rounded-xl shadow p-5 h-full">
-        <a href={to} className="group block h-full">
+        <a href={profilePath} onClick={go} className="group block h-full">
           <div className="w-full flex justify-center">
             <img
               src={img}

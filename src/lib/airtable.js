@@ -1,3 +1,5 @@
+import { normalizeSpeaker } from './normalizeSpeaker';
+
 const API_KEY =
   import.meta.env.VITE_AIRTABLE_API_KEY ||
   import.meta.env.AIRTABLE_API_KEY;
@@ -6,13 +8,6 @@ const BASE_ID =
   import.meta.env.AIRTABLE_BASE_ID;
 const API = `https://api.airtable.com/v0/${BASE_ID}`;
 const TBL_SPEAKERS = encodeURIComponent('Speaker Applications');
-
-export function toSlug(str = '') {
-  return String(str)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
 
 function ensureEnv() {
   if (!BASE_ID || !API_KEY) {
@@ -54,35 +49,6 @@ async function list(
   return json.records || [];
 }
 
-function mapSpeaker(r) {
-  const f = r.fields || {};
-  const image = Array.isArray(f['Profile Image']) ? f['Profile Image'][0]?.url : '';
-  const title = f['Title'] ? String(f['Title']).trim() : '';
-  const first = f['First Name'] ? String(f['First Name']).trim() : '';
-  const last = f['Last Name'] ? String(f['Last Name']).trim() : '';
-  const name = [title, first, last].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
-  const slugBase = f['Slug'] || f['Full Name'] || name || `${first}-${last}` || r.id;
-  const slug = toSlug(slugBase);
-
-  return {
-    id: r.id,
-    name,
-    firstName: first,
-    lastName: last,
-    title: f['Professional Title'] || '',
-    location: f['Location'] || '',
-    country: f['Country'] || '',
-    spokenLanguages: f['Spoken Languages'] || [],
-    expertise: f['Expertise Areas'] || [],
-    keyMessage: f['Key Messages'] || '',
-    feeRange: f['Fee Range'] || '',
-    photoUrl: image || '',
-    featured: f['Featured'] === 'Yes',
-    status: f['Status'] || [],
-    slug
-  };
-}
-
 const PUBLISHED = "FIND('Published on Site', ARRAYJOIN({Status}))";
 
 export async function fetchFeaturedSpeakers(limit = 3) {
@@ -92,7 +58,7 @@ export async function fetchFeaturedSpeakers(limit = 3) {
     maxRecords: limit,
     pageSize: limit
   });
-  return records.map(mapSpeaker);
+  return records.map(normalizeSpeaker);
 }
 
 export async function fetchPublishedSpeakers({
@@ -106,7 +72,7 @@ export async function fetchPublishedSpeakers({
     maxRecords: limit,
     pageSize: limit
   });
-  return records.map(mapSpeaker);
+  return records.map(normalizeSpeaker);
 }
 
 export async function fetchAllPublishedSpeakers({ limit = 15 } = {}) {
@@ -116,7 +82,7 @@ export async function fetchAllPublishedSpeakers({ limit = 15 } = {}) {
     maxRecords: limit,
     pageSize: limit
   });
-  return records.map(mapSpeaker);
+  return records.map(normalizeSpeaker);
 }
 
 async function query(table, params = {}) {

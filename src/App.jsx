@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
+import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import Footer from './components/Footer'
 import ReactDOM from 'react-dom'
@@ -12,6 +13,7 @@ import {
   getClientInquiries,
   getQuickInquiries,
   fetchPublishedSpeakers,
+  fetchAllPublishedSpeakers,
 } from '@/lib/airtable'
 import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
@@ -138,6 +140,7 @@ function App() {
   const [featuredSpeakers, setFeaturedSpeakers] = useState([])
   const [randomSpeakers, setRandomSpeakers] = useState([])
   const [publishedSpeakers, setPublishedSpeakers] = useState([])
+  const [speakers, setSpeakers] = useState([])
   const [selectedRecord, setSelectedRecord] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
@@ -169,6 +172,11 @@ function App() {
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
+  const go = (path) => {
+    window.history.pushState({}, '', path)
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  }
+
   useEffect(() => {
     const syncAndScroll = () => {
       const { pathname, hash } = window.location
@@ -180,12 +188,26 @@ function App() {
       }
 
       // Path → state
-      if (pathname === '/find') setCurrentPage('find-speakers')
-      else if (pathname.startsWith('/speaker/')) setCurrentPage('speaker-profile')
-      else if (pathname === '/services') setCurrentPage('services')
-      else if (pathname === '/about') setCurrentPage('about')
-      else if (pathname === '/book') setCurrentPage('client-booking')
-      else setCurrentPage('home')
+      if (pathname === '/find') {
+        setCurrentPage('find-speakers')
+        setSelectedSpeakerId(null)
+      } else if (pathname.startsWith('/speaker/')) {
+        const sid = decodeURIComponent(pathname.split('/speaker/')[1] || '')
+        setSelectedSpeakerId(sid)
+        setCurrentPage('speaker-profile')
+      } else if (pathname === '/services') {
+        setCurrentPage('services')
+        setSelectedSpeakerId(null)
+      } else if (pathname === '/about') {
+        setCurrentPage('about')
+        setSelectedSpeakerId(null)
+      } else if (pathname === '/book') {
+        setCurrentPage('client-booking')
+        setSelectedSpeakerId(null)
+      } else {
+        setCurrentPage('home')
+        setSelectedSpeakerId(null)
+      }
 
       if (pathname === '/services' && id && hashToService[id]) {
         setSelectedService(hashToService[id])
@@ -240,6 +262,19 @@ function App() {
         if (alive) setPublishedSpeakers(rows)
       } catch (e) {
         console.error('Fetch published speakers failed', e)
+      }
+    })()
+    return () => { alive = false }
+  }, [])
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const rows = await fetchAllPublishedSpeakers({ limit: 100 })
+        if (alive) setSpeakers(rows)
+      } catch (e) {
+        console.error('Fetch speakers failed', e)
       }
     })()
     return () => { alive = false }
@@ -1181,55 +1216,9 @@ function App() {
   // [The rest of the component remains the same as the original, including speaker-application, client-booking, quick-inquiry, and home pages]
 
   // Speaker Profile Page
-  if (currentPage === 'speaker-profile' && selectedSpeakerId) {
-    const speaker = [...featuredSpeakers, ...randomSpeakers].find(s => s.id === selectedSpeakerId)
-    
-    if (!speaker) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Speaker Not Found</h1>
-            <Button onClick={() => setCurrentPage('home')}>Return Home</Button>
-          </div>
-        </div>
-      )
-    }
-
-    const fields = speaker.fields
-    const titlePrefix = fields['Title Prefix'] || ''
-    const firstName = fields['First Name'] || ''
-    const lastName = fields['Last Name'] || ''
-    const professionalTitle = fields['Professional Title'] || ''
-    const keyMessages = fields['Key Messages'] || ''
-    const country = fields['Country'] || ''
-    const spokenLanguages = fields['Spoken Languages'] || ''
-    const industry = fields['Industry'] || ''
-    const expertiseAreas = fields['Expertise Areas'] || []
-    const achievements = fields['Achievements'] || ''
-    const speakingTopics = fields['Speaking Topics'] || ''
-    const professionalBio = fields['Professional Bio'] || ''
-    const videoLink1 = fields['Video Link 1'] || ''
-    const videoLink2 = fields['Video Link 2'] || ''
-    const videoLink3 = fields['Video Link 3'] || ''
-    const profileImage = fields['Profile Image']?.[0]?.url || 'https://via.placeholder.com/200x200/3b82f6/ffffff?text=Speaker'
-    const secondImage = fields['Second Image']?.[0]?.url || 'https://via.placeholder.com/1200x400/6366f1/ffffff?text=Speaker+Banner'
-
-    const Detail = ({ label, value }) => {
-      if (!value) return null
-      const items = Array.isArray(value) ? value : [value]
-      return (
-        <div className="mb-4">
-          <h4 className="font-semibold text-gray-900 mb-2">{label}</h4>
-          <ul className="list-disc list-inside text-gray-700 space-y-1">
-            {items.map((v, i) => <li key={i}>{v}</li>)}
-          </ul>
-        </div>
-      )
-    }
-
+  if (currentPage === 'speaker-profile') {
     return (
-      <div className="min-h-screen bg-white">
-        {/* Header */}
+      <>
         <header className="bg-white shadow-sm border-b sticky top-0 z-40">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
@@ -1255,91 +1244,12 @@ function App() {
             </div>
           </div>
         </header>
-
-        <main className="container mx-auto px-4 py-12">
-          {/* Breadcrumb / Nav */}
-          <nav className="mb-8 text-sm">
-            <button onClick={() => setCurrentPage('home')} className="mr-4 hover:underline text-blue-600">Home</button>
-            <button onClick={() => setCurrentPage('find-speakers')} className="hover:underline text-blue-600">Find Speakers</button>
-          </nav>
-
-          {/* Hero Banner */}
-          <section className="relative mb-12">
-            <img
-              src={secondImage}
-              alt={`${firstName} ${lastName}`}
-              className="w-full h-64 object-cover rounded-lg shadow"
-            />
-            <div className="absolute bottom-0 left-0 p-6 bg-gradient-to-t from-black/70 to-transparent w-full rounded-b-lg">
-              <div className="flex items-center space-x-4">
-                <img
-                  src={profileImage}
-                  alt={`${firstName} ${lastName}`}
-                  className="w-24 h-24 rounded-full border-4 border-white object-cover"
-                />
-                <div className="text-white">
-                  <h1 className="text-3xl font-bold">
-                    {titlePrefix && `${titlePrefix} `}{firstName} {lastName}
-                  </h1>
-                  <p className="text-xl">{professionalTitle}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Key Details */}
-          <section className="grid md:grid-cols-2 gap-8 mb-12">
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">About {firstName}</h2>
-              <p className="text-gray-700 leading-relaxed">{professionalBio}</p>
-            </div>
-            <aside className="space-y-4">
-              <Detail label="Key Messages" value={keyMessages} />
-              <Detail label="Country" value={country} />
-              <Detail label="Spoken Languages" value={spokenLanguages} />
-              <Detail label="Industry" value={industry} />
-              <Detail label="Expertise Areas" value={expertiseAreas} />
-              <Detail label="Achievements" value={achievements} />
-              <Detail label="Speaking Topics" value={speakingTopics} />
-            </aside>
-          </section>
-
-          {/* Videos & Articles */}
-          {(videoLink1 || videoLink2 || videoLink3) && (
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-4">Media</h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                {[videoLink1, videoLink2, videoLink3].map((link, i) =>
-                  link ? (
-                    <div key={i} className="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow">
-                      <iframe
-                        src={link}
-                        title={`Video ${i + 1}`}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
-                  ) : null
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Contact Button */}
-          <section className="text-center">
-            <Button 
-              onClick={() => setCurrentPage('client-booking')}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-8 rounded-lg"
-            >
-              Contact {firstName}
-            </Button>
-          </section>
-        </main>
-      </div>
+        <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find')} />
+        <Footer />
+      </>
     )
   }
+
 
   if (currentPage === 'speaker-application') {
     return (
