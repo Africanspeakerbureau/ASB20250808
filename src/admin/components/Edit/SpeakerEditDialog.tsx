@@ -10,6 +10,7 @@ import { useToast } from "@/components/Toast";
 import { buildFields } from "../../shapeSpeakerPayload";
 import { F } from "../../fieldMap";
 import { useAirtableRecord } from "../../hooks/useAirtableRecord";
+import { updateRecord } from "../../api/airtable";
 import "./editDialog.css";
 
 type Props = {
@@ -189,17 +190,13 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           : draft.headerImageUrls || [],
       };
       const fields = buildFields(state);
-      const res = await fetch("/api/admin/speakers/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recordId: record.id, fields }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Save failed");
-      push({ text: "Saved ✔︎", type: "success" });
+      delete fields[F.ProfileImage];
+      delete fields[F.HeaderImage];
+      await updateRecord('Speaker Applications', record.id, fields);
+      push({ text: 'Saved ✔︎', type: 'success' });
       if (closeAfter) onClose();
     } catch (e: any) {
-      push({ text: e?.message || "Could not save", type: "error" });
+      push({ text: e?.message || 'Could not save', type: 'error' });
     } finally {
       setSaving(false);
     }

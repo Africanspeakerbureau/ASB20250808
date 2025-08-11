@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { getRecord, readSingleSelect } from '../../api/airtable';
+import { getRecord, readSingleSelect, updateRecord } from '../../api/airtable';
+import { useToast } from '@/components/Toast';
 import './editDialog.css';
 
 type ClientFields = {
@@ -27,7 +28,9 @@ type ClientFields = {
 
 export default function ClientInquiryEditDialog({ recordId, onClose }: { recordId: string; onClose: () => void }) {
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<any>({});
+  const { push } = useToast();
 
   useEffect(() => {
     (async () => {
@@ -58,6 +61,40 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
       setLoading(false);
     })();
   }, [recordId]);
+
+  async function handleSave(closeAfter = true) {
+    try {
+      setSaving(true);
+      const fields: Record<string, any> = {
+        'First Name': form.firstName,
+        'Last Name': form.lastName,
+        'Email': form.email,
+        'Phone': form.phone,
+        'Company Name': form.company,
+        'Job Title': form.jobTitle,
+        'Industry': form.industry,
+        'Company Website': form.website,
+        'Event Name': form.eventName,
+        'Event Date': form.eventDate ? new Date(form.eventDate).toISOString().slice(0,10) : '',
+        'Event Location': form.eventLocation,
+        'Audience Size': form.audienceSize,
+        'Speaking Topic': form.speakingTopic,
+        'Budget Range': form.budgetRange,
+        'Presentation Format': form.format,
+        'Additional Requirements': form.requirements,
+        'Status': form.status,
+        'Created Date': form.createdDate ? new Date(form.createdDate).toISOString().slice(0,10) : '',
+        'Notes': form.notes,
+      };
+      await updateRecord('Client Inquiries', recordId, fields);
+      push({ text: 'Saved ✔︎', type: 'success' });
+      if (closeAfter) onClose();
+    } catch (e: any) {
+      push({ text: e?.message || 'Could not save', type: 'error' });
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return ReactDOM.createPortal(
     <div className="modal">
@@ -147,9 +184,11 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
             </div>
           </div>
         </div>
-        <div className="modal__footer">
-          <button className="btn" onClick={onClose}>Close</button>
-        </div>
+          <div className="modal__footer">
+            <button className="btn" disabled={saving} onClick={onClose}>Close</button>
+            <button className="btn" disabled={saving} onClick={() => handleSave(false)}>{saving ? 'Saving…' : 'Save'}</button>
+            <button className="btn btn--primary" disabled={saving} onClick={() => handleSave(true)}>{saving ? 'Saving…' : 'Save & Close'}</button>
+          </div>
       </div>
     </div>,
     document.body

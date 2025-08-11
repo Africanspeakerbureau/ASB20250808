@@ -12,8 +12,21 @@ async function getRecord<T>(table: string, id: string): Promise<AirtableRecord<T
   return res.json();
 }
 
+async function updateRecord<T>(table: string, id: string, fields: Record<string, any>): Promise<AirtableRecord<T>> {
+  const res = await fetch(`${endpoint}/${encodeURIComponent(table)}/${id}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ fields }),
+  });
+  if (!res.ok) throw new Error(`Airtable ${table}/${id} ${res.status}`);
+  return res.json();
+}
+
 const readSingleSelect = (v: any) => (typeof v === 'string' ? v : v?.name ?? '');
 const readMultiSelect = (v: any) => Array.isArray(v) ? v.map(x => (typeof x === 'string' ? x : x?.name)).filter(Boolean) : [];
 const readAttachments = (v: any) => Array.isArray(v) ? v.map(a => ({ url: a.url, filename: a.filename })) : [];
 
-export { getRecord, readSingleSelect, readMultiSelect, readAttachments };
+export { getRecord, updateRecord, readSingleSelect, readMultiSelect, readAttachments };
