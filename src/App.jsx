@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
@@ -19,8 +19,8 @@ import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
 import AdminLoginModal from "./components/AdminLoginModal"
-import AdminEditModal from "./admin/AdminEditModal"
-import Toast from "./components/Toast"
+import EditSpeakerDialog from "./admin/EditSpeakerDialog"
+import { toast } from "./lib/toast"
 import { validateAdmin } from "./utils/auth"
 
 // Field presets mapping for dropdowns
@@ -164,36 +164,34 @@ function App() {
     Object.entries(hashToService).map(([k, v]) => [v, k])
   )
   const [editOpen, setEditOpen] = useState(false)
-  const [activeId, setActiveId] = useState(null)
-  const [toast, setToast] = useState({ open: false, msg: '' })
+  const [editing, setEditing] = useState(null)
 
-  const openEdit = useCallback((id) => {
-    setActiveId(id)
-    setEditOpen(true)
-    setToast({ open: true, msg: `Edit clicked: ${id}` })
-    console.debug('[admin] edit click:', id)
-  }, [])
-
-  const closeEdit = useCallback(() => {
-    setEditOpen(false)
-    setActiveId(null)
-  }, [])
-
-  useEffect(() => {
-    window.__asbDebug = window.__asbDebug || {}
-    window.__asbDebug.openEdit = (id) => openEdit(id || 'debug-id')
-  }, [openEdit])
-
-  useEffect(() => {
-    const handler = (e) => {
-      const btn = e.target.closest('.js-edit-btn[data-edit-id]')
-      if (!btn) return
-      const id = btn.getAttribute('data-edit-id')
-      if (id) openEdit(id)
+  const openEdit = (record) => {
+    try {
+      if (!record) {
+        toast('No record to edit')
+        return
+      }
+      console.log('[ASB] Edit click', { id: record.id, name: record.name || record['First Name'] })
+      toast(`Opening editor for ${record.name || record['First Name'] || record.id}`)
+      setEditing(record)
+      setEditOpen(true)
+    } catch (err) {
+      console.error('[ASB] openEdit error', err)
+      toast('Could not open editor')
     }
-    document.addEventListener('click', handler)
-    return () => document.removeEventListener('click', handler)
-  }, [openEdit])
+  }
+
+  const data = activeTab === 'speakers' ? apps : activeTab === 'clients' ? clients : quick
+
+  useEffect(() => {
+    window.__asbOpenEdit = (id) => {
+      const r = (Array.isArray(data) ? data : []).find(x => x.id === id)
+      if (r) openEdit(r)
+      else toast(`Record not found: ${id}`)
+    }
+    return () => { try { delete window.__asbOpenEdit } catch {} }
+  }, [data])
 
   const handleNav = (e) => {
     e.preventDefault()
@@ -1112,17 +1110,18 @@ function App() {
                               <TableCell>{record.createdTime ? new Date(record.createdTime).toLocaleDateString() : 'N/A'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Button
-                                    className="js-edit-btn"
-                                    data-edit-id={record.id}
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => openEdit(record.id)}
-                                    title="View & Edit"
-                                    aria-label={`Edit ${record.firstName || record.name || record.id}`}
+                                  <button
+                                    type="button"
+                                    className="asb-edit-btn"
+                                    aria-label={`View & Edit ${record['First Name'] || record.name || 'record'}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      openEdit(record);
+                                    }}
                                   >
                                     <Edit className="w-4 h-4" />
-                                  </Button>
+                                  </button>
                                 </div>
                               </TableCell>
                             </>
@@ -1139,17 +1138,18 @@ function App() {
                               <TableCell>{getStatusBadge(record.Status)}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="js-edit-btn"
-                                    data-edit-id={record.id}
-                                    onClick={() => openEdit(record.id)}
-                                    title="View & Edit"
-                                    aria-label={`Edit ${record.firstName || record.name || record.id}`}
+                                  <button
+                                    type="button"
+                                    className="asb-edit-btn"
+                                    aria-label={`View & Edit ${record['First Name'] || record.name || 'record'}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      openEdit(record);
+                                    }}
                                   >
                                     <Edit className="w-4 h-4" />
-                                  </Button>
+                                  </button>
                                 </div>
                               </TableCell>
                             </>
@@ -1163,17 +1163,18 @@ function App() {
                               <TableCell>{record.createdTime ? new Date(record.createdTime).toLocaleDateString() : 'N/A'}</TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="js-edit-btn"
-                                    data-edit-id={record.id}
-                                    onClick={() => openEdit(record.id)}
-                                    title="View & Edit"
-                                    aria-label={`Edit ${record.firstName || record.name || record.id}`}
+                                  <button
+                                    type="button"
+                                    className="asb-edit-btn"
+                                    aria-label={`View & Edit ${record['First Name'] || record.name || 'record'}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      openEdit(record);
+                                    }}
                                   >
                                     <Edit className="w-4 h-4" />
-                                  </Button>
+                                  </button>
                                 </div>
                               </TableCell>
                             </>
@@ -1187,6 +1188,11 @@ function App() {
             </Card>
           )}
         </div>
+        <EditSpeakerDialog
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          record={editing}
+        />
       </div>
     )
   }
@@ -3026,12 +3032,6 @@ function App() {
         open={route === '/admin' && !isAuthed}
         onClose={closeAdminModal}
         onSubmit={handleAdminSubmit}
-      />
-      <AdminEditModal open={editOpen} recordId={activeId} onClose={closeEdit} />
-      <Toast
-        open={toast.open}
-        message={toast.msg}
-        onClose={() => setToast({ open: false, msg: '' })}
       />
     </div>
   )
