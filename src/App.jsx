@@ -250,6 +250,14 @@ function App() {
         setCurrentPage('about')
         setSelectedSpeakerId(null)
         setShowBookingForm(false)
+      } else if (pathname === '/speaker-application') {
+        setCurrentPage('speaker-application')
+        setSelectedSpeakerId(null)
+        setShowBookingForm(false)
+      } else if (pathname === '/apply-v2') {
+        setCurrentPage('speaker-application-v2')
+        setSelectedSpeakerId(null)
+        setShowBookingForm(false)
       } else if (pathname === '/book-a-speaker') {
         setCurrentPage('home')
         setSelectedSpeakerId(null)
@@ -822,6 +830,96 @@ function App() {
     }
   }
 
+  const handleSpeakerSubmitV2 = async (e) => {
+    e.preventDefault()
+    setSubmitStatus({ type: 'loading', message: 'Submitting your application...' })
+
+    const formData = new FormData(e.target)
+
+    const virtualExp = formData.get('virtualExperience');
+    if (!["None","Limited","Moderate","Extensive"].includes(virtualExp)) {
+      setSubmitStatus({ type: 'error', message: 'Invalid Virtual Experience selection. Please choose from the available options.' });
+      return;
+    }
+
+    const validExpertise = [
+      "Business / Management","Art / Culture","Cities / Environment","Economic / Finance",
+      "Facilitator / Moderator","Future / Technology","Government / Politics",
+      "Innovation / Creativity","Leadership / Motivation","Society / Education",
+      "Celebrity","IT / AI"
+    ];
+    const chosenExpertise = Array.from(formData.getAll('expertiseAreas'));
+    const invalidExpertise = chosenExpertise.filter(e => !validExpertise.includes(e));
+    if (invalidExpertise.length > 0) {
+      setSubmitStatus({ type: 'error', message: 'Invalid Expertise Areas selected. Please choose from the available options.' });
+      return;
+    }
+
+    const data = {
+      "First Name": formData.get('firstName'),
+      "Last Name": formData.get('lastName'),
+      "Title": formData.get('title'),
+      "Email": formData.get('email'),
+      "Phone": formData.get('phone'),
+      "Location": formData.get('location'),
+      "Country": formData.get('country'),
+      "Professional Title": formData.get('professionalTitle'),
+      "Company": formData.get('company'),
+      "Industry": formData.get('industry'),
+      "Years Experience": formData.get('experience'),
+      "Speaking Experience": formData.get('speakingExperience'),
+      "Number of Events": formData.get('numberOfEvents'),
+      "Largest Audience": formData.get('largestAudience'),
+      "Virtual Experience": formData.get('virtualExperience'),
+      "Expertise Areas": Array.from(formData.getAll('expertiseAreas')),
+      "Speaking Topics": formData.get('speakingTopics'),
+      "Key Messages": formData.get('keyMessages'),
+      "Speakers Delivery Style": formData.get('speakersDeliveryStyle'),
+      "Why the audience should listen to these topics": formData.get('whyAudience'),
+      "What the speeches will address": formData.get('whatAddress'),
+      "What participants will learn": formData.get('whatLearn'),
+      "What the audience will take home": formData.get('whatTakeHome'),
+      "Benefits for the individual": formData.get('benefitsIndividual'),
+      "Benefits for the organisation": formData.get('benefitsOrganisation'),
+      "Professional Bio": formData.get('bio'),
+      "Achievements": formData.get('achievements'),
+      "Education": formData.get('education'),
+      "Fee Range": formData.get('feeRange'),
+      "Display Fee": formData.get('displayFee'),
+      "Travel Willingness": formData.get('travelWillingness'),
+      "Travel Requirements": formData.get('travelRequirements'),
+      "Website": formData.get('website'),
+      "LinkedIn": formData.get('linkedin'),
+      "Twitter": formData.get('twitter'),
+      "References": formData.get('references'),
+      "Banking Details": formData.get('bankingDetails'),
+      "PA Name": formData.get('paName'),
+      "PA Email": formData.get('paEmail'),
+      "PA Phone": formData.get('paPhone'),
+      "Special Requirements": formData.get('specialRequirements'),
+      "Additional Info": formData.get('additionalInfo'),
+      "Video Link 1": formData.get('videoLink1'),
+      "Video Link 2": formData.get('videoLink2'),
+      "Video Link 3": formData.get('videoLink3'),
+      "Profile Image": profileImageUrl ? [{ url: profileImageUrl }] : undefined,
+      "Spoken Languages": Array.from(formData.getAll('spokenLanguages')),
+      "Expertise Level": formData.get('expertiseLevel'),
+      "Notable Achievements": formData.get('notableAchievements'),
+      "Status": ["Pending"]
+    }
+
+    console.log('Submitting full data:', data)
+    const result = await submitToAirtable('Speaker%20Applications', data)
+    if (result.success) {
+      if (result.data.fields && result.data.fields['Profile Image']) {
+        setAttachments(result.data.fields['Profile Image'])
+      }
+      e.target.reset()
+      setProfileImageUrl('')
+      setTimeout(() => setSubmitStatus({ type: '', message: '' }), 5000)
+    }
+  }
+
   const handleClientSubmit = async (e) => {
     e.preventDefault()
     setBookingStatus('loading')
@@ -1231,8 +1329,8 @@ function App() {
     )
   }
 
-
-  if (currentPage === 'speaker-application') {
+  if (currentPage === 'speaker-application' || currentPage === 'speaker-application-v2') {
+    const isV2 = currentPage === 'speaker-application-v2'
     return (
       <div className="min-h-screen bg-gray-50">
         <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
@@ -1256,11 +1354,11 @@ function App() {
 
             <Card>
               <CardContent className="p-8">
-                <form onSubmit={handleSpeakerSubmit} className="space-y-8">
+                <form onSubmit={isV2 ? handleSpeakerSubmitV2 : handleSpeakerSubmit} className="space-y-8">
                   {/* Personal Information */}
                   <div>
                     <h3 className="text-xl font-semibold mb-4">Personal Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className={`grid grid-cols-1 ${isV2 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
                       <div>
                         <label className="block text-sm font-medium mb-2">First Name *</label>
                         <Input name="firstName" placeholder="Your first name" required />
@@ -1269,6 +1367,12 @@ function App() {
                         <label className="block text-sm font-medium mb-2">Last Name *</label>
                         <Input name="lastName" placeholder="Your last name" required />
                       </div>
+                      {isV2 && (
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Title</label>
+                          <Input name="title" placeholder="Mr, Ms, Dr, etc." />
+                        </div>
+                      )}
                       <div>
                         <label className="block text-sm font-medium mb-2">Email Address *</label>
                         <Input name="email" type="email" placeholder="your.email@example.com" required />
@@ -1535,7 +1639,7 @@ function App() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-2">Professional Title</label>
-                        <Input name="title" placeholder="CEO, Director, Professor, etc." />
+                        <Input name={isV2 ? 'professionalTitle' : 'title'} placeholder="CEO, Director, Professor, etc." />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Company/Organization *</label>
@@ -1676,6 +1780,38 @@ function App() {
                         <label className="block text-sm font-medium mb-2">Key Messages</label>
                         <Textarea name="keyMessages" placeholder="What are the key messages you want to share with audiences?" />
                       </div>
+                      {isV2 && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Speakers Delivery Style</label>
+                            <Textarea name="speakersDeliveryStyle" placeholder="Describe your delivery style" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Why the audience should listen to these topics</label>
+                            <Textarea name="whyAudience" placeholder="Explain the importance of your topics" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">What the speeches will address</label>
+                            <Textarea name="whatAddress" placeholder="Outline what your speeches will address" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">What participants will learn</label>
+                            <Textarea name="whatLearn" placeholder="Describe what participants will learn" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">What the audience will take home</label>
+                            <Textarea name="whatTakeHome" placeholder="Explain what the audience will take home" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Benefits for the individual</label>
+                            <Textarea name="benefitsIndividual" placeholder="List benefits for individuals" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Benefits for the organisation</label>
+                            <Textarea name="benefitsOrganisation" placeholder="List benefits for the organisation" />
+                          </div>
+                        </>
+                      )}
                       <div>
                         <label className="block text-sm font-medium mb-2">Professional Bio *</label>
                         <Textarea name="bio" placeholder="Write a comprehensive professional biography (3-4 paragraphs). Include your background, achievements, expertise, and what makes you unique as a speaker." required className="min-h-[200px]" />
@@ -1786,7 +1922,7 @@ function App() {
                         <label className="block text-sm font-medium mb-2">Education Background</label>
                         <Textarea name="education" placeholder="Your educational background and qualifications" />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className={`grid grid-cols-1 ${isV2 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
                         <div>
                           <label className="block text-sm font-medium mb-2">Fee Range (USD)</label>
                           <select name="feeRange" className="w-full p-2 border border-gray-300 rounded-md">
@@ -1805,6 +1941,16 @@ function App() {
                             ))}
                           </select>
                         </div>
+                        {isV2 && (
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Display Fee</label>
+                            <select name="displayFee" className="w-full p-2 border border-gray-300 rounded-md">
+                              <option value="">Select option</option>
+                              <option value="Yes">Yes</option>
+                              <option value="No">No</option>
+                            </select>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Travel Requirements</label>
@@ -2079,7 +2225,7 @@ function App() {
               <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
                 The African Speaker Bureau is more than a business – we are a bridge between Africa and the world, a platform for authentic voices, and a catalyst for global understanding and exchange. Whether you're seeking African expertise for your global audience or international insights for your African community, we're here to connect you with the perfect speaker.
               </p>
-              <Button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg">
+              <Button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg" onClick={() => go('/apply-v2')}>
                 Partner With Us Today
               </Button>
             </div>
