@@ -2389,13 +2389,13 @@ function App() {
                 Authentic African Voices
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 md:mb-6 leading-tight">
               Connect with Africa's Most<br />
               Compelling Voices
             </h1>
-            <p className="text-lg mb-8 text-blue-100 max-w-2xl mx-auto">
-              Access world-class African speakers who bring authentic insights, innovative solutions, 
-              and transformative perspectives to your events. From Fortune 500 boardrooms to 
+            <p className="text-base sm:text-lg mb-6 md:mb-8 text-blue-100 max-w-2xl mx-auto">
+              Access world-class African speakers who bring authentic insights, innovative solutions,
+              and transformative perspectives to your events. From Fortune 500 boardrooms to
               international conferences.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
