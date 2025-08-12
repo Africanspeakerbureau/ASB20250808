@@ -1,7 +1,17 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 export default function Footer({ appActions }) {
+  const navigate = useNavigate();
+  const buildVersion = import.meta.env.VITE_BUILD_ID ?? "";
+
+  const handleNav = (e) => {
+    e.preventDefault();
+    const href = e.currentTarget.getAttribute('href');
+    // Use react-router for consistent client-side nav (handles hashes too)
+    navigate(href);
+  };
+
   return (
     <footer className="bg-slate-900 text-slate-200">
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -24,7 +34,7 @@ export default function Footer({ appActions }) {
           {/* Quick Links */}
           <div>
             <h3 className="text-xl font-semibold">Quick Links</h3>
-            <ul className="mt-6 space-y-3 text-slate-300">
+            <ul className="space-y-2 text-gray-400">
               <li><NavLink to="/" className="hover:text-white">Home</NavLink></li>
               <li><NavLink to="/find-speakers" className="hover:text-white">Find a Speaker</NavLink></li>
               <li><NavLink to="/services" className="hover:text-white">Services</NavLink></li>
@@ -38,13 +48,13 @@ export default function Footer({ appActions }) {
           {/* Services */}
           <div>
             <h3 className="text-xl font-semibold">Services</h3>
-            <ul className="mt-6 space-y-3 text-slate-300">
-              <li><NavLink to="/services#keynotes" className="hover:text-white">Keynote Speakers</NavLink></li>
-              <li><NavLink to="/services#panel-discussions" className="hover:text-white">Panel Discussions</NavLink></li>
-              <li><NavLink to="/services#boardroom-consulting" className="hover:text-white">Boardroom Consulting</NavLink></li>
+            <ul className="space-y-2 text-gray-400">
+              <li><NavLink to="/services#keynote" className="hover:text-white">Keynote Speakers</NavLink></li>
+              <li><NavLink to="/services#panel" className="hover:text-white">Panel Discussions</NavLink></li>
+              <li><NavLink to="/services#boardroom" className="hover:text-white">Boardroom Consulting</NavLink></li>
               <li><NavLink to="/services#workshops" className="hover:text-white">Workshop Facilitators</NavLink></li>
-              <li><NavLink to="/services#virtual-events" className="hover:text-white">Virtual Events</NavLink></li>
-              <li><NavLink to="/services#leadership-coaching" className="hover:text-white">Leadership Coaching</NavLink></li>
+              <li><NavLink to="/services#virtual" className="hover:text-white">Virtual Events</NavLink></li>
+              <li><NavLink to="/services#coaching" className="hover:text-white">Leadership Coaching</NavLink></li>
             </ul>
           </div>
 
@@ -61,14 +71,14 @@ export default function Footer({ appActions }) {
               {/* Remove phone + city list per your request */}
 
               <div>
-                <a className="hover:text-white underline" href="#/#quick-inquiry">
+                <a className="hover:text-white underline" href="/#quick-inquiry" onClick={handleNav}>
                   Message us
                 </a>
               </div>
               <div>
                 <a
                   className="hover:text-white underline"
-                  href="#/book-a-speaker"
+                  href="/book-a-speaker"
                   onClick={(e) => { e.preventDefault(); appActions.openBooking(); }}
                 >
                   Request Consultation
@@ -81,7 +91,7 @@ export default function Footer({ appActions }) {
         {/* bottom line */}
         <div className="mt-12 border-t border-white/10 pt-6 text-sm text-slate-400 flex items-center justify-between">
           <span>© 2025 African Speaker Bureau. All rights reserved.</span>
-          <span>{import.meta.env.VITE_BUILD_ID ?? ""}</span>
+          <span>{buildVersion}</span>
         </div>
       </div>
     </footer>
