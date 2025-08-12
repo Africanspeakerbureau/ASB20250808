@@ -333,9 +333,9 @@ function App() {
   }, [])
 
   // Currency state
-  const [, setCurrency] = useState('ZAR');
-  const [, setCountryCode] = useState('ZA');
-  const [, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 });
+  const [currency, setCurrency] = useState('ZAR');
+  const [countryCode, setCountryCode] = useState('ZA');
+  const [currencyInfo, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 });
 
   // Initialize currency based on geolocation
   useEffect(() => {
@@ -1225,7 +1225,7 @@ function App() {
   if (currentPage === 'speaker-profile') {
     return (
       <>
-        <Header />
+        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
         <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
       </>
     )
@@ -1235,7 +1235,7 @@ function App() {
   if (currentPage === 'speaker-application') {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
@@ -1883,13 +1883,13 @@ function App() {
   }
 
   if (currentPage === 'find-speakers') {
-    return <FindSpeakersPage />
+    return <FindSpeakersPage countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
   }
 
     if (currentPage === 'about') {
       return (
         <div className="min-h-screen bg-white">
-        <Header />
+        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
 
           <div className="container mx-auto px-4 py-12">
             <div className="text-center mb-16">
@@ -2210,7 +2210,7 @@ function App() {
 
     return (
       <div className="min-h-screen bg-white">
-        <Header />
+        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
 
         <div className="container mx-auto px-4 py-12">
           <div className="text-center mb-12">
@@ -2312,7 +2312,7 @@ function App() {
   if (currentPage === 'quick-inquiry') {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
@@ -2369,7 +2369,7 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <Header />
+      <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
 
       {/* Hero Section */}
       <section className="relative h-[700px] overflow-hidden">

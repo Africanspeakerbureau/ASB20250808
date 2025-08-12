@@ -59,7 +59,7 @@ function SearchCard({ s }) {
   )
 }
 
-export default function FindSpeakersPage() {
+export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' } = {}) {
   const [all, setAll] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -130,7 +130,7 @@ export default function FindSpeakersPage() {
 
   return (
     <>
-      <Header />
+      <Header countryCode={countryCode} currency={currency} />
       <div className="max-w-6xl mx-auto px-4 py-12 mb-16">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold">Find Your Perfect Speaker</h1>
