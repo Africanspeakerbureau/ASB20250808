@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
 
 export default function Footer({ appActions }) {
   const handleConsult = (e) => {
@@ -32,25 +33,22 @@ export default function Footer({ appActions }) {
           <div>
             <h3 className="text-xl font-semibold">Quick Links</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
-              <li><NavLink to="/" className="hover:text-white">Home</NavLink></li>
-              <li><NavLink to="/find-speakers" className="hover:text-white">Find a Speaker</NavLink></li>
-              <li><NavLink to="/services" className="hover:text-white">Services</NavLink></li>
-              <li><NavLink to="/about" className="hover:text-white">About</NavLink></li>
-              <li><NavLink to="/#get-in-touch" className="hover:text-white">Contact</NavLink></li>
-              <li><NavLink to="/book-a-speaker" className="hover:text-white">Book a Speaker</NavLink></li>
-              <li><NavLink to="/admin" className="hover:text-white">Admin</NavLink></li>
+              {MAIN_LINKS.map(({ to, label }) => (
+                <li key={to}>
+                  <NavLink to={to} className="hover:text-white">{label}</NavLink>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div>
             <h3 className="text-xl font-semibold">Services</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
-              <li><NavLink to="/services#keynotes" className="hover:text-white">Keynote Speakers</NavLink></li>
-              <li><NavLink to="/services#panel-discussions" className="hover:text-white">Panel Discussions</NavLink></li>
-              <li><NavLink to="/services#boardroom-consulting" className="hover:text-white">Boardroom Consulting</NavLink></li>
-              <li><NavLink to="/services#workshops" className="hover:text-white">Workshop Facilitators</NavLink></li>
-              <li><NavLink to="/services#virtual-events" className="hover:text-white">Virtual Events</NavLink></li>
-              <li><NavLink to="/services#leadership-coaching" className="hover:text-white">Leadership Coaching</NavLink></li>
+              {SERVICE_LINKS.map(({ to, label }) => (
+                <li key={to}>
+                  <NavLink to={to} className="hover:text-white">{label}</NavLink>
+                </li>
+              ))}
             </ul>
           </div>
 

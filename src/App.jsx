@@ -5,6 +5,7 @@ import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import BookingForm from './components/BookingForm'
+import Header from './components/Header.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
 import {
@@ -95,7 +96,7 @@ import { Badge } from '@/components/ui/badge.jsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.jsx'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog.jsx'
-import { Star, MapPin, Users, Calendar, Award, Globe, ChevronRight, Search, Mail, Building, Edit, Trash2, Download, Filter, RefreshCw, Eye, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
+import { Star, MapPin, Users, Calendar, Award, Globe, ChevronRight, Search, Mail, Building, Edit, Trash2, Download, Filter, RefreshCw, Eye, CheckCircle, XCircle, Clock, AlertCircle, Menu } from 'lucide-react'
 import './App.css'
 import heroImage from './assets/hero_background_professional.webp'
 import heroBg1 from './assets/hero-bg-1.jpg'
@@ -216,6 +217,8 @@ function App() {
 
   const appActions = { openBooking, closeBooking }
 
+  
+
   useEffect(() => {
     const syncAndScroll = () => {
       const fullHash = window.location.hash || ''
@@ -330,9 +333,9 @@ function App() {
   }, [])
 
   // Currency state
-  const [currency, setCurrency] = useState('ZAR');
-  const [countryCode, setCountryCode] = useState('ZA');
-  const [currencyInfo, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 });
+  const [, setCurrency] = useState('ZAR');
+  const [, setCountryCode] = useState('ZA');
+  const [, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 });
 
   // Initialize currency based on geolocation
   useEffect(() => {
@@ -1222,31 +1225,7 @@ function App() {
   if (currentPage === 'speaker-profile') {
     return (
       <>
-        <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
-              </nav>
-            </div>
-          </div>
-        </header>
+        <Header />
         <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
       </>
     )
@@ -1256,31 +1235,7 @@ function App() {
   if (currentPage === 'speaker-application') {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
-              </nav>
-            </div>
-          </div>
-        </header>
+        <Header />
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
@@ -1934,31 +1889,7 @@ function App() {
     if (currentPage === 'about') {
       return (
         <div className="min-h-screen bg-white">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
-              </nav>
-            </div>
-          </div>
-        </header>
+        <Header />
 
           <div className="container mx-auto px-4 py-12">
             <div className="text-center mb-16">
@@ -2279,31 +2210,7 @@ function App() {
 
     return (
       <div className="min-h-screen bg-white">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
-              </nav>
-            </div>
-          </div>
-        </header>
+        <Header />
 
         <div className="container mx-auto px-4 py-12">
           <div className="text-center mb-12">
@@ -2405,31 +2312,7 @@ function App() {
   if (currentPage === 'quick-inquiry') {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
-              </nav>
-            </div>
-          </div>
-        </header>
+        <Header />
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
@@ -2486,56 +2369,7 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <a href="#/" onClick={handleNav} className="h-12 flex items-center">
-              <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                <span className="text-white font-bold text-lg">ASB</span>
-              </div>
-              <div className="ml-3">
-                <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-              </div>
-            </a>
-            
-            <div className="flex items-center">
-              <div 
-                className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer" 
-                onClick={() => {
-                  // Toggle between currencies on click
-                  const currencies = ['USD', 'ZAR', 'GBP', 'EUR'];
-                  const countries = ['US', 'ZA', 'GB', 'EU'];
-                  const currentIndex = currencies.indexOf(currency);
-                  const nextIndex = (currentIndex + 1) % currencies.length;
-                  setCountryCode(countries[nextIndex]);
-                  setCurrency(currencies[nextIndex]);
-                  setCurrencyInfo({ currency: currencies[nextIndex], rate: 1 });
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe h-4 w-4" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
-                  <path d="M2 12h20"></path>
-                </svg>
-                <span>{countryCode}</span>
-                <span className="text-blue-600 font-medium">{currency}</span>
-              </div>
-            </div>
-            
-            <nav className="hidden md:flex items-center space-x-8">
-              <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-              <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-              <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-              <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-              <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-              <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="relative h-[700px] overflow-hidden">
