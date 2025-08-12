@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
+import { NavLink } from 'react-router-dom'
 import { fetchAllPublishedSpeakers } from '../lib/airtable'
 import { Button } from '@/components/ui/button.jsx'
+import MobileMenu from '@/components/MobileMenu.jsx'
+import { Menu } from 'lucide-react'
+import { MAIN_LINKS } from '@/lib/navLinks'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
@@ -71,13 +75,12 @@ export default function FindSpeakersPage() {
   const [currency, setCurrency] = useState('ZAR')
   const [countryCode, setCountryCode] = useState('ZA')
   const [, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 })
-
-  const handleNav = (e) => {
-    e.preventDefault()
-    const href = e.currentTarget.getAttribute('href')
-    window.history.pushState({}, '', href)
-    window.dispatchEvent(new PopStateEvent('popstate'))
-  }
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const navButtons = MAIN_LINKS.map(({ to, label, variant }) => (
+    <Button asChild variant={variant} key={to}>
+      <NavLink to={to}>{label}</NavLink>
+    </Button>
+  ))
 
   // fetch from Airtable directly (no reliance on App state)
   useEffect(() => {
@@ -143,7 +146,7 @@ export default function FindSpeakersPage() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <a href="#/" onClick={handleNav} className="h-12 flex items-center">
+            <NavLink to="/" className="h-12 flex items-center">
               <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                 <span className="text-white font-bold text-lg">ASB</span>
               </div>
@@ -152,7 +155,7 @@ export default function FindSpeakersPage() {
                 <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                 <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
               </div>
-            </a>
+            </NavLink>
 
             <div className="flex items-center">
               <div
@@ -178,17 +181,19 @@ export default function FindSpeakersPage() {
             </div>
 
             <nav className="hidden md:flex items-center space-x-8">
-              <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-              <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-              <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-              <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-              <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-              <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><a href="#/book-a-speaker">Book a Speaker</a></Button>
+              {navButtons}
             </nav>
+            <button
+              aria-label="Open menu"
+              className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </button>
           </div>
         </div>
       </header>
+      <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
       <div className="max-w-6xl mx-auto px-4 py-12 mb-16">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold">Find Your Perfect Speaker</h1>

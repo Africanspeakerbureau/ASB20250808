@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { NavLink } from 'react-router-dom'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import BookingForm from './components/BookingForm'
+import MobileMenu from '@/components/MobileMenu.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
 import {
@@ -95,7 +97,8 @@ import { Badge } from '@/components/ui/badge.jsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.jsx'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog.jsx'
-import { Star, MapPin, Users, Calendar, Award, Globe, ChevronRight, Search, Mail, Building, Edit, Trash2, Download, Filter, RefreshCw, Eye, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react'
+import { Star, MapPin, Users, Calendar, Award, Globe, ChevronRight, Search, Mail, Building, Edit, Trash2, Download, Filter, RefreshCw, Eye, CheckCircle, XCircle, Clock, AlertCircle, Menu } from 'lucide-react'
+import { MAIN_LINKS } from '@/lib/navLinks'
 import './App.css'
 import heroImage from './assets/hero_background_professional.webp'
 import heroBg1 from './assets/hero-bg-1.jpg'
@@ -125,6 +128,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [selectedSpeakerId, setSelectedSpeakerId] = useState(null)
   const [showBookingForm, setShowBookingForm] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [clientForm, setClientForm] = useState({})
   const [quickForm, setQuickForm] = useState({})
@@ -215,6 +219,12 @@ function App() {
   }
 
   const appActions = { openBooking, closeBooking }
+
+  const navButtons = MAIN_LINKS.map(({ to, label, variant }) => (
+    <Button asChild variant={variant} key={to}>
+      <NavLink to={to}>{label}</NavLink>
+    </Button>
+  ))
 
   useEffect(() => {
     const syncAndScroll = () => {
@@ -1236,17 +1246,19 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                {navButtons}
               </nav>
+              <button
+                aria-label="Open menu"
+                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <Menu className="h-6 w-6" />
+              </button>
             </div>
           </div>
         </header>
+        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
         <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
       </>
     )
@@ -1270,17 +1282,19 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                {navButtons}
               </nav>
+              <button
+                aria-label="Open menu"
+                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <Menu className="h-6 w-6" />
+              </button>
             </div>
           </div>
         </header>
+        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
@@ -1948,17 +1962,19 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                {navButtons}
               </nav>
+              <button
+                aria-label="Open menu"
+                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <Menu className="h-6 w-6" />
+              </button>
             </div>
           </div>
         </header>
+        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
           <div className="container mx-auto px-4 py-12">
             <div className="text-center mb-16">
@@ -2293,17 +2309,19 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                {navButtons}
               </nav>
+              <button
+                aria-label="Open menu"
+                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <Menu className="h-6 w-6" />
+              </button>
             </div>
           </div>
         </header>
+        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
         <div className="container mx-auto px-4 py-12">
           <div className="text-center mb-12">
@@ -2419,17 +2437,19 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                {navButtons}
               </nav>
+              <button
+                aria-label="Open menu"
+                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <Menu className="h-6 w-6" />
+              </button>
             </div>
           </div>
         </header>
+        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
@@ -2525,17 +2545,19 @@ function App() {
             </div>
             
             <nav className="hidden md:flex items-center space-x-8">
-              <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
-              <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-              <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
-              <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-              <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
-              <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+              {navButtons}
             </nav>
+            <button
+              aria-label="Open menu"
+              className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </button>
           </div>
         </div>
       </header>
+      <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
       {/* Hero Section */}
       <section className="relative h-[700px] overflow-hidden">
