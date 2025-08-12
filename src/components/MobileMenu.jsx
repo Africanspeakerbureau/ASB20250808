@@ -3,13 +3,10 @@ import { NavLink } from 'react-router-dom';
 import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
 
 export default function MobileMenu({ open, onClose }) {
+  // lock/unlock body scroll
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
+    if (open) document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
   }, [open]);
 
   if (!open) return null;
@@ -22,7 +19,9 @@ export default function MobileMenu({ open, onClose }) {
       className="fixed inset-0 z-50 lg:hidden"
       onClick={onClose}
     >
+      {/* backdrop */}
       <div className="absolute inset-0 bg-black/50" />
+      {/* panel */}
       <nav
         className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-slate-900 text-slate-100 p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
@@ -37,9 +36,14 @@ export default function MobileMenu({ open, onClose }) {
         </div>
 
         <ul className="space-y-4 text-base">
-          {MAIN_LINKS.map(({ to, label }) => (
+          {MAIN_LINKS.map(({ to, label, variant }) => (
             <li key={to}>
-              <NavLink to={to} onClick={onClose}>{label}</NavLink>
+              <NavLink to={to} onClick={onClose}
+                className={variant === 'default'
+                  ? 'inline-block px-3 py-2 rounded bg-black text-white'
+                  : undefined}>
+                {label}
+              </NavLink>
             </li>
           ))}
         </ul>
@@ -48,9 +52,7 @@ export default function MobileMenu({ open, onClose }) {
           <div className="text-sm text-slate-300 font-semibold mb-2">Services</div>
           <ul className="space-y-3 text-sm">
             {SERVICE_LINKS.map(({ to, label }) => (
-              <li key={to}>
-                <NavLink to={to} onClick={onClose}>{label}</NavLink>
-              </li>
+              <li key={to}><NavLink to={to} onClick={onClose}>{label}</NavLink></li>
             ))}
           </ul>
         </div>

@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu } from "lucide-react"; // hamburger icon
 import { MAIN_LINKS } from "@/lib/navLinks";
-import MobileMenu from "@/components/MobileMenu.jsx"; // will use in Patch 3
+import MobileMenu from "@/components/MobileMenu.jsx";
 
 export default function Header({ countryCode, currency }) {
-  const [open, setOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <>
@@ -60,7 +60,7 @@ export default function Header({ countryCode, currency }) {
               <button
                 className="lg:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
                 aria-label="Open menu"
-                onClick={() => setOpen(true)}
+                onClick={() => setMobileMenuOpen(true)}
               >
                 <Menu className="h-6 w-6" />
               </button>
@@ -70,7 +70,7 @@ export default function Header({ countryCode, currency }) {
       </header>
 
       {/* stays mounted but hidden unless open */}
-      <MobileMenu open={open} onClose={() => setOpen(false)} />
+      <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </>
   );
 }
