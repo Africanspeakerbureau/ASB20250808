@@ -2372,11 +2372,11 @@ function App() {
       <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
 
       {/* Hero Section */}
-      <section className="relative h-[700px] overflow-hidden">
+      <section className="relative overflow-hidden min-h-[720px] sm:min-h-[760px] pb-20 sm:pb-24">
         <div className="absolute inset-0">
-          <img 
-            src={heroSlides[currentSlide].image} 
-            alt="Hero background" 
+          <img
+            src={heroSlides[currentSlide].image}
+            alt="Hero background"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-blue-900/60"></div>
@@ -2395,17 +2395,32 @@ function App() {
               Connect with Africa's Most Compelling Voices
             </h1>
             <p
-              className="mx-auto mt-3 text-center text-white/90 leading-relaxed max-w-[38ch] text-[clamp(15px,4.4vw,18px)]"
+              className="mx-auto mt-3 text-center text-white/90 leading-relaxed text-[clamp(14px,3.8vw,16px)] max-w-[92vw] sm:max-w-[60ch]"
             >
               Access world-class African speakers who bring authentic insights, innovative solutions, and transformative perspectives to your events. From Fortune 500 boardrooms to international conferences.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => setCurrentPage('find-speakers')}>
                 Find Your Speaker
               </Button>
               <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900" onClick={() => setCurrentPage('speaker-application')}>
                 Join as Speaker
               </Button>
+            </div>
+            <div className="mt-12 sm:mt-14">
+              <form onSubmit={handleSearch} className="search-form">
+                <div className="search-input-wrapper">
+                  <Search className="search-icon" />
+                  <Input
+                    type="text"
+                    placeholder="Search by expertise, topic, or speaker name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                  />
+                </div>
+                <Button type="submit" className="search-button">Search</Button>
+              </form>
             </div>
           </div>
         </div>
@@ -2414,23 +2429,6 @@ function App() {
         <div className="absolute bottom-20 left-8 text-white">
           <h3 className="text-lg font-semibold">{heroSlides[currentSlide].title}</h3>
           <p className="text-blue-200 text-sm">{heroSlides[currentSlide].subtitle}</p>
-        </div>
-
-        {/* Search bar */}
-        <div className="search-section mt-8 sm:mt-10">
-          <form onSubmit={handleSearch} className="search-form">
-            <div className="search-input-wrapper">
-              <Search className="search-icon" />
-              <Input
-                type="text"
-                placeholder="Search by expertise, topic, or speaker name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-            <Button type="submit" className="search-button">Search</Button>
-          </form>
         </div>
 
         {/* Slide indicators */}
