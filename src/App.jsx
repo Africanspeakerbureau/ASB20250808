@@ -4,7 +4,7 @@ import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
-import Footer from './components/Footer'
+import Footer from '@/components/Footer'
 import BookingForm from './components/BookingForm'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -157,12 +157,12 @@ function App() {
   const [selectedService, setSelectedService] = useState('keynote-speakers')
 
   const hashToService = {
-    'keynotes': 'keynote-speakers',
-    'panel-discussions': 'panel-discussions',
-    'boardroom-consulting': 'boardroom-consulting',
-    'workshops': 'workshop-facilitators',
-    'virtual-events': 'virtual-events',
-    'leadership-coaching': 'leadership-coaching'
+    keynote: 'keynote-speakers',
+    panel: 'panel-discussions',
+    boardroom: 'boardroom-consulting',
+    workshops: 'workshop-facilitators',
+    virtual: 'virtual-events',
+    coaching: 'leadership-coaching'
   }
   const serviceToHash = Object.fromEntries(
     Object.entries(hashToService).map(([k, v]) => [v, k])
@@ -1249,7 +1249,7 @@ function App() {
           </div>
         </header>
         <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
-        <Footer appActions={appActions} />
+        <Footer />
       </>
     )
   }
@@ -2157,7 +2157,7 @@ function App() {
           </div>
 
           {/* Footer */}
-          <Footer appActions={appActions} />
+          <Footer />
         </div>
       )
     }
@@ -2403,7 +2403,7 @@ function App() {
         </div>
 
         {/* Footer */}
-        <Footer appActions={appActions} />
+        <Footer />
       </div>
     )
   }
@@ -2742,7 +2742,7 @@ function App() {
         </div>
       </section>
 
-      <Footer appActions={appActions} />
+      <Footer />
 
       <BookingForm
         open={showBookingForm}
