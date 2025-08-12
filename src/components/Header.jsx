@@ -9,8 +9,9 @@ export default function Header({ countryCode, currency }) {
 
   return (
     <>
+      {/* bump header above hero UI; toggle the menu; keep a11y attrs */}
       <header
-        className="sticky top-0 z-[70] bg-slate-900/80 backdrop-blur"
+        className="sticky top-0 z-[100] bg-slate-900/80 backdrop-blur"
         onClickCapture={(e) => e.stopPropagation()}
       >
         <div className="container mx-auto px-4">
@@ -63,7 +64,7 @@ export default function Header({ countryCode, currency }) {
                 aria-controls="mobile-menu"
                 aria-expanded={mobileMenuOpen ? 'true' : 'false'}
                 className="lg:hidden p-2 rounded hover:bg-white/10 text-white"
-                onClick={() => setMobileMenuOpen(true)}
+                onClick={() => setMobileMenuOpen((v) => !v)} // ⬅️ toggle
               >
                 <Menu className="h-6 w-6" />
               </button>
