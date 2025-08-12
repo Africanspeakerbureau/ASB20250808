@@ -10,7 +10,11 @@ export default function Footer({ appActions }) {
   };
 
   return (
-    <footer data-footer="ASB-GOOD" className="bg-slate-900 text-slate-200">
+    <footer
+      data-footer="ASB-GOOD"
+      className="bg-slate-900 text-slate-200 relative z-10"
+      onClickCapture={(e) => e.stopPropagation()}
+    >
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <div>

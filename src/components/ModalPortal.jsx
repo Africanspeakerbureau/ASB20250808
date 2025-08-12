@@ -80,16 +80,16 @@ export default function ModalPortal({ children, onClose }) {
   }, []);
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999]" aria-live="assertive">
+    <div className="pointer-events-none fixed inset-0 z-[9999]" aria-live="assertive">
       {/* Backdrop */}
-      <button aria-label="Close" className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <button aria-label="Close" className="pointer-events-auto absolute inset-0 bg-black/50" onClick={onClose} />
       {/* Modal container */}
       <div
         ref={contentRef}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        className="relative z-10 mx-auto my-6 sm:my-12 w-[min(92vw,900px)] rounded-2xl bg-white shadow-2xl outline-none"
+        className="pointer-events-auto relative z-10 mx-auto my-6 sm:my-12 w-[min(92vw,900px)] rounded-2xl bg-white shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
