@@ -2399,7 +2399,8 @@ function App() {
             >
               Access world-class African speakers who bring authentic insights, innovative solutions, and transformative perspectives to your events. From Fortune 500 boardrooms to international conferences.
             </p>
-            <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+            {/* Buttons */}
+            <div className="mt-4 sm:mt-5 lg:mt-8 flex flex-col sm:flex-row gap-4 justify-center mb-2 sm:mb-3 lg:mb-4">
               <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => setCurrentPage('find-speakers')}>
                 Find Your Speaker
               </Button>
@@ -2408,7 +2409,8 @@ function App() {
               </Button>
             </div>
           </div>
-          <div className="hero-search mt-12 sm:mt-14 lg:mt-8">
+          {/* Search — tighter to buttons on mobile */}
+          <div className="hero-search mt-2 sm:mt-3 md:mt-4 lg:mt-8">
             <form onSubmit={handleSearch} className="search-form">
               <div className="search-input-wrapper">
                 <Search className="search-icon" />
