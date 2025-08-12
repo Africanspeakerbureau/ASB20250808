@@ -1,30 +1,25 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-export default function Footer({ appActions }) {
-  return (
-    <footer className="bg-slate-900 text-slate-200">
-      <div className="mx-auto max-w-7xl px-6 py-16">
-        {/* 4-column layout on desktop, 2 on tablet, 1 on mobile */}
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
+export default function Footer() {
+  const buildVersion =
+    import.meta.env.VITE_BUILD_VERSION ||
+    new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-          {/* Brand / blurb */}
+  return (
+    <footer className="bg-gray-900 text-white py-16 mt-16">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
-            <div className="flex items-center gap-3">
-              <img src="/logo-asb.svg" alt="ASB" className="h-10 w-10" />
-              <div className="text-lg font-semibold leading-tight">
-                AFRICAN<br/>SPEAKER<br/>BUREAU
-              </div>
-            </div>
-            <p className="mt-6 text-slate-400">
+            <h4 className="font-semibold mb-4">African Speaker Bureau</h4>
+            <p className="text-gray-400">
               Connecting authentic African voices with global audiences since 2008.
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h3 className="text-xl font-semibold">Quick Links</h3>
-            <ul className="mt-6 space-y-3 text-slate-300">
+            <h4 className="font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-2 text-gray-400">
               <li><NavLink to="/" className="hover:text-white">Home</NavLink></li>
               <li><NavLink to="/find-speakers" className="hover:text-white">Find a Speaker</NavLink></li>
               <li><NavLink to="/services" className="hover:text-white">Services</NavLink></li>
@@ -35,53 +30,32 @@ export default function Footer({ appActions }) {
             </ul>
           </div>
 
-          {/* Services */}
           <div>
-            <h3 className="text-xl font-semibold">Services</h3>
-            <ul className="mt-6 space-y-3 text-slate-300">
-              <li><NavLink to="/services#keynotes" className="hover:text-white">Keynote Speakers</NavLink></li>
-              <li><NavLink to="/services#panel-discussions" className="hover:text-white">Panel Discussions</NavLink></li>
-              <li><NavLink to="/services#boardroom-consulting" className="hover:text-white">Boardroom Consulting</NavLink></li>
+            <h4 className="font-semibold mb-4">Services</h4>
+            <ul className="space-y-2 text-gray-400">
+              <li><NavLink to="/services#keynote" className="hover:text-white">Keynote Speakers</NavLink></li>
+              <li><NavLink to="/services#panel" className="hover:text-white">Panel Discussions</NavLink></li>
+              <li><NavLink to="/services#boardroom" className="hover:text-white">Boardroom Consulting</NavLink></li>
               <li><NavLink to="/services#workshops" className="hover:text-white">Workshop Facilitators</NavLink></li>
-              <li><NavLink to="/services#virtual-events" className="hover:text-white">Virtual Events</NavLink></li>
-              <li><NavLink to="/services#leadership-coaching" className="hover:text-white">Leadership Coaching</NavLink></li>
+              <li><NavLink to="/services#virtual" className="hover:text-white">Virtual Events</NavLink></li>
+              <li><NavLink to="/services#coaching" className="hover:text-white">Leadership Coaching</NavLink></li>
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
-            <h3 className="text-xl font-semibold">Contact</h3>
-            <div className="mt-6 space-y-4 text-slate-300">
-              <div>
-                <a className="hover:text-white" href="mailto:info@africanspeakerbureau.com">
-                  info@africanspeakerbureau.com
-                </a>
-              </div>
-
-              {/* Remove phone + city list per your request */}
-
-              <div>
-                <a className="hover:text-white underline" href="#/#quick-inquiry">
-                  Message us
-                </a>
-              </div>
-              <div>
-                <a
-                  className="hover:text-white underline"
-                  href="#/book-a-speaker"
-                  onClick={(e) => { e.preventDefault(); appActions.openBooking(); }}
-                >
-                  Request Consultation
-                </a>
-              </div>
-            </div>
+            <h4 className="font-semibold mb-4">Contact</h4>
+            <ul className="space-y-2 text-gray-400">
+              <li>+1 (555) 123-4567</li>
+              <li>info@africanspeakerbureau.com</li>
+              <li>New York • London • Lagos •</li>
+              <li>Cape Town</li>
+            </ul>
           </div>
         </div>
 
-        {/* bottom line */}
-        <div className="mt-12 border-t border-white/10 pt-6 text-sm text-slate-400 flex items-center justify-between">
-          <span>© 2025 African Speaker Bureau. All rights reserved.</span>
-          <span>{import.meta.env.VITE_BUILD_ID ?? ""}</span>
+        <div className="border-t border-gray-800 mt-8 pt-8 flex justify-between items-end text-gray-400 text-sm relative">
+          <p>© 2025 African Speaker Bureau. All rights reserved.</p>
+          <span className="text-[12px] text-gray-500">{buildVersion}</span>
         </div>
       </div>
     </footer>
