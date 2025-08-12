@@ -2,8 +2,15 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 export default function Footer({ appActions }) {
+  const handleConsult = (e) => {
+    if (appActions?.openBooking) {
+      e.preventDefault();
+      appActions.openBooking();
+    }
+  };
+
   return (
-    <footer className="bg-slate-900 text-slate-200">
+    <footer className="bg-slate-900 text-slate-200" data-footer="ASB-GOOD">
       <div className="mx-auto max-w-7xl px-6 py-16">
         {/* 4-column layout on desktop, 2 on tablet, 1 on mobile */}
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
@@ -69,7 +76,7 @@ export default function Footer({ appActions }) {
                 <a
                   className="hover:text-white underline"
                   href="#/book-a-speaker"
-                  onClick={(e) => { e.preventDefault(); appActions.openBooking(); }}
+                  onClick={handleConsult}
                 >
                   Request Consultation
                 </a>
