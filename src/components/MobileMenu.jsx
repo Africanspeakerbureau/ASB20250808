@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
 
-// key changes: z-index way up, stable ids/aria, and toggle-friendly
 export default function MobileMenu({ open, onClose }) {
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    }
     return () => {
       document.body.style.overflow = '';
     };
@@ -14,12 +16,10 @@ export default function MobileMenu({ open, onClose }) {
 
   return (
     <div
-      id="mobile-menu"
-      data-mm-state="open"
       aria-modal="true"
       role="dialog"
       aria-label="Mobile navigation"
-      className="fixed inset-0 z-[200] lg:hidden"
+      className="fixed inset-0 z-[100] lg:hidden"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/50" />
@@ -30,7 +30,6 @@ export default function MobileMenu({ open, onClose }) {
         <div className="flex items-center justify-between mb-6">
           <span className="text-lg font-semibold">Menu</span>
           <button
-            type="button"
             aria-label="Close menu"
             onClick={onClose}
             className="p-2 rounded hover:bg-white/10"
@@ -40,43 +39,37 @@ export default function MobileMenu({ open, onClose }) {
         </div>
 
         <ul className="space-y-4 text-base">
-          <li>
-            <NavLink to="/" onClick={onClose}>
-              Home
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/find-speakers" onClick={onClose}>
-              Find a Speaker
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/services" onClick={onClose}>
-              Services
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/about" onClick={onClose}>
-              About
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/#get-in-touch" onClick={onClose}>
-              Contact
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/book-a-speaker" onClick={onClose}>
-              Book a Speaker
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/admin" onClick={onClose}>
-              Admin
-            </NavLink>
-          </li>
+          {MAIN_LINKS.map(({ to, label, variant }) => (
+            <li key={to}>
+              <NavLink
+                to={to}
+                onClick={onClose}
+                className={
+                  variant === 'default'
+                    ? 'inline-block px-3 py-2 rounded bg-black text-white'
+                    : undefined
+                }
+              >
+                {label}
+              </NavLink>
+            </li>
+          ))}
         </ul>
+
+        <div className="mt-8 border-t border-white/10 pt-4">
+          <div className="text-sm text-slate-300 font-semibold mb-2">Services</div>
+          <ul className="space-y-3 text-sm">
+            {SERVICE_LINKS.map(({ to, label }) => (
+              <li key={to}>
+                <NavLink to={to} onClick={onClose}>
+                  {label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
       </nav>
     </div>
   );
 }
+
