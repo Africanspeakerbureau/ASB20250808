@@ -220,11 +220,21 @@ function App() {
 
   const appActions = { openBooking, closeBooking }
 
-  const navButtons = MAIN_LINKS.map(({ to, label, variant }) => (
-    <Button asChild variant={variant} key={to}>
-      <NavLink to={to}>{label}</NavLink>
-    </Button>
-  ))
+  const navButtons = MAIN_LINKS
+    .filter(({ to }) => to !== '/')
+    .map(({ to, label, variant }) => (
+      <NavLink
+        key={to}
+        to={to}
+        className={
+          variant === 'default'
+            ? 'px-3 py-1 rounded bg-black text-white hover:bg-black/80'
+            : undefined
+        }
+      >
+        {label}
+      </NavLink>
+    ))
 
   useEffect(() => {
     const syncAndScroll = () => {
@@ -1235,7 +1245,7 @@ function App() {
         <header className="bg-white shadow-sm border-b sticky top-0 z-40">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
+              <NavLink to="/" className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -1244,8 +1254,8 @@ function App() {
                   <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                   <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
                 </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
+              </NavLink>
+              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
                 {navButtons}
               </nav>
               <button
@@ -1271,7 +1281,7 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
+              <NavLink to="/" className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -1280,8 +1290,8 @@ function App() {
                   <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                   <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
                 </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
+              </NavLink>
+              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
                 {navButtons}
               </nav>
               <button
@@ -1951,7 +1961,7 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
+              <NavLink to="/" className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -1960,8 +1970,8 @@ function App() {
                   <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                   <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
                 </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
+              </NavLink>
+              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
                 {navButtons}
               </nav>
               <button
@@ -2298,7 +2308,7 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
+              <NavLink to="/" className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -2307,8 +2317,8 @@ function App() {
                   <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                   <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
                 </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
+              </NavLink>
+              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
                 {navButtons}
               </nav>
               <button
@@ -2426,7 +2436,7 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
+              <NavLink to="/" className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -2435,8 +2445,8 @@ function App() {
                   <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                   <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
                 </div>
-              </a>
-              <nav className="hidden md:flex items-center space-x-8">
+              </NavLink>
+              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
                 {navButtons}
               </nav>
               <button
@@ -2509,7 +2519,7 @@ function App() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <a href="#/" onClick={handleNav} className="h-12 flex items-center">
+            <NavLink to="/" className="h-12 flex items-center">
               <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                 <span className="text-white font-bold text-lg">ASB</span>
               </div>
@@ -2518,7 +2528,7 @@ function App() {
                 <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
                 <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
               </div>
-            </a>
+            </NavLink>
             
             <div className="flex items-center">
               <div 
@@ -2544,7 +2554,7 @@ function App() {
               </div>
             </div>
             
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden lg:flex items-center gap-6 text-slate-200">
               {navButtons}
             </nav>
             <button

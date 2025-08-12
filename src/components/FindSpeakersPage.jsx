@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { fetchAllPublishedSpeakers } from '../lib/airtable'
-import { Button } from '@/components/ui/button.jsx'
 import MobileMenu from '@/components/MobileMenu.jsx'
 import { Menu } from 'lucide-react'
 import { MAIN_LINKS } from '@/lib/navLinks'
@@ -76,11 +75,21 @@ export default function FindSpeakersPage() {
   const [countryCode, setCountryCode] = useState('ZA')
   const [, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 })
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const navButtons = MAIN_LINKS.map(({ to, label, variant }) => (
-    <Button asChild variant={variant} key={to}>
-      <NavLink to={to}>{label}</NavLink>
-    </Button>
-  ))
+  const navButtons = MAIN_LINKS
+    .filter(({ to }) => to !== '/')
+    .map(({ to, label, variant }) => (
+      <NavLink
+        key={to}
+        to={to}
+        className={
+          variant === 'default'
+            ? 'px-3 py-1 rounded bg-black text-white hover:bg-black/80'
+            : undefined
+        }
+      >
+        {label}
+      </NavLink>
+    ))
 
   // fetch from Airtable directly (no reliance on App state)
   useEffect(() => {
@@ -180,7 +189,7 @@ export default function FindSpeakersPage() {
               </div>
             </div>
 
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden lg:flex items-center gap-6 text-slate-200">
               {navButtons}
             </nav>
             <button
