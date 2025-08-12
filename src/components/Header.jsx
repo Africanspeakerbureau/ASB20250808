@@ -10,7 +10,7 @@ export default function Header({ countryCode, currency }) {
   return (
     <>
       <header
-        className="bg-white shadow-sm border-b sticky top-0 z-50"
+        className="sticky top-0 z-[70] bg-slate-900/80 backdrop-blur"
         onClickCapture={(e) => e.stopPropagation()}
       >
         <div className="container mx-auto px-4">
@@ -58,8 +58,11 @@ export default function Header({ countryCode, currency }) {
                 </div>
               )}
               <button
-                className="lg:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
+                type="button"
                 aria-label="Open menu"
+                aria-controls="mobile-menu"
+                aria-expanded={mobileMenuOpen ? 'true' : 'false'}
+                className="lg:hidden p-2 rounded hover:bg-white/10 text-white"
                 onClick={() => setMobileMenuOpen(true)}
               >
                 <Menu className="h-6 w-6" />

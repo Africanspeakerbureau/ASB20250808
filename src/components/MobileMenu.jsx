@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
 
 export default function MobileMenu({ open, onClose }) {
-  // lock/unlock body scroll
+  // lock scroll when menu open
   useEffect(() => {
-    if (open) document.body.style.overflow = 'hidden';
+    document.body.style.overflow = open ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
@@ -16,15 +15,18 @@ export default function MobileMenu({ open, onClose }) {
       aria-modal="true"
       role="dialog"
       aria-label="Mobile navigation"
-      className="fixed inset-0 z-50 lg:hidden"
+      data-mobile-menu
+      id="mobile-menu"
+      className="fixed inset-0 z-[80] lg:hidden"
       onClick={onClose}
     >
-      {/* backdrop */}
+      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" />
-      {/* panel */}
+
+      {/* Panel */}
       <nav
         className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-slate-900 text-slate-100 p-6 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}        // don’t close when tapping inside
       >
         <div className="flex items-center justify-between mb-6">
           <span className="text-lg font-semibold">Menu</span>
@@ -36,26 +38,14 @@ export default function MobileMenu({ open, onClose }) {
         </div>
 
         <ul className="space-y-4 text-base">
-          {MAIN_LINKS.map(({ to, label, variant }) => (
-            <li key={to}>
-              <NavLink to={to} onClick={onClose}
-                className={variant === 'default'
-                  ? 'inline-block px-3 py-2 rounded bg-black text-white'
-                  : undefined}>
-                {label}
-              </NavLink>
-            </li>
-          ))}
+          <li><NavLink to="/" onClick={onClose}>Home</NavLink></li>
+          <li><NavLink to="/find-speakers" onClick={onClose}>Find a Speaker</NavLink></li>
+          <li><NavLink to="/services" onClick={onClose}>Services</NavLink></li>
+          <li><NavLink to="/about" onClick={onClose}>About</NavLink></li>
+          <li><NavLink to="/#get-in-touch" onClick={onClose}>Contact</NavLink></li>
+          <li><NavLink to="/book-a-speaker" onClick={onClose}>Book a Speaker</NavLink></li>
+          <li><NavLink to="/admin" onClick={onClose}>Admin</NavLink></li>
         </ul>
-
-        <div className="mt-8 border-t border-white/10 pt-4">
-          <div className="text-sm text-slate-300 font-semibold mb-2">Services</div>
-          <ul className="space-y-3 text-sm">
-            {SERVICE_LINKS.map(({ to, label }) => (
-              <li key={to}><NavLink to={to} onClick={onClose}>{label}</NavLink></li>
-            ))}
-          </ul>
-        </div>
       </nav>
     </div>
   );
