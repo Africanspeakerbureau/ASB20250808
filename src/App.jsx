@@ -2390,15 +2390,14 @@ function App() {
               </span>
             </div>
             <h1
-              className="mx-auto max-w-[18ch] text-[28px] leading-[1.1] sm:text-[36px] md:text-[56px] font-extrabold tracking-[-0.01em] text-white text-center"
+              className="mx-auto text-center font-bold text-white leading-[1.1] [text-wrap:balance] max-w-[22ch] sm:max-w-[26ch] text-[clamp(28px,8vw,40px)] sm:text-[clamp(32px,6vw,44px)]"
             >
-              Connect with Africa's Most<br />
-              Compelling Voices
+              Connect with Africa's Most Compelling Voices
             </h1>
-            <p className="text-base sm:text-lg mb-6 md:mb-8 text-blue-100 max-w-2xl mx-auto">
-              Access world-class African speakers who bring authentic insights, innovative solutions,
-              and transformative perspectives to your events. From Fortune 500 boardrooms to
-              international conferences.
+            <p
+              className="mx-auto mt-3 text-center text-white/90 leading-relaxed max-w-[38ch] text-[clamp(15px,4.4vw,18px)]"
+            >
+              Access world-class African speakers who bring authentic insights, innovative solutions, and transformative perspectives to your events. From Fortune 500 boardrooms to international conferences.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => setCurrentPage('find-speakers')}>
@@ -2418,7 +2417,7 @@ function App() {
         </div>
 
         {/* Search bar */}
-        <div className="search-section">
+        <div className="search-section mt-8 sm:mt-10">
           <form onSubmit={handleSearch} className="search-form">
             <div className="search-input-wrapper">
               <Search className="search-icon" />
