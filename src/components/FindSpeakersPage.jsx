@@ -8,7 +8,7 @@ function SearchCard({ s }) {
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
   const langs = (s.spokenLanguages || []).join(', ')
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
-  const profilePath = `/speaker/${encodeURIComponent(s.id || s.slug)}`
+  const profilePath = `#/speaker/${encodeURIComponent(s.id || s.slug)}`
   const go = (e) => {
     e.preventDefault()
     window.history.pushState({}, '', profilePath)
@@ -144,7 +144,7 @@ export default function FindSpeakersPage() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <a href="/" onClick={handleNav} className="h-12 flex items-center">
+            <a href="#/" onClick={handleNav} className="h-12 flex items-center">
               <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                 <span className="text-white font-bold text-lg">ASB</span>
               </div>
@@ -179,13 +179,13 @@ export default function FindSpeakersPage() {
             </div>
 
             <nav className="hidden md:flex items-center space-x-8">
-              <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-              <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-              <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-              <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-              <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-              <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><a href="/book-a-speaker">Book a Speaker</a></Button>
+              <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
+              <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
+              <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
+              <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
+              <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+              <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
+              <Button asChild><a href="#/book-a-speaker">Book a Speaker</a></Button>
             </nav>
           </div>
         </div>

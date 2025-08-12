@@ -121,7 +121,7 @@ function App() {
   const widgetRef = useRef()
   
   // State variables
-  const [route, setRoute] = useState(window.location.pathname)
+  const [route, setRoute] = useState(() => window.location.hash.slice(1) || '/')
   const [isAuthed, setIsAuthed] = useState(() => sessionStorage.getItem('asb_admin') === '1')
   const [currentPage, setCurrentPage] = useState('home')
   const [selectedSpeakerId, setSelectedSpeakerId] = useState(null)
@@ -192,12 +192,13 @@ function App() {
   }
 
   const go = (path) => {
-    window.history.pushState({}, '', path)
+    const target = path.startsWith('#') ? path : `#${path}`
+    window.history.pushState({}, '', target)
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
   function openBooking() {
-    window.history.pushState({}, '', '/book-a-speaker')
+    window.history.pushState({}, '', '#/book-a-speaker')
     setCurrentPage('home')
     setShowBookingForm(true)
     window.scrollTo(0, 0)
@@ -205,11 +206,11 @@ function App() {
 
   function closeBooking() {
     setShowBookingForm(false)
-    window.history.replaceState({}, '', '/')
+    window.history.replaceState({}, '', '#/')
   }
 
   function closeAdminModal() {
-    window.history.replaceState({}, '', '/')
+    window.history.replaceState({}, '', '#/')
     setRoute('/')
     setCurrentPage('home')
   }
@@ -218,8 +219,10 @@ function App() {
 
   useEffect(() => {
     const syncAndScroll = () => {
-      const { pathname, hash } = window.location
-      const id = hash ? decodeURIComponent(hash.slice(1)) : ''
+      const fullHash = window.location.hash || ''
+      const [pathPart, anchor] = fullHash.replace(/^#/, '').split('#')
+      const pathname = pathPart || '/'
+      const id = anchor ? decodeURIComponent(anchor) : ''
       setRoute(pathname)
 
       if (pathname === '/admin') {
@@ -262,7 +265,7 @@ function App() {
 
       // Scroll after view mounts for hash anchors
       requestAnimationFrame(() => {
-        if (hash) {
+        if (anchor) {
           const el = document.getElementById(id)
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }
@@ -1223,7 +1226,7 @@ function App() {
         <header className="bg-white shadow-sm border-b sticky top-0 z-40">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -1234,13 +1237,13 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1258,7 +1261,7 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -1269,13 +1272,13 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -1936,7 +1939,7 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -1947,13 +1950,13 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2283,7 +2286,7 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -2294,13 +2297,13 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2411,7 +2414,7 @@ function App() {
         <header className="bg-white shadow-sm border-b">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <a href="/" onClick={handleNav} className="h-12 flex items-center">
+              <a href="#/" onClick={handleNav} className="h-12 flex items-center">
                 <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                   <span className="text-white font-bold text-lg">ASB</span>
                 </div>
@@ -2422,13 +2425,13 @@ function App() {
                 </div>
               </a>
               <nav className="hidden md:flex items-center space-x-8">
-                <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-                <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-                <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-                <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-                <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-                <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+                <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
+                <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
+                <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
+                <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
+                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
+                <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
             </div>
           </div>
@@ -2448,7 +2451,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
+                        <a href="#/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
@@ -2492,7 +2495,7 @@ function App() {
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <a href="/" onClick={handleNav} className="h-12 flex items-center">
+            <a href="#/" onClick={handleNav} className="h-12 flex items-center">
               <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
                 <span className="text-white font-bold text-lg">ASB</span>
               </div>
@@ -2528,13 +2531,13 @@ function App() {
             </div>
             
             <nav className="hidden md:flex items-center space-x-8">
-              <Button asChild variant="ghost"><a href="/" onClick={handleNav}>Home</a></Button>
-              <Button asChild variant="ghost"><a href="/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
-              <Button asChild variant="ghost"><a href="/services" onClick={handleNav}>Services</a></Button>
-              <Button asChild variant="ghost"><a href="/about" onClick={handleNav}>About</a></Button>
-              <Button asChild variant="ghost"><a href="/#contact" onClick={handleNav}>Contact</a></Button>
-              <Button asChild variant="ghost"><a href="/admin" onClick={handleNav}>Admin</a></Button>
-              <Button asChild><a href="/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
+              <Button asChild variant="ghost"><a href="#/" onClick={handleNav}>Home</a></Button>
+              <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
+              <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
+              <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
+              <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+              <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
+              <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
             </nav>
           </div>
         </div>
@@ -2688,11 +2691,11 @@ function App() {
                 </a>
 
                 <div className="flex flex-col gap-2 pt-2">
-                  <a href="/#quick-inquiry" className="text-primary hover:underline">
+                  <a href="#/#quick-inquiry" className="text-primary hover:underline">
                     Message us
                   </a>
                   <a
-                    href="/book-a-speaker"
+                    href="#/book-a-speaker"
                     className="text-primary hover:underline"
                     onClick={(e) => { e.preventDefault(); openBooking(); }}
                   >
@@ -2713,7 +2716,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
+                        <a href="#/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
