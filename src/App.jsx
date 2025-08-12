@@ -2389,7 +2389,9 @@ function App() {
                 Authentic African Voices
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 md:mb-6 leading-tight">
+            <h1
+              className="mx-auto max-w-[18ch] text-[28px] leading-[1.1] sm:text-[36px] md:text-[56px] font-extrabold tracking-[-0.01em] text-white text-center"
+            >
               Connect with Africa's Most<br />
               Compelling Voices
             </h1>
