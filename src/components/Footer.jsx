@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 export default function Footer({ appActions }) {
   const navigate = useNavigate();
@@ -34,27 +34,27 @@ export default function Footer({ appActions }) {
           {/* Quick Links */}
           <div>
             <h3 className="text-xl font-semibold">Quick Links</h3>
-            <ul className="mt-6 space-y-3 text-slate-300">
-              <li><a href="/" onClick={handleNav} className="hover:text-white">Home</a></li>
-              <li><a href="/find-speakers" onClick={handleNav} className="hover:text-white">Find a Speaker</a></li>
-              <li><a href="/services" onClick={handleNav} className="hover:text-white">Services</a></li>
-              <li><a href="/about" onClick={handleNav} className="hover:text-white">About</a></li>
-              <li><a href="/#get-in-touch" onClick={handleNav} className="hover:text-white">Contact</a></li>
-              <li><a href="/book-a-speaker" onClick={handleNav} className="hover:text-white">Book a Speaker</a></li>
-              <li><a href="/admin" onClick={handleNav} className="hover:text-white">Admin</a></li>
+            <ul className="space-y-2 text-gray-400">
+              <li><NavLink to="/" className="hover:text-white">Home</NavLink></li>
+              <li><NavLink to="/find-speakers" className="hover:text-white">Find a Speaker</NavLink></li>
+              <li><NavLink to="/services" className="hover:text-white">Services</NavLink></li>
+              <li><NavLink to="/about" className="hover:text-white">About</NavLink></li>
+              <li><NavLink to="/#get-in-touch" className="hover:text-white">Contact</NavLink></li>
+              <li><NavLink to="/book-a-speaker" className="hover:text-white">Book a Speaker</NavLink></li>
+              <li><NavLink to="/admin" className="hover:text-white">Admin</NavLink></li>
             </ul>
           </div>
 
           {/* Services */}
           <div>
             <h3 className="text-xl font-semibold">Services</h3>
-            <ul className="mt-6 space-y-3 text-slate-300">
-              <li><a href="/services#keynotes" onClick={handleNav} className="hover:text-white">Keynote Speakers</a></li>
-              <li><a href="/services#panel-discussions" onClick={handleNav} className="hover:text-white">Panel Discussions</a></li>
-              <li><a href="/services#boardroom-consulting" onClick={handleNav} className="hover:text-white">Boardroom Consulting</a></li>
-              <li><a href="/services#workshops" onClick={handleNav} className="hover:text-white">Workshop Facilitators</a></li>
-              <li><a href="/services#virtual-events" onClick={handleNav} className="hover:text-white">Virtual Events</a></li>
-              <li><a href="/services#leadership-coaching" onClick={handleNav} className="hover:text-white">Leadership Coaching</a></li>
+            <ul className="space-y-2 text-gray-400">
+              <li><NavLink to="/services#keynote" className="hover:text-white">Keynote Speakers</NavLink></li>
+              <li><NavLink to="/services#panel" className="hover:text-white">Panel Discussions</NavLink></li>
+              <li><NavLink to="/services#boardroom" className="hover:text-white">Boardroom Consulting</NavLink></li>
+              <li><NavLink to="/services#workshops" className="hover:text-white">Workshop Facilitators</NavLink></li>
+              <li><NavLink to="/services#virtual" className="hover:text-white">Virtual Events</NavLink></li>
+              <li><NavLink to="/services#coaching" className="hover:text-white">Leadership Coaching</NavLink></li>
             </ul>
           </div>
 
