@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { NavLink } from 'react-router-dom'
 import { fetchAllPublishedSpeakers } from '../lib/airtable'
-import MobileMenu from '@/components/MobileMenu.jsx'
-import { Menu } from 'lucide-react'
-import { MAIN_LINKS } from '@/lib/navLinks'
+import Header from './Header.jsx'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
@@ -71,25 +68,6 @@ export default function FindSpeakersPage() {
   const [country, setCountry] = useState('All Countries')
   const [lang, setLang] = useState('All Languages')
   const [fee, setFee] = useState('All Fee Ranges')
-  const [currency, setCurrency] = useState('ZAR')
-  const [countryCode, setCountryCode] = useState('ZA')
-  const [, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 })
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const navButtons = MAIN_LINKS
-    .filter(({ to }) => to !== '/')
-    .map(({ to, label, variant }) => (
-      <NavLink
-        key={to}
-        to={to}
-        className={
-          variant === 'default'
-            ? 'px-3 py-1 rounded bg-black text-white hover:bg-black/80'
-            : undefined
-        }
-      >
-        {label}
-      </NavLink>
-    ))
 
   // fetch from Airtable directly (no reliance on App state)
   useEffect(() => {
@@ -152,57 +130,7 @@ export default function FindSpeakersPage() {
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <NavLink to="/" className="h-12 flex items-center">
-              <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                <span className="text-white font-bold text-lg">ASB</span>
-              </div>
-              <div className="ml-3">
-                <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-              </div>
-            </NavLink>
-
-            <div className="flex items-center">
-              <div
-                className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer"
-                onClick={() => {
-                  const currencies = ['USD', 'ZAR', 'GBP', 'EUR']
-                  const countries = ['US', 'ZA', 'GB', 'EU']
-                  const currentIndex = currencies.indexOf(currency)
-                  const nextIndex = (currentIndex + 1) % currencies.length
-                  setCountryCode(countries[nextIndex])
-                  setCurrency(currencies[nextIndex])
-                  setCurrencyInfo({ currency: currencies[nextIndex], rate: 1 })
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe h-4 w-4" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
-                  <path d="M2 12h20"></path>
-                </svg>
-                <span>{countryCode}</span>
-                <span className="text-blue-600 font-medium">{currency}</span>
-              </div>
-            </div>
-
-            <nav className="hidden lg:flex items-center gap-6 text-slate-200">
-              {navButtons}
-            </nav>
-            <button
-              aria-label="Open menu"
-              className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-          </div>
-        </div>
-      </header>
-      <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      <Header />
       <div className="max-w-6xl mx-auto px-4 py-12 mb-16">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold">Find Your Perfect Speaker</h1>

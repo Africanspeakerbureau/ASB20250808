@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import BookingForm from './components/BookingForm'
-import MobileMenu from '@/components/MobileMenu.jsx'
+import Header from './components/Header.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
 import {
@@ -98,7 +97,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.jsx'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog.jsx'
 import { Star, MapPin, Users, Calendar, Award, Globe, ChevronRight, Search, Mail, Building, Edit, Trash2, Download, Filter, RefreshCw, Eye, CheckCircle, XCircle, Clock, AlertCircle, Menu } from 'lucide-react'
-import { MAIN_LINKS } from '@/lib/navLinks'
 import './App.css'
 import heroImage from './assets/hero_background_professional.webp'
 import heroBg1 from './assets/hero-bg-1.jpg'
@@ -128,7 +126,6 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [selectedSpeakerId, setSelectedSpeakerId] = useState(null)
   const [showBookingForm, setShowBookingForm] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [clientForm, setClientForm] = useState({})
   const [quickForm, setQuickForm] = useState({})
@@ -220,21 +217,7 @@ function App() {
 
   const appActions = { openBooking, closeBooking }
 
-  const navButtons = MAIN_LINKS
-    .filter(({ to }) => to !== '/')
-    .map(({ to, label, variant }) => (
-      <NavLink
-        key={to}
-        to={to}
-        className={
-          variant === 'default'
-            ? 'px-3 py-1 rounded bg-black text-white hover:bg-black/80'
-            : undefined
-        }
-      >
-        {label}
-      </NavLink>
-    ))
+  
 
   useEffect(() => {
     const syncAndScroll = () => {
@@ -350,9 +333,9 @@ function App() {
   }, [])
 
   // Currency state
-  const [currency, setCurrency] = useState('ZAR');
-  const [countryCode, setCountryCode] = useState('ZA');
-  const [currencyInfo, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 });
+  const [, setCurrency] = useState('ZAR');
+  const [, setCountryCode] = useState('ZA');
+  const [, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 });
 
   // Initialize currency based on geolocation
   useEffect(() => {
@@ -1242,33 +1225,7 @@ function App() {
   if (currentPage === 'speaker-profile') {
     return (
       <>
-        <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <NavLink to="/" className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </NavLink>
-              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
-                {navButtons}
-              </nav>
-              <button
-                aria-label="Open menu"
-                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-        </header>
-        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        <Header />
         <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
       </>
     )
@@ -1278,33 +1235,7 @@ function App() {
   if (currentPage === 'speaker-application') {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <NavLink to="/" className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </NavLink>
-              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
-                {navButtons}
-              </nav>
-              <button
-                aria-label="Open menu"
-                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-        </header>
-        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        <Header />
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
@@ -1958,33 +1889,7 @@ function App() {
     if (currentPage === 'about') {
       return (
         <div className="min-h-screen bg-white">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <NavLink to="/" className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </NavLink>
-              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
-                {navButtons}
-              </nav>
-              <button
-                aria-label="Open menu"
-                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-        </header>
-        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        <Header />
 
           <div className="container mx-auto px-4 py-12">
             <div className="text-center mb-16">
@@ -2305,33 +2210,7 @@ function App() {
 
     return (
       <div className="min-h-screen bg-white">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <NavLink to="/" className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </NavLink>
-              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
-                {navButtons}
-              </nav>
-              <button
-                aria-label="Open menu"
-                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-        </header>
-        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        <Header />
 
         <div className="container mx-auto px-4 py-12">
           <div className="text-center mb-12">
@@ -2433,33 +2312,7 @@ function App() {
   if (currentPage === 'quick-inquiry') {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              <NavLink to="/" className="h-12 flex items-center">
-                <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                  <span className="text-white font-bold text-lg">ASB</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                  <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-                </div>
-              </NavLink>
-              <nav className="hidden lg:flex items-center gap-6 text-slate-200">
-                {navButtons}
-              </nav>
-              <button
-                aria-label="Open menu"
-                className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-        </header>
-        <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        <Header />
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
@@ -2516,58 +2369,7 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <NavLink to="/" className="h-12 flex items-center">
-              <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
-                <span className="text-white font-bold text-lg">ASB</span>
-              </div>
-              <div className="ml-3">
-                <span className="text-sm font-medium leading-tight block text-blue-900">AFRICAN</span>
-                <span className="text-sm font-medium leading-tight block text-blue-900">SPEAKER</span>
-                <span className="text-sm font-medium leading-tight block text-blue-900">BUREAU</span>
-              </div>
-            </NavLink>
-            
-            <div className="flex items-center">
-              <div 
-                className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer" 
-                onClick={() => {
-                  // Toggle between currencies on click
-                  const currencies = ['USD', 'ZAR', 'GBP', 'EUR'];
-                  const countries = ['US', 'ZA', 'GB', 'EU'];
-                  const currentIndex = currencies.indexOf(currency);
-                  const nextIndex = (currentIndex + 1) % currencies.length;
-                  setCountryCode(countries[nextIndex]);
-                  setCurrency(currencies[nextIndex]);
-                  setCurrencyInfo({ currency: currencies[nextIndex], rate: 1 });
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-globe h-4 w-4" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
-                  <path d="M2 12h20"></path>
-                </svg>
-                <span>{countryCode}</span>
-                <span className="text-blue-600 font-medium">{currency}</span>
-              </div>
-            </div>
-            
-            <nav className="hidden lg:flex items-center gap-6 text-slate-200">
-              {navButtons}
-            </nav>
-            <button
-              aria-label="Open menu"
-              className="md:hidden p-2 rounded hover:bg-blue-50 text-blue-900"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-          </div>
-        </div>
-      </header>
-      <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      <Header />
 
       {/* Hero Section */}
       <section className="relative h-[700px] overflow-hidden">
