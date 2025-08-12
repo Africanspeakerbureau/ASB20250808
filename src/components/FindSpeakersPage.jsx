@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchAllPublishedSpeakers } from '../lib/airtable'
-import Footer from '../components/Footer'
+import FooterASB from '@/components/FooterASB';
 import { Button } from '@/components/ui/button.jsx'
 
 // Compact, search-variant card (square image)
@@ -229,7 +229,7 @@ export default function FindSpeakersPage() {
         </div>
       )}
       </div>
-      <Footer />
+      <FooterASB />
     </>
   )
 }

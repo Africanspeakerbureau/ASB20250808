@@ -1,14 +1,18 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-export default function Footer({ appActions }) {
-  return (
-    <footer className="bg-slate-900 text-slate-200">
-      <div className="mx-auto max-w-7xl px-6 py-16">
-        {/* 4-column layout on desktop, 2 on tablet, 1 on mobile */}
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
+export default function FooterASB({ appActions }) {
+  const handleConsult = (e) => {
+    if (appActions?.openBooking) {
+      e.preventDefault();
+      appActions.openBooking();
+    }
+  };
 
-          {/* Brand / blurb */}
+  return (
+    <footer data-footer="ASB-GOOD" className="bg-slate-900 text-slate-200">
+      <div className="mx-auto max-w-7xl px-6 py-16">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-3">
               <img src="/logo-asb.svg" alt="ASB" className="h-10 w-10" />
@@ -21,7 +25,6 @@ export default function Footer({ appActions }) {
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h3 className="text-xl font-semibold">Quick Links</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
@@ -35,7 +38,6 @@ export default function Footer({ appActions }) {
             </ul>
           </div>
 
-          {/* Services */}
           <div>
             <h3 className="text-xl font-semibold">Services</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
@@ -48,7 +50,6 @@ export default function Footer({ appActions }) {
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h3 className="text-xl font-semibold">Contact</h3>
             <div className="mt-6 space-y-4 text-slate-300">
@@ -57,9 +58,6 @@ export default function Footer({ appActions }) {
                   info@africanspeakerbureau.com
                 </a>
               </div>
-
-              {/* Remove phone + city list per your request */}
-
               <div>
                 <a className="hover:text-white underline" href="#/#quick-inquiry">
                   Message us
@@ -69,7 +67,7 @@ export default function Footer({ appActions }) {
                 <a
                   className="hover:text-white underline"
                   href="#/book-a-speaker"
-                  onClick={(e) => { e.preventDefault(); appActions.openBooking(); }}
+                  onClick={handleConsult}
                 >
                   Request Consultation
                 </a>
@@ -78,7 +76,6 @@ export default function Footer({ appActions }) {
           </div>
         </div>
 
-        {/* bottom line */}
         <div className="mt-12 border-t border-white/10 pt-6 text-sm text-slate-400 flex items-center justify-between">
           <span>© 2025 African Speaker Bureau. All rights reserved.</span>
           <span>{import.meta.env.VITE_BUILD_ID ?? ""}</span>
