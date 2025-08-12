@@ -4,7 +4,7 @@ import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
-import Footer from './components/Footer'
+import Footer from '@/components/Footer'
 import BookingForm from './components/BookingForm'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -2279,7 +2279,6 @@ function App() {
       { id: 'leadership-coaching', label: 'Leadership Coaching', color: 'bg-red-500' }
     ]
 
-    const currentService = services[selectedService]
 
     return (
       <div className="min-h-screen bg-white">
@@ -2333,57 +2332,61 @@ function App() {
           </div>
 
           {/* Service Content */}
-          <section id={serviceToHash[selectedService]} className="scroll-mt-24 max-w-6xl mx-auto">
-            <div className="mb-8">
-              <div className={`border-l-4 border-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-500 pl-6`}>
-                <h2 className={`text-3xl font-bold text-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-600 mb-4`}>
-                  {currentService.title}
-                </h2>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  {currentService.description}
+          {Object.entries(services).map(([id, svc]) => (
+            <section
+              key={id}
+              id={serviceToHash[id]}
+              className={`${selectedService === id ? '' : 'hidden'} scroll-mt-24 max-w-6xl mx-auto`}
+            >
+              <div className="mb-8">
+                <div className={`border-l-4 border-${svc.color === 'blue' ? 'blue' : svc.color === 'green' ? 'green' : svc.color === 'purple' ? 'purple' : svc.color === 'orange' ? 'orange' : svc.color === 'teal' ? 'teal' : 'red'}-500 pl-6`}>
+                  <h2 className={`text-3xl font-bold text-${svc.color === 'blue' ? 'blue' : svc.color === 'green' ? 'green' : svc.color === 'purple' ? 'purple' : svc.color === 'orange' ? 'orange' : svc.color === 'teal' ? 'teal' : 'red'}-600 mb-4`}>
+                    {svc.title}
+                  </h2>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    {svc.description}
+                  </p>
+                </div>
+              </div>
+
+              {id === 'keynote-speakers' && svc.sections && (
+                <div className="grid md:grid-cols-2 gap-12 mb-12">
+                  <div>
+                    <h3 className="text-2xl font-bold text-blue-600 mb-6">{svc.sections.left.title}</h3>
+                    <div className="space-y-6">
+                      {svc.sections.left.items.map((item, index) => (
+                        <div key={index} className="border-l-4 border-blue-200 pl-4">
+                          <h4 className="font-semibold text-gray-900 mb-2">{item.title}</h4>
+                          <p className="text-gray-700">{item.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-blue-600 mb-6">{svc.sections.right.title}</h3>
+                    <div className="space-y-4">
+                      {svc.sections.right.items.map((item, index) => (
+                        <div key={index}>
+                          <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
+                          <p className="text-gray-700 text-sm">{item.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className={`bg-${svc.color === 'blue' ? 'blue' : svc.color === 'green' ? 'green' : svc.color === 'purple' ? 'purple' : svc.color === 'orange' ? 'orange' : svc.color === 'teal' ? 'teal' : 'red'}-500 text-white rounded-xl p-8 mb-12`}>
+                <h3 className="text-2xl font-bold mb-4">{svc.investment.title}</h3>
+                <p className="text-lg mb-6 opacity-90">
+                  {svc.investment.description}
                 </p>
+                <Button className="bg-white text-gray-900 hover:bg-gray-100">
+                  {svc.investment.cta}
+                </Button>
               </div>
-            </div>
-
-            {/* Two-column content for keynote speakers */}
-            {selectedService === 'keynote-speakers' && currentService.sections && (
-              <div className="grid md:grid-cols-2 gap-12 mb-12">
-                <div>
-                  <h3 className="text-2xl font-bold text-blue-600 mb-6">{currentService.sections.left.title}</h3>
-                  <div className="space-y-6">
-                    {currentService.sections.left.items.map((item, index) => (
-                      <div key={index} className="border-l-4 border-blue-200 pl-4">
-                        <h4 className="font-semibold text-gray-900 mb-2">{item.title}</h4>
-                        <p className="text-gray-700">{item.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-blue-600 mb-6">{currentService.sections.right.title}</h3>
-                  <div className="space-y-4">
-                    {currentService.sections.right.items.map((item, index) => (
-                      <div key={index}>
-                        <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
-                        <p className="text-gray-700 text-sm">{item.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Investment Section */}
-            <div className={`bg-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-500 text-white rounded-xl p-8 mb-12`}>
-              <h3 className="text-2xl font-bold mb-4">{currentService.investment.title}</h3>
-              <p className="text-lg mb-6 opacity-90">
-                {currentService.investment.description}
-              </p>
-              <Button className="bg-white text-gray-900 hover:bg-gray-100">
-                {currentService.investment.cta}
-              </Button>
-            </div>
-          </section>
+            </section>
+          ))}
 
           {/* Call to Action Section */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-12 text-center">

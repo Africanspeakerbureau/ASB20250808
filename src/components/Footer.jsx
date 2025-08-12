@@ -2,6 +2,12 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 export default function Footer({ appActions }) {
+  const handleConsult = (e) => {
+    if (appActions?.openBooking) {
+      e.preventDefault();
+      appActions.openBooking();
+    }
+  };
   return (
     <footer className="bg-slate-900 text-slate-200">
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -69,7 +75,7 @@ export default function Footer({ appActions }) {
                 <a
                   className="hover:text-white underline"
                   href="#/book-a-speaker"
-                  onClick={(e) => { e.preventDefault(); appActions.openBooking(); }}
+                  onClick={handleConsult}
                 >
                   Request Consultation
                 </a>
