@@ -4,7 +4,6 @@ import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
-import Footer from './components/Footer'
 import BookingForm from './components/BookingForm'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -1249,7 +1248,6 @@ function App() {
           </div>
         </header>
         <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
-        <Footer appActions={appActions} />
       </>
     )
   }
@@ -2156,8 +2154,6 @@ function App() {
             </div>
           </div>
 
-          {/* Footer */}
-          <Footer appActions={appActions} />
         </div>
       )
     }
@@ -2402,8 +2398,6 @@ function App() {
           </div>
         </div>
 
-        {/* Footer */}
-        <Footer appActions={appActions} />
       </div>
     )
   }
@@ -2742,7 +2736,6 @@ function App() {
         </div>
       </section>
 
-      <Footer appActions={appActions} />
 
       <BookingForm
         open={showBookingForm}
