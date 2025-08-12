@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 export default function Footer({ appActions }) {
   return (
@@ -24,13 +25,13 @@ export default function Footer({ appActions }) {
           <div>
             <h3 className="text-xl font-semibold">Quick Links</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
-              <li><a href="#/" className="hover:text-white">Home</a></li>
-              <li><a href="#/find-speakers" className="hover:text-white">Find Speakers</a></li>
-              <li><a href="#/services" className="hover:text-white">Services</a></li>
-              <li><a href="#/about" className="hover:text-white">About</a></li>
-              <li><a href="#/contact" className="hover:text-white">Contact</a></li>
-              <li><a href="#/book-a-speaker" className="hover:text-white">Book a Speaker</a></li>
-              <li><a href="#/admin" className="hover:text-white">Admin</a></li>
+              <li><NavLink to="/" className="hover:text-white">Home</NavLink></li>
+              <li><NavLink to="/find-speakers" className="hover:text-white">Find a Speaker</NavLink></li>
+              <li><NavLink to="/services" className="hover:text-white">Services</NavLink></li>
+              <li><NavLink to="/about" className="hover:text-white">About</NavLink></li>
+              <li><NavLink to="/#get-in-touch" className="hover:text-white">Contact</NavLink></li>
+              <li><NavLink to="/book-a-speaker" className="hover:text-white">Book a Speaker</NavLink></li>
+              <li><NavLink to="/admin" className="hover:text-white">Admin</NavLink></li>
             </ul>
           </div>
 
@@ -38,12 +39,12 @@ export default function Footer({ appActions }) {
           <div>
             <h3 className="text-xl font-semibold">Services</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
-              <li><a href="#/services" className="hover:text-white">Keynote Speakers</a></li>
-              <li><a href="#/services" className="hover:text-white">Panel Discussions</a></li>
-              <li><a href="#/services" className="hover:text-white">Boardroom Consulting</a></li>
-              <li><a href="#/services" className="hover:text-white">Workshop Facilitators</a></li>
-              <li><a href="#/services" className="hover:text-white">Virtual Events</a></li>
-              <li><a href="#/services" className="hover:text-white">Leadership Coaching</a></li>
+              <li><NavLink to="/services#keynotes" className="hover:text-white">Keynote Speakers</NavLink></li>
+              <li><NavLink to="/services#panel-discussions" className="hover:text-white">Panel Discussions</NavLink></li>
+              <li><NavLink to="/services#boardroom-consulting" className="hover:text-white">Boardroom Consulting</NavLink></li>
+              <li><NavLink to="/services#workshops" className="hover:text-white">Workshop Facilitators</NavLink></li>
+              <li><NavLink to="/services#virtual-events" className="hover:text-white">Virtual Events</NavLink></li>
+              <li><NavLink to="/services#leadership-coaching" className="hover:text-white">Leadership Coaching</NavLink></li>
             </ul>
           </div>
 

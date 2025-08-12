@@ -157,12 +157,12 @@ function App() {
   const [selectedService, setSelectedService] = useState('keynote-speakers')
 
   const hashToService = {
-    keynote: 'keynote-speakers',
-    panel: 'panel-discussions',
-    boardroom: 'boardroom-consulting',
-    workshops: 'workshop-facilitators',
-    virtual: 'virtual-events',
-    coaching: 'leadership-coaching'
+    'keynotes': 'keynote-speakers',
+    'panel-discussions': 'panel-discussions',
+    'boardroom-consulting': 'boardroom-consulting',
+    'workshops': 'workshop-facilitators',
+    'virtual-events': 'virtual-events',
+    'leadership-coaching': 'leadership-coaching'
   }
   const serviceToHash = Object.fromEntries(
     Object.entries(hashToService).map(([k, v]) => [v, k])
@@ -1241,7 +1241,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
                 <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
@@ -1276,7 +1276,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
                 <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
@@ -1954,7 +1954,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
                 <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
@@ -2301,7 +2301,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
                 <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
@@ -2429,7 +2429,7 @@ function App() {
                 <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
                 <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
                 <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-                <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+                <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
                 <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
                 <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
               </nav>
@@ -2535,7 +2535,7 @@ function App() {
               <Button asChild variant="ghost"><a href="#/find-speakers" onClick={handleNav}>Find Speakers</a></Button>
               <Button asChild variant="ghost"><a href="#/services" onClick={handleNav}>Services</a></Button>
               <Button asChild variant="ghost"><a href="#/about" onClick={handleNav}>About</a></Button>
-              <Button asChild variant="ghost"><a href="#/contact" onClick={handleNav}>Contact</a></Button>
+              <Button asChild variant="ghost"><a href="#/#get-in-touch" onClick={handleNav}>Contact</a></Button>
               <Button asChild variant="ghost"><a href="#/admin" onClick={handleNav}>Admin</a></Button>
               <Button asChild><a href="#/book-a-speaker" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a></Button>
             </nav>
@@ -2670,7 +2670,7 @@ function App() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-gray-50">
+      <section id="get-in-touch" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h2>
