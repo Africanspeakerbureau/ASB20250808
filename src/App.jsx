@@ -2372,33 +2372,35 @@ function App() {
       <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
 
       {/* Hero Section */}
-      <section className="relative h-[700px] overflow-hidden">
+      <section id="home-hero" className="relative overflow-hidden min-h-[720px] sm:min-h-[760px] pb-20 sm:pb-24">
         <div className="absolute inset-0">
-          <img 
-            src={heroSlides[currentSlide].image} 
-            alt="Hero background" 
+          <img
+            src={heroSlides[currentSlide].image}
+            alt="Hero background"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-blue-900/60"></div>
         </div>
         
-        <div className="relative z-10 container mx-auto px-4 h-full flex items-center justify-center">
-          <div className="max-w-4xl text-white text-center">
+        <div className="hero-stack relative z-10 container mx-auto px-4 h-full flex flex-col items-center lg:mt-[8vh] xl:mt-[10vh] 2xl:mt-[11vh]">
+          <div className="hero-content max-w-4xl text-white text-center">
             <div className="mb-4">
               <span className="inline-block bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
                 Authentic African Voices
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-              Connect with Africa's Most<br />
-              Compelling Voices
+            <h1
+              className="mx-auto text-center font-bold text-white leading-[1.1] [text-wrap:balance] max-w-[22ch] sm:max-w-[26ch] text-[clamp(28px,8vw,40px)] sm:text-[clamp(32px,6vw,44px)]"
+            >
+              Connect with Africa's Most Compelling Voices
             </h1>
-            <p className="text-lg mb-8 text-blue-100 max-w-2xl mx-auto">
-              Access world-class African speakers who bring authentic insights, innovative solutions, 
-              and transformative perspectives to your events. From Fortune 500 boardrooms to 
-              international conferences.
+            <p
+              className="mx-auto mt-3 text-center text-white/90 leading-relaxed text-[clamp(14px,3.8vw,16px)] max-w-[92vw] sm:max-w-[60ch]"
+            >
+              Access world-class African speakers who bring authentic insights, innovative solutions, and transformative perspectives to your events. From Fortune 500 boardrooms to international conferences.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            {/* Buttons */}
+            <div className="mt-4 sm:mt-5 lg:mt-8 flex flex-col sm:flex-row gap-4 justify-center mb-2 sm:mb-3 lg:mb-4">
               <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => setCurrentPage('find-speakers')}>
                 Find Your Speaker
               </Button>
@@ -2407,29 +2409,28 @@ function App() {
               </Button>
             </div>
           </div>
+          {/* Search — tighter to buttons on mobile */}
+          <div className="hero-search mt-2 sm:mt-3 md:mt-4 lg:mt-8">
+            <form onSubmit={handleSearch} className="search-form">
+              <div className="search-input-wrapper">
+                <Search className="search-icon" />
+                <Input
+                  type="text"
+                  placeholder="Search by expertise, topic, or speaker name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              <Button type="submit" className="search-button">Search</Button>
+            </form>
+          </div>
         </div>
 
         {/* Hero slide info */}
         <div className="absolute bottom-20 left-8 text-white">
           <h3 className="text-lg font-semibold">{heroSlides[currentSlide].title}</h3>
           <p className="text-blue-200 text-sm">{heroSlides[currentSlide].subtitle}</p>
-        </div>
-
-        {/* Search bar */}
-        <div className="search-section">
-          <form onSubmit={handleSearch} className="search-form">
-            <div className="search-input-wrapper">
-              <Search className="search-icon" />
-              <Input
-                type="text"
-                placeholder="Search by expertise, topic, or speaker name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-            <Button type="submit" className="search-button">Search</Button>
-          </form>
         </div>
 
         {/* Slide indicators */}

@@ -207,3 +207,17 @@ h2 {
   line-height: 1.2;
 }
 
+/* M2.4 — only vertical offsets; no font/size changes */
+#home-hero { position: relative; }
+#home-hero .hero-content { margin-top: 18vh; }
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  #home-hero .hero-content { margin-top: 12vh; }
+}
+
+/* Very wide screens (optional finesse) */
+@media (min-width: 1280px) {
+  #home-hero .hero-content { margin-top: 10vh; }
+}
+
