@@ -11,7 +11,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
-  const profilePath = `/speaker/${encodeURIComponent(s.id || s.slug)}`;
+  const profilePath = `#/speaker/${encodeURIComponent(s.id || s.slug)}`;
   const go = (e) => {
     e.preventDefault();
     window.history.pushState({}, '', profilePath);
@@ -21,7 +21,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   // ===== Search page card (bigger, like your mockup) =====
   if (variant === 'search') {
     return (
-      <div className="bg-white rounded-2xl shadow p-6 h-full flex flex-col">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 h-full flex flex-col">
         <div className="w-full flex justify-center">
           <a href={profilePath} onClick={go}>
             <img
@@ -74,7 +74,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   // ===== Compact (used on Home) =====
   if (variant === 'compact') {
     return (
-      <div className="bg-white rounded-xl shadow p-5 h-full">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 h-full">
         <a href={profilePath} onClick={go} className="group block h-full">
           <div className="w-full flex justify-center">
             <img
