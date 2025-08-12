@@ -2372,7 +2372,7 @@ function App() {
       <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-[720px] sm:min-h-[760px] pb-20 sm:pb-24">
+      <section id="home-hero" className="relative overflow-hidden min-h-[720px] sm:min-h-[760px] pb-20 sm:pb-24">
         <div className="absolute inset-0">
           <img
             src={heroSlides[currentSlide].image}
@@ -2382,8 +2382,8 @@ function App() {
           <div className="absolute inset-0 bg-blue-900/60"></div>
         </div>
         
-        <div className="relative z-10 container mx-auto px-4 h-full flex items-center justify-center">
-          <div className="max-w-4xl text-white text-center">
+        <div className="relative z-10 container mx-auto px-4 h-full flex flex-col items-center">
+          <div className="hero-content max-w-4xl text-white text-center">
             <div className="mb-4">
               <span className="inline-block bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
                 Authentic African Voices
@@ -2407,21 +2407,21 @@ function App() {
                 Join as Speaker
               </Button>
             </div>
-            <div className="mt-12 sm:mt-14">
-              <form onSubmit={handleSearch} className="search-form">
-                <div className="search-input-wrapper">
-                  <Search className="search-icon" />
-                  <Input
-                    type="text"
-                    placeholder="Search by expertise, topic, or speaker name..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input"
-                  />
-                </div>
-                <Button type="submit" className="search-button">Search</Button>
-              </form>
-            </div>
+          </div>
+          <div className="hero-search mt-12 sm:mt-14">
+            <form onSubmit={handleSearch} className="search-form">
+              <div className="search-input-wrapper">
+                <Search className="search-icon" />
+                <Input
+                  type="text"
+                  placeholder="Search by expertise, topic, or speaker name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              <Button type="submit" className="search-button">Search</Button>
+            </form>
           </div>
         </div>
 
