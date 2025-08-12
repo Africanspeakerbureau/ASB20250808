@@ -2382,7 +2382,7 @@ function App() {
           <div className="absolute inset-0 bg-blue-900/60"></div>
         </div>
         
-        <div className="relative z-10 container mx-auto px-4 h-full flex flex-col items-center">
+        <div className="hero-stack relative z-10 container mx-auto px-4 h-full flex flex-col items-center lg:mt-[8vh] xl:mt-[10vh] 2xl:mt-[11vh]">
           <div className="hero-content max-w-4xl text-white text-center">
             <div className="mb-4">
               <span className="inline-block bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
@@ -2408,7 +2408,7 @@ function App() {
               </Button>
             </div>
           </div>
-          <div className="hero-search mt-12 sm:mt-14">
+          <div className="hero-search mt-12 sm:mt-14 lg:mt-8">
             <form onSubmit={handleSearch} className="search-form">
               <div className="search-input-wrapper">
                 <Search className="search-icon" />
