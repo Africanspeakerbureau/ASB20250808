@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
+import MobileLinks from '@/components/MobileLinks.jsx';
 
 export default function MobileMenu({ open, onClose }) {
   useEffect(() => {
@@ -16,45 +16,52 @@ export default function MobileMenu({ open, onClose }) {
 
   return (
     <div
+      data-testid="mobile-menu"
+      className="fixed inset-0 z-[200] lg:hidden"
       aria-modal="true"
       role="dialog"
-      aria-label="Mobile navigation"
-      className="fixed inset-0 z-50 lg:hidden"
-      onClick={onClose}
     >
-      <div className="absolute inset-0 bg-black/50" />
-      <nav
-        className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-slate-900 text-slate-100 p-6 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/60"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Drawer panel (dark) */}
+      <aside
+        className="absolute left-0 top-0 h-full w-[84%] max-w-xs bg-slate-900 text-white shadow-2xl outline-none pointer-events-auto"
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between px-5 h-14 border-b border-white/10">
           <span className="text-lg font-semibold">Menu</span>
           <button
             aria-label="Close menu"
             onClick={onClose}
-            className="p-2 rounded hover:bg-white/10"
-          >✕</button>
+            className="rounded-md p-2 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40"
+          >
+            ✕
+          </button>
         </div>
 
-        <ul className="space-y-4 text-base">
-          {MAIN_LINKS.map(({ to, label }) => (
-            <li key={to}>
-              <NavLink to={to} onClick={onClose}>{label}</NavLink>
-            </li>
-          ))}
-        </ul>
+        <nav className="px-5 py-6 space-y-6 text-lg">
+          {/* Links */}
+          <MobileLinks onNavigate={onClose} />
 
-        <div className="mt-8 border-t border-white/10 pt-4">
-          <div className="text-sm text-slate-300 font-semibold mb-2">Services</div>
-          <ul className="space-y-3 text-sm">
-            {SERVICE_LINKS.map(({ to, label }) => (
-              <li key={to}>
-                <NavLink to={to} onClick={onClose}>{label}</NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </nav>
+          {/* Primary CTA */}
+          <NavLink
+            to="/book"
+            className="block rounded-xl bg-black text-white text-center py-3 font-medium"
+            onClick={onClose}
+          >
+            Book a Speaker
+          </NavLink>
+
+          {/* Admin */}
+          <NavLink to="/admin" className="block" onClick={onClose}>
+            Admin
+          </NavLink>
+        </nav>
+      </aside>
     </div>
   );
 }
