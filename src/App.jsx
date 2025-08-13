@@ -2561,9 +2561,12 @@ function App() {
               <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => setCurrentPage('find-speakers')}>
                 Find Your Speaker
               </Button>
-              <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900" onClick={() => setCurrentPage('speaker-application')}>
+              <a
+                href="/#/apply-v2"
+                className="h-10 px-6 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900"
+              >
                 Join as Speaker
-              </Button>
+              </a>
             </div>
           </div>
           {/* Search — tighter to buttons on mobile */}
