@@ -2525,7 +2525,7 @@ function App() {
             alt="Hero background"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-blue-900/60"></div>
+          <div className="hero-overlay absolute inset-0 bg-blue-900/60 pointer-events-none"></div>
         </div>
         
         <div className="hero-stack relative z-10 container mx-auto px-4 h-full flex flex-col items-center lg:mt-[8vh] xl:mt-[10vh] 2xl:mt-[11vh]">
