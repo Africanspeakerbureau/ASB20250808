@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
 import { Menu } from "lucide-react"; // hamburger icon
 import { MAIN_LINKS } from "@/lib/navLinks";
 import MobileMenu from "@/components/MobileMenu.jsx";
@@ -9,13 +8,10 @@ export default function Header({ countryCode, currency }) {
 
   return (
     <>
-      <header
-        className="sticky top-0 z-50 bg-white border-b shadow-sm"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <header className="sticky top-0 z-50 bg-white border-b shadow-sm pointer-events-auto">
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
           {/* Logo -> Home */}
-          <NavLink to="/" className="h-12 flex items-center">
+          <a href="#/" className="h-12 flex items-center">
             <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
               <span className="text-white font-bold text-lg">ASB</span>
             </div>
@@ -24,14 +20,14 @@ export default function Header({ countryCode, currency }) {
               <span className="text-sm font-medium block">SPEAKER</span>
               <span className="text-sm font-medium block">BUREAU</span>
             </div>
-          </NavLink>
+          </a>
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-6 text-slate-800">
             {MAIN_LINKS.map(({ to, label, variant }) => (
-              <NavLink
+              <a
                 key={to}
-                to={to}
+                href={`#${to}`}
                 className={
                   variant === 'default'
                     ? 'px-3 py-1 rounded bg-black text-white hover:bg-black/80'
@@ -39,7 +35,7 @@ export default function Header({ countryCode, currency }) {
                 }
               >
                 {label}
-              </NavLink>
+              </a>
             ))}
           </nav>
 
