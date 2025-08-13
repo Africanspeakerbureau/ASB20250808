@@ -15,17 +15,13 @@ export default function MobileMenu({ open, onClose }) {
   if (!open) return null;
 
   return (
-    <div
-      aria-modal="true"
-      role="dialog"
-      aria-label="Mobile navigation"
-      className="fixed inset-0 z-[100] lg:hidden"
-      onClick={onClose}
-    >
-      <div className="absolute inset-0 bg-black/50" />
+    <>
+      <div className="fixed inset-0 bg-black/40 z-[99]" onClick={onClose} />
       <nav
-        className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-slate-900 text-slate-100 p-6 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+        aria-modal="true"
+        role="dialog"
+        aria-label="Mobile navigation"
+        className="fixed right-0 top-0 z-[100] h-full w-80 max-w-[85vw] bg-slate-900 text-slate-100 p-6 shadow-xl lg:hidden"
       >
         <div className="flex items-center justify-between mb-6">
           <span className="text-lg font-semibold">Menu</span>
@@ -39,8 +35,8 @@ export default function MobileMenu({ open, onClose }) {
         </div>
 
         <ul className="space-y-4 text-base">
-          {MAIN_LINKS.map(({ to, label, variant }) => (
-            <li key={to}>
+          {MAIN_LINKS.map(({ key, to, label, variant }) => (
+            <li key={key}>
               <NavLink
                 to={to}
                 onClick={onClose}
@@ -69,7 +65,7 @@ export default function MobileMenu({ open, onClose }) {
           </ul>
         </div>
       </nav>
-    </div>
+    </>
   );
 }
 

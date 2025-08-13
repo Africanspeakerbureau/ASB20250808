@@ -9,7 +9,7 @@ export default function PlanYourEvent({ appActions }) {
           we have the expertise to make your event unforgettable.
         </p>
         <a
-          href="#/book-a-speaker"
+          href="/book"
           className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
           onClick={(e) => { e.preventDefault(); appActions.openBooking(); }}
         >

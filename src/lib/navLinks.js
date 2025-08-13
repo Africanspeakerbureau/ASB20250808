@@ -1,11 +1,11 @@
 export const MAIN_LINKS = [
-  { to: '/', label: 'Home', variant: 'ghost' },
-  { to: '/find-speakers', label: 'Find a Speaker', variant: 'ghost' },
-  { to: '/services', label: 'Services', variant: 'ghost' },
-  { to: '/about', label: 'About', variant: 'ghost' },
-  { to: '/#get-in-touch', label: 'Contact', variant: 'ghost' },
-  { to: '/book-a-speaker', label: 'Book a Speaker', variant: 'default' },
-  { to: '/admin', label: 'Admin', variant: 'ghost' }
+  { key: 'home', to: '/', label: 'Home', variant: 'ghost' },
+  { key: 'find', to: '/find-speakers', label: 'Find a Speaker', variant: 'ghost' },
+  { key: 'services', to: '/services', label: 'Services', variant: 'ghost' },
+  { key: 'about', to: { pathname: '/', state: { scrollTo: 'about' } }, label: 'About', variant: 'ghost' },
+  { key: 'contact', to: { pathname: '/', state: { scrollTo: 'contact' } }, label: 'Contact', variant: 'ghost' },
+  { key: 'book', to: '/book', label: 'Book a Speaker', variant: 'default' },
+  { key: 'admin', to: '/admin', label: 'Admin', variant: 'ghost' }
 ];
 
 export const SERVICE_LINKS = [

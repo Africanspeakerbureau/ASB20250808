@@ -9,10 +9,7 @@ export default function Header({ countryCode, currency }) {
 
   return (
     <>
-      <header
-        className="sticky top-0 z-50 bg-white border-b shadow-sm"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <header className="sticky top-0 z-50 bg-white border-b shadow-sm pointer-events-auto">
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
           {/* Logo -> Home */}
           <NavLink to="/" className="h-12 flex items-center">
@@ -28,9 +25,9 @@ export default function Header({ countryCode, currency }) {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-6 text-slate-800">
-            {MAIN_LINKS.map(({ to, label, variant }) => (
+            {MAIN_LINKS.map(({ key, to, label, variant }) => (
               <NavLink
-                key={to}
+                key={key}
                 to={to}
                 className={
                   variant === 'default'

@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect } from 'react'
+import { NavLink } from 'react-router-dom'
 
 const placeholderAvatar = 'https://via.placeholder.com/160?text=ASB'
 
@@ -101,12 +102,12 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-3">
-              <a
-                href="#/book-a-speaker"
+              <NavLink
+                to="/book"
                 className="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
               >
                 Contact {speaker.firstName}
-              </a>
+              </NavLink>
               <button
                 type="button"
                 className="inline-flex items-center rounded-xl border px-4 py-2 text-gray-800 bg-white shadow-sm"
