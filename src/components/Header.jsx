@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu } from "lucide-react"; // hamburger icon
-import { MAIN_LINKS } from "@/lib/navLinks";
 import MobileMenu from "@/components/MobileMenu.jsx";
+
+const FOOTER_HREFS = {
+  about: "/about",
+  contact: "/#get-in-touch",
+  book: "/book-a-speaker",
+  admin: "/admin",
+};
 
 export default function Header({ countryCode, currency }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <>
-      <header
-        className="sticky top-0 z-50 bg-white border-b shadow-sm"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <header className="sticky top-0 z-50 bg-white border-b shadow-sm pointer-events-auto">
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
           {/* Logo -> Home */}
           <NavLink to="/" className="h-12 flex items-center">
@@ -27,20 +30,16 @@ export default function Header({ countryCode, currency }) {
           </NavLink>
 
           {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-6 text-slate-800">
-            {MAIN_LINKS.map(({ to, label, variant }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={
-                  variant === 'default'
-                    ? 'px-3 py-1 rounded bg-black text-white hover:bg-black/80'
-                    : undefined
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
+          <nav className="hidden lg:flex items-center gap-6">
+            <a href={FOOTER_HREFS.about}>About</a>
+            <a href={FOOTER_HREFS.contact}>Contact</a>
+            <a
+              className="px-3 py-1 rounded bg-black text-white hover:bg-black/80"
+              href={FOOTER_HREFS.book}
+            >
+              Book a Speaker
+            </a>
+            <a href={FOOTER_HREFS.admin}>Admin</a>
           </nav>
 
           {/* Geo/currency chip (wired in Patch 2) + mobile button */}
