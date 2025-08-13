@@ -17,7 +17,7 @@ export default function Footer({ appActions }) {
       onClickCapture={(e) => e.stopPropagation()}
     >
       <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-3">
               <img src="/logo-asb.svg" alt="ASB" className="h-10 w-10" />
