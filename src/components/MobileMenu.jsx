@@ -19,7 +19,7 @@ export default function MobileMenu({ open, onClose }) {
       aria-modal="true"
       role="dialog"
       aria-label="Mobile navigation"
-      className="fixed inset-0 z-50 lg:hidden"
+      className="fixed inset-0 z-[100] lg:hidden"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/50" />
@@ -33,13 +33,25 @@ export default function MobileMenu({ open, onClose }) {
             aria-label="Close menu"
             onClick={onClose}
             className="p-2 rounded hover:bg-white/10"
-          >✕</button>
+          >
+            ✕
+          </button>
         </div>
 
         <ul className="space-y-4 text-base">
-          {MAIN_LINKS.map(({ to, label }) => (
+          {MAIN_LINKS.map(({ to, label, variant }) => (
             <li key={to}>
-              <NavLink to={to} onClick={onClose}>{label}</NavLink>
+              <NavLink
+                to={to}
+                onClick={onClose}
+                className={
+                  variant === 'default'
+                    ? 'inline-block px-3 py-2 rounded bg-black text-white'
+                    : undefined
+                }
+              >
+                {label}
+              </NavLink>
             </li>
           ))}
         </ul>
@@ -49,7 +61,9 @@ export default function MobileMenu({ open, onClose }) {
           <ul className="space-y-3 text-sm">
             {SERVICE_LINKS.map(({ to, label }) => (
               <li key={to}>
-                <NavLink to={to} onClick={onClose}>{label}</NavLink>
+                <NavLink to={to} onClick={onClose}>
+                  {label}
+                </NavLink>
               </li>
             ))}
           </ul>
@@ -58,3 +72,4 @@ export default function MobileMenu({ open, onClose }) {
     </div>
   );
 }
+
