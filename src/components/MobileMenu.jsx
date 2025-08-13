@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
 import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
 
 export default function MobileMenu({ open, onClose }) {
@@ -41,8 +40,8 @@ export default function MobileMenu({ open, onClose }) {
         <ul className="space-y-4 text-base">
           {MAIN_LINKS.map(({ to, label, variant }) => (
             <li key={to}>
-              <NavLink
-                to={to}
+              <a
+                href={`#${to}`}
                 onClick={onClose}
                 className={
                   variant === 'default'
@@ -51,7 +50,7 @@ export default function MobileMenu({ open, onClose }) {
                 }
               >
                 {label}
-              </NavLink>
+              </a>
             </li>
           ))}
         </ul>
@@ -61,9 +60,9 @@ export default function MobileMenu({ open, onClose }) {
           <ul className="space-y-3 text-sm">
             {SERVICE_LINKS.map(({ to, label }) => (
               <li key={to}>
-                <NavLink to={to} onClick={onClose}>
+                <a href={`#${to}`} onClick={onClose}>
                   {label}
-                </NavLink>
+                </a>
               </li>
             ))}
           </ul>
