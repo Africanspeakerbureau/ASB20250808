@@ -1,1 +1,7 @@
 .modal-open { overflow: hidden; }
+
+/* ===== Header / Mobile Menu helpers ===== */
+.body-no-scroll {
+  overflow: hidden;
+  touch-action: none;
+}
