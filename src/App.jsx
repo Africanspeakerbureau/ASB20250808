@@ -25,6 +25,7 @@ import QuickInquiryEditDialog from "./admin/components/Edit/QuickInquiryEditDial
 import ClientInquiryEditDialog from "./admin/components/Edit/ClientInquiryEditDialog"
 import { toast } from "./lib/toast"
 import { validateAdmin } from "./utils/auth"
+import { useLocation, useNavigate } from 'react-router-dom'
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -119,6 +120,9 @@ function App() {
   })
   
   const widgetRef = useRef()
+
+  const location = useLocation()
+  const navigate = useNavigate()
   
   // State variables
   const [route, setRoute] = useState(() => window.location.hash.slice(1) || '/')
@@ -198,7 +202,7 @@ function App() {
   }
 
   function openBooking() {
-    window.history.pushState({}, '', '#/book-a-speaker')
+    window.history.pushState({}, '', '#/book')
     setCurrentPage('home')
     setShowBookingForm(true)
     window.scrollTo(0, 0)
@@ -216,6 +220,27 @@ function App() {
   }
 
   const appActions = { openBooking, closeBooking }
+
+  useEffect(() => {
+    const target = location.state && location.state.scrollTo
+    if (!target) return
+
+    requestAnimationFrame(() => {
+      const id =
+        target === 'about'
+          ? 'about'
+          : target === 'contact'
+            ? 'get-in-touch'
+            : target === 'quick-inquiry'
+              ? 'quick-inquiry'
+              : null
+      if (id) {
+        const el = document.getElementById(id)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+      navigate('.', { replace: true, state: null })
+    })
+  }, [location.state, navigate])
 
   
 
@@ -258,7 +283,7 @@ function App() {
         setCurrentPage('speaker-application-v2')
         setSelectedSpeakerId(null)
         setShowBookingForm(false)
-      } else if (pathname === '/book-a-speaker') {
+      } else if (pathname === '/book') {
         setCurrentPage('home')
         setSelectedSpeakerId(null)
         setShowBookingForm(true)
@@ -2474,7 +2499,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="#/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
+                        <a href="/book" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
@@ -2666,11 +2691,11 @@ function App() {
                 </a>
 
                 <div className="flex flex-col gap-2 pt-2">
-                  <a href="#/#quick-inquiry" className="text-primary hover:underline">
+                  <a href="#quick-inquiry" className="text-primary hover:underline">
                     Message us
                   </a>
                   <a
-                    href="#/book-a-speaker"
+                    href="/book"
                     className="text-primary hover:underline"
                     onClick={(e) => { e.preventDefault(); openBooking(); }}
                   >
@@ -2691,7 +2716,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="#/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
+                        <a href="/book" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (

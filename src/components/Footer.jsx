@@ -14,7 +14,6 @@ export default function Footer({ appActions }) {
     <footer
       data-footer="ASB-GOOD"
       className="bg-slate-900 text-slate-200 relative z-10"
-      onClickCapture={(e) => e.stopPropagation()}
     >
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
@@ -33,8 +32,8 @@ export default function Footer({ appActions }) {
           <div>
             <h3 className="text-xl font-semibold">Quick Links</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
-              {MAIN_LINKS.map(({ to, label }) => (
-                <li key={to}>
+              {MAIN_LINKS.map(({ key, to, label }) => (
+                <li key={key}>
                   <NavLink to={to} className="hover:text-white">{label}</NavLink>
                 </li>
               ))}
@@ -61,10 +60,15 @@ export default function Footer({ appActions }) {
                 </a>
               </div>
               <div>
-                <a className="hover:text-white underline" href="#/#quick-inquiry">Message us</a>
+                <NavLink
+                  to={{ pathname: '/', state: { scrollTo: 'quick-inquiry' } }}
+                  className="hover:text-white underline"
+                >
+                  Message us
+                </NavLink>
               </div>
               <div>
-                <a className="hover:text-white underline" href="#/book-a-speaker" onClick={handleConsult}>
+                <a className="hover:text-white underline" href="/book" onClick={handleConsult}>
                   Request Consultation
                 </a>
               </div>
