@@ -25,6 +25,9 @@ import QuickInquiryEditDialog from "./admin/components/Edit/QuickInquiryEditDial
 import ClientInquiryEditDialog from "./admin/components/Edit/ClientInquiryEditDialog"
 import { toast } from "./lib/toast"
 import { validateAdmin } from "./utils/auth"
+import ConsentBanner from "@/components/ConsentBanner"
+import { getConsent } from "@/lib/consent"
+import { useGeolocation } from "@/hooks/useGeolocation"
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -345,79 +348,15 @@ function App() {
   const [countryCode, setCountryCode] = useState('ZA');
   const [currencyInfo, setCurrencyInfo] = useState({ currency: 'ZAR', rate: 1 });
 
-  // Initialize currency based on geolocation
-  useEffect(() => {
-    console.log('Initializing geolocation...');
-    // First try navigator.geolocation as in ChatGPT's original fix
-    if (navigator.geolocation) {
-      console.log('Browser supports geolocation, requesting position...');
-      navigator.geolocation.getCurrentPosition(
-        ({ coords }) => {
-          console.log('Geolocation success:', coords);
-          // For demo, we'll flip to USD if in US longitude range
-          if (coords.longitude > -130 && coords.longitude < -60) {
-            console.log('Detected US location based on longitude');
-            setCountryCode('US');
-            setCurrency('USD');
-            setCurrencyInfo({ currency: 'USD', rate: 1 });
-          } else {
-            console.log('Location outside US longitude range:', coords.longitude);
-          }
-        },
-        (error) => {
-          // If geolocation fails, fall back to IP-based detection
-          console.log('Geolocation error:', error);
-          console.log('Falling back to IP-based detection...');
-          // Fallback to IP-based detection
-          fetch('https://ipapi.co/json')
-            .then(res => {
-              console.log('IP API response status:', res.status);
-              return res.json();
-            })
-            .then(data => {
-              console.log('IP API data:', data);
-              // map country_code → currency_code (you can expand mapping)
-              const map = { ZA: 'ZAR', US: 'USD', GB: 'GBP', EU: 'EUR' };
-              const detectedCountry = data.country_code || 'ZA';
-              const detectedCurrency = map[detectedCountry] || 'USD';
-              
-              console.log('Setting country to:', detectedCountry, 'and currency to:', detectedCurrency);
-              setCountryCode(detectedCountry);
-              setCurrency(detectedCurrency);
-              setCurrencyInfo({ currency: detectedCurrency, rate: 1 });
-            })
-            .catch((error) => {
-              console.log('IP API error:', error);
-              // Keep defaults if everything fails
-              console.log('Using default ZA ZAR');
-              setCountryCode('ZA');
-              setCurrency('ZAR');
-              setCurrencyInfo({ currency: 'ZAR', rate: 1 });
-            });
-        }
-      );
-    } else {
-      // Browser doesn't support geolocation, fall back to IP-based detection
-      fetch('https://ipapi.co/json')
-        .then(res => res.json())
-        .then(data => {
-          // map country_code → currency_code (you can expand mapping)
-          const map = { ZA: 'ZAR', US: 'USD', GB: 'GBP', EU: 'EUR' };
-          const detectedCountry = data.country_code || 'ZA';
-          const detectedCurrency = map[detectedCountry] || 'USD';
-          
-          setCountryCode(detectedCountry);
-          setCurrency(detectedCurrency);
-          setCurrencyInfo({ currency: detectedCurrency, rate: 1 });
-        })
-        .catch(() => {
-          // Keep defaults if everything fails
-          setCountryCode('ZA');
-          setCurrency('ZAR');
-          setCurrencyInfo({ currency: 'ZAR', rate: 1 });
-        });
-    }
-  }, []);
+  const consent = getConsent();
+  const { request } = useGeolocation(consent.geo === true);
+
+  const banner = consent.geo === null ? (
+    <ConsentBanner onAllow={() => {
+      request();
+    }} />
+  ) : null;
+
   const handleSearch = (e) => {
     e.preventDefault()
     setCurrentPage('find-speakers')
@@ -488,7 +427,9 @@ function App() {
   useEffect(() => {
     const initializeCurrency = async () => {
       try {
-        const { currency, rate } = await getLocationAndRate()
+        const { country, currency, rate } = await getLocationAndRate()
+        setCountryCode(country)
+        setCurrency(currency)
         setCurrencyInfo({ currency, rate })
       } catch (error) {
         console.error('Failed to get currency info:', error)
@@ -1325,6 +1266,7 @@ function App() {
       <>
         <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
         <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
+        {banner}
       </>
     )
   }
@@ -2032,12 +1974,18 @@ function App() {
             </Card>
           </div>
         </div>
+      {banner}
       </div>
     )
   }
 
   if (currentPage === 'find-speakers') {
-    return <FindSpeakersPage countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
+    return (
+      <>
+        <FindSpeakersPage countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
+        {banner}
+      </>
+    )
   }
 
     if (currentPage === 'about') {
@@ -2242,6 +2190,7 @@ function App() {
             </div>
           </div>
 
+        {banner}
         </div>
       )
     }
@@ -2461,7 +2410,7 @@ function App() {
             </div>
           </div>
         </div>
-
+        {banner}
       </div>
     )
   }
@@ -2520,6 +2469,7 @@ function App() {
               </Card>
           </div>
         </div>
+      {banner}
       </div>
     )
   }
@@ -2746,6 +2696,7 @@ function App() {
         onClose={closeAdminModal}
         onSubmit={handleAdminSubmit}
       />
+      {banner}
     </div>
   )
 }
