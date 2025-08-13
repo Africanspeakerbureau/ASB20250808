@@ -1337,9 +1337,17 @@ function App() {
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Join as Speaker</h1>
-              <p className="text-lg text-gray-600">Share your expertise with global audiences and become part of Africa's premier speaker network</p>
+            <h1 className="text-4xl font-bold tracking-tight text-center">Join as Speaker</h1>
+            <p className="mt-3 text-slate-600 text-center">
+              Share your expertise with global audiences and become part of Africa's premier speaker network
+            </p>
+            <div className="mt-6 max-w-3xl mx-auto px-4 text-center">
+              <p className="text-slate-700 leading-relaxed">
+                Thank you for your interest in speaking with African Speaker Bureau.
+                Please share as much detail as you can—fields marked * are required; the rest are optional.
+                The more we know about your expertise and formats, the better we can match you with the right stages and clients.
+                We look forward to partnering with you.
+              </p>
             </div>
 
             {submitStatus.message && (
@@ -1354,7 +1362,7 @@ function App() {
 
             <Card>
               <CardContent className="p-8">
-                <form onSubmit={isV2 ? handleSpeakerSubmitV2 : handleSpeakerSubmit} className="space-y-8">
+                <form onSubmit={isV2 ? handleSpeakerSubmitV2 : handleSpeakerSubmit} className="mt-8 space-y-8">
                   {/* Personal Information */}
                   <div>
                     <h3 className="text-xl font-semibold mb-4">Personal Information</h3>
@@ -2225,9 +2233,12 @@ function App() {
               <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
                 The African Speaker Bureau is more than a business – we are a bridge between Africa and the world, a platform for authentic voices, and a catalyst for global understanding and exchange. Whether you're seeking African expertise for your global audience or international insights for your African community, we're here to connect you with the perfect speaker.
               </p>
-              <Button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg" onClick={() => go('/apply-v2')}>
+              <a
+                href="/#/apply-v2"
+                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg inline-block rounded"
+              >
                 Partner With Us Today
-              </Button>
+              </a>
             </div>
           </div>
 

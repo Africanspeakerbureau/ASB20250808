@@ -18,6 +18,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/speakers/:slug" element={<SpeakerProfile />} />
           <Route path="/find-speakers" element={<FindSpeakersPage />} />
           <Route path="/book-a-speaker" element={<App />} />
+          <Route path="/apply-v2" element={<App />} />
           <Route path="/*" element={<App />} />
         </Routes>
         {/* Global footer for all routes */}
