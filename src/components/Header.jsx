@@ -30,7 +30,7 @@ export default function Header({ countryCode, currency }) {
           <nav className="hidden lg:flex items-center gap-6 text-slate-800">
             {MAIN_LINKS.map(({ to, label, variant }) => (
               <NavLink
-                key={to}
+                key={label}
                 to={to}
                 className={
                   variant === 'default'

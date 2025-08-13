@@ -34,7 +34,7 @@ export default function Footer({ appActions }) {
             <h3 className="text-xl font-semibold">Quick Links</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
               {MAIN_LINKS.map(({ to, label }) => (
-                <li key={to}>
+                <li key={label}>
                   <NavLink to={to} className="hover:text-white">{label}</NavLink>
                 </li>
               ))}
@@ -45,7 +45,7 @@ export default function Footer({ appActions }) {
             <h3 className="text-xl font-semibold">Services</h3>
             <ul className="mt-6 space-y-3 text-slate-300">
               {SERVICE_LINKS.map(({ to, label }) => (
-                <li key={to}>
+                <li key={label}>
                   <NavLink to={to} className="hover:text-white">{label}</NavLink>
                 </li>
               ))}
@@ -64,9 +64,9 @@ export default function Footer({ appActions }) {
                 <a className="hover:text-white underline" href="#/#quick-inquiry">Message us</a>
               </div>
               <div>
-                <a className="hover:text-white underline" href="#/book-a-speaker" onClick={handleConsult}>
+                <NavLink to="/book" className="hover:text-white underline" onClick={handleConsult}>
                   Request Consultation
-                </a>
+                </NavLink>
               </div>
             </div>
           </div>

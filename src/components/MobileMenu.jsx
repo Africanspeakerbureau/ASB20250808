@@ -40,7 +40,7 @@ export default function MobileMenu({ open, onClose }) {
 
         <ul className="space-y-4 text-base">
           {MAIN_LINKS.map(({ to, label, variant }) => (
-            <li key={to}>
+            <li key={label}>
               <NavLink
                 to={to}
                 onClick={onClose}
