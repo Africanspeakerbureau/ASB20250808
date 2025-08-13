@@ -1,3 +1,4 @@
+// FILE: src/components/MobileMenu.jsx
 import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
@@ -19,10 +20,12 @@ export default function MobileMenu({ open, onClose }) {
       aria-modal="true"
       role="dialog"
       aria-label="Mobile navigation"
-      className="fixed inset-0 z-50 lg:hidden"
+      className="fixed inset-0 z-[300] lg:hidden"
       onClick={onClose}
     >
+      {/* backdrop */}
       <div className="absolute inset-0 bg-black/50" />
+      {/* panel */}
       <nav
         className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-slate-900 text-slate-100 p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
@@ -33,13 +36,25 @@ export default function MobileMenu({ open, onClose }) {
             aria-label="Close menu"
             onClick={onClose}
             className="p-2 rounded hover:bg-white/10"
-          >✕</button>
+          >
+            ✕
+          </button>
         </div>
 
         <ul className="space-y-4 text-base">
-          {MAIN_LINKS.map(({ to, label }) => (
+          {MAIN_LINKS.map(({ to, label, variant }) => (
             <li key={to}>
-              <NavLink to={to} onClick={onClose}>{label}</NavLink>
+              <NavLink
+                to={to}
+                onClick={onClose}
+                className={
+                  variant === 'default'
+                    ? 'inline-flex px-3 py-1 rounded bg-black text-white hover:bg-black/80'
+                    : undefined
+                }
+              >
+                {label}
+              </NavLink>
             </li>
           ))}
         </ul>
@@ -49,7 +64,9 @@ export default function MobileMenu({ open, onClose }) {
           <ul className="space-y-3 text-sm">
             {SERVICE_LINKS.map(({ to, label }) => (
               <li key={to}>
-                <NavLink to={to} onClick={onClose}>{label}</NavLink>
+                <NavLink to={to} onClick={onClose}>
+                  {label}
+                </NavLink>
               </li>
             ))}
           </ul>
@@ -58,3 +75,4 @@ export default function MobileMenu({ open, onClose }) {
     </div>
   );
 }
+
