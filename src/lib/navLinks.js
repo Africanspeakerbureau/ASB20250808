@@ -1,10 +1,9 @@
 export const MAIN_LINKS = [
   { to: '/', label: 'Home', variant: 'ghost' },
-  { to: '/find-speakers', label: 'Find a Speaker', variant: 'ghost' },
-  { to: '/services', label: 'Services', variant: 'ghost' },
-  { to: '/about', label: 'About', variant: 'ghost' },
-  { to: '/#get-in-touch', label: 'Contact', variant: 'ghost' },
-  { to: '/book-a-speaker', label: 'Book a Speaker', variant: 'default' },
+  { to: '/find', label: 'Find Speakers', variant: 'ghost' },
+  { to: { pathname: '/', hash: '#about' }, label: 'About', variant: 'ghost' },
+  { to: { pathname: '/', hash: '#contact' }, label: 'Contact', variant: 'ghost' },
+  { to: '/book', label: 'Book a Speaker', variant: 'default' },
   { to: '/admin', label: 'Admin', variant: 'ghost' }
 ];
 

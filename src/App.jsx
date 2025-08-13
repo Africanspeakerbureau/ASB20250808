@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
@@ -110,7 +111,24 @@ import heroExecutiveAI from './assets/hero_executive_ai_training.jpg'
 import heroCorporateLeadership from './assets/hero_corporate_leadership_conference.jpg'
 import heroVirtualSeminars from './assets/hero_virtual_seminars_webinars.jpg'
 
+function useHashScroll() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }, 0);
+      }
+    }
+  }, [location]);
+}
+
 function App() {
+  useHashScroll();
+
   // Cloudinary configuration
   const cld = new Cloudinary({
     cloud: {
@@ -198,7 +216,7 @@ function App() {
   }
 
   function openBooking() {
-    window.history.pushState({}, '', '#/book-a-speaker')
+    window.history.pushState({}, '', '#/book')
     setCurrentPage('home')
     setShowBookingForm(true)
     window.scrollTo(0, 0)
@@ -233,8 +251,8 @@ function App() {
       }
 
       // Path → state
-      if (pathname === '/find-speakers') {
-        setCurrentPage('find-speakers')
+      if (pathname === '/find') {
+        setCurrentPage('find')
         setSelectedSpeakerId(null)
         setShowBookingForm(false)
       } else if (pathname.startsWith('/speaker/')) {
@@ -258,7 +276,7 @@ function App() {
         setCurrentPage('speaker-application-v2')
         setSelectedSpeakerId(null)
         setShowBookingForm(false)
-      } else if (pathname === '/book-a-speaker') {
+      } else if (pathname === '/book') {
         setCurrentPage('home')
         setSelectedSpeakerId(null)
         setShowBookingForm(true)
@@ -272,14 +290,6 @@ function App() {
       if (pathname === '/services' && id && hashToService[id]) {
         setSelectedService(hashToService[id])
       }
-
-      // Scroll after view mounts for hash anchors
-      requestAnimationFrame(() => {
-        if (anchor) {
-          const el = document.getElementById(id)
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }
-      })
     }
 
     syncAndScroll()
@@ -420,7 +430,7 @@ function App() {
   }, []);
   const handleSearch = (e) => {
     e.preventDefault()
-    setCurrentPage('find-speakers')
+    go('/find')
   }
 
   // Airtable configuration
@@ -1324,7 +1334,7 @@ function App() {
     return (
       <>
         <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
-        <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
+        <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find')} />
       </>
     )
   }
@@ -2028,7 +2038,7 @@ function App() {
     )
   }
 
-  if (currentPage === 'find-speakers') {
+  if (currentPage === 'find') {
     return <FindSpeakersPage countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
   }
 
@@ -2444,7 +2454,7 @@ function App() {
               <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3">
                 Schedule Consultation
               </Button>
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3" onClick={() => setCurrentPage('find-speakers')}>
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3" onClick={() => go('/find')}>
                 Browse Our Speakers
               </Button>
             </div>
@@ -2474,7 +2484,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="#/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
+                        <a href="#/book" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
@@ -2547,7 +2557,7 @@ function App() {
             </p>
             {/* Buttons */}
             <div className="mt-4 sm:mt-5 lg:mt-8 flex flex-col sm:flex-row gap-4 justify-center mb-2 sm:mb-3 lg:mb-4">
-              <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => setCurrentPage('find-speakers')}>
+              <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white" onClick={() => go('/find')}>
                 Find Your Speaker
               </Button>
               <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900" onClick={() => setCurrentPage('speaker-application')}>
@@ -2645,7 +2655,7 @@ function App() {
       </section>
 
       {/* Contact Section */}
-      <section id="get-in-touch" className="py-20 bg-gray-50">
+      <section id="contact" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h2>
@@ -2670,7 +2680,7 @@ function App() {
                     Message us
                   </a>
                   <a
-                    href="#/book-a-speaker"
+                    href="#/book"
                     className="text-primary hover:underline"
                     onClick={(e) => { e.preventDefault(); openBooking(); }}
                   >
@@ -2691,7 +2701,7 @@ function App() {
                       <p className="font-medium">Thank you for your inquiry.</p>
                       <p>
                         We’ll get back to you soon. For urgent booking requests, please fill in our{' '}
-                        <a href="#/book-a-speaker" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
+                        <a href="#/book" className="underline font-medium" onClick={(e) => { e.preventDefault(); openBooking(); }}>Book a Speaker</a> form.
                       </p>
                     </div>
                   ) : (
