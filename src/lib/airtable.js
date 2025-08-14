@@ -50,6 +50,7 @@ async function list(
 }
 
 const PUBLISHED = "FIND('Published on Site', ARRAYJOIN({Status}))";
+const APPROVED = "FIND('Approved', ARRAYJOIN({Status}))";
 
 export async function fetchFeaturedSpeakers(limit = 3) {
   const filterByFormula = `AND(${PUBLISHED}, {Featured}='Yes')`;
@@ -83,6 +84,39 @@ export async function fetchAllPublishedSpeakers({ limit = 15 } = {}) {
     pageSize: limit
   });
   return records.map(normalizeSpeaker);
+}
+
+/**
+ * Fetch ALL Approved + Published speakers by paging Airtable with `offset`.
+ * Reuses the SAME filter formula and mapping as other helpers in this file.
+ * Returns an array of normalized speaker objects.
+ */
+export async function fetchAllApprovedPublishedSpeakers({ pageSize = 100, max = 5000 } = {}) {
+  const filterByFormula = `AND(${APPROVED}, ${PUBLISHED})`;
+  let all = [];
+  let offset = '';
+  let guard = 0;
+  ensureEnv();
+  const headers = { Authorization: `Bearer ${API_KEY}` };
+  do {
+    const params = new URLSearchParams();
+    params.set('pageSize', String(pageSize));
+    params.set('filterByFormula', filterByFormula);
+    if (offset) params.set('offset', offset);
+    const url = `${API}/${TBL_SPEAKERS}?${params.toString()}`;
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      const t = await res.text().catch(() => '');
+      throw new Error(`Airtable ${res.status}: ${t}`);
+    }
+    const json = await res.json();
+    const rows = (json.records || []).map(normalizeSpeaker);
+    all = all.concat(rows);
+    offset = json.offset || '';
+    guard += 1;
+    if (all.length >= max || guard > 200) break;
+  } while (offset);
+  return all;
 }
 
 async function query(table, params = {}) {

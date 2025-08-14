@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchAllPublishedSpeakers } from '../lib/airtable'
+import { fetchAllApprovedPublishedSpeakers } from '../lib/airtable'
 import Header from './Header.jsx'
 
 // Compact, search-variant card (square image)
@@ -68,6 +68,7 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
   const [country, setCountry] = useState('All Countries')
   const [lang, setLang] = useState('All Languages')
   const [fee, setFee] = useState('All Fee Ranges')
+  const [visible, setVisible] = useState(15)
 
   // fetch from Airtable directly (no reliance on App state)
   useEffect(() => {
@@ -75,7 +76,7 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
     ;(async () => {
       try {
         setLoading(true)
-        const rows = await fetchAllPublishedSpeakers({ limit: 15 })
+        const rows = await fetchAllApprovedPublishedSpeakers({ pageSize: 100 })
         if (alive) setAll(rows)
       } catch (e) {
         console.error('Fetch speakers failed:', e)
@@ -125,8 +126,8 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
     })
   }, [all, q, cat, country, lang, fee])
 
-  // Show exactly 15 cards (5 rows × 3)
-  const top15 = filtered.slice(0, 15)
+  const canLoadMore = visible < filtered.length
+  const top = filtered.slice(0, visible)
 
   return (
     <>
@@ -144,18 +145,18 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
             className="col-span-1 md:col-span-4 lg:col-span-4 border rounded-lg px-4 py-3"
             placeholder="Search speakers…"
             value={q}
-            onChange={e => setQ(e.target.value)}
+            onChange={e => { setQ(e.target.value); setVisible(15); }}
           />
-          <select className="border rounded-lg px-3 py-3" value={cat} onChange={e => setCat(e.target.value)}>
+          <select className="border rounded-lg px-3 py-3" value={cat} onChange={e => { setCat(e.target.value); setVisible(15); }}>
             {categories.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select className="border rounded-lg px-3 py-3" value={country} onChange={e => setCountry(e.target.value)}>
+          <select className="border rounded-lg px-3 py-3" value={country} onChange={e => { setCountry(e.target.value); setVisible(15); }}>
             {countries.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select className="border rounded-lg px-3 py-3" value={lang} onChange={e => setLang(e.target.value)}>
+          <select className="border rounded-lg px-3 py-3" value={lang} onChange={e => { setLang(e.target.value); setVisible(15); }}>
             {languages.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
-          <select className="border rounded-lg px-3 py-3" value={fee} onChange={e => setFee(e.target.value)}>
+          <select className="border rounded-lg px-3 py-3" value={fee} onChange={e => { setFee(e.target.value); setVisible(15); }}>
             {feeRanges.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         </div>
@@ -165,9 +166,24 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
       {error && <p className="text-center text-red-600">{error}</p>}
 
       {!loading && !error && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {top15.map(s => <SearchCard key={s.id} s={s} />)}
-        </div>
+        <>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {top.map(s => <SearchCard key={s.id} s={s} />)}
+          </div>
+          {filtered.length === 0 && (
+            <p className="mt-8 text-center text-gray-600">No speakers found.</p>
+          )}
+          {canLoadMore && (
+            <div className="mt-8 flex justify-center">
+              <button
+                className="px-4 py-2 rounded border border-slate-300 hover:bg-slate-50"
+                onClick={() => setVisible(v => v + 15)}
+              >
+                Load more
+              </button>
+            </div>
+          )}
+        </>
       )}
       </div>
     </>
