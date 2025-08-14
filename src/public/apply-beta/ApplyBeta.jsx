@@ -37,10 +37,11 @@ const CARD_COMPONENTS = {
 };
 
 export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
+  const DRAFT_KEY = "asbApplyDraft:v1";
   const [tab, setTab] = React.useState("identity");
   const [form, setForm] = React.useState(() => {
     try {
-      const saved = localStorage.getItem("asbApplyDraft:v1");
+      const saved = localStorage.getItem(DRAFT_KEY);
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -49,8 +50,8 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
   const [submitting, setSubmitting] = React.useState(false);
   const [message, setMessage] = React.useState(null);
 
-  React.useEffect(() => {
-    localStorage.setItem("asbApplyDraft:v1", JSON.stringify(form));
+  const saveDraft = React.useCallback(() => {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
   }, [form]);
 
   function setField(name, value) {
@@ -58,13 +59,15 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
   }
 
   const index = TABS.findIndex(t => t.key === tab);
+  const total = TABS.length;
 
   async function handleSubmit() {
     try {
       setSubmitting(true);
+      saveDraft();
       const payload = toApplyV2Payload(form);
       await submitApplication(payload);
-      localStorage.removeItem("asbApplyDraft:v1");
+      localStorage.removeItem(DRAFT_KEY);
       setMessage("Application submitted successfully!");
     } catch (e) {
       setMessage(e.message || "Submission failed");
@@ -90,6 +93,44 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
             </p>
           </div>
 
+          <div className="mt-4 sticky top-0 z-40">
+            <div className="mx-auto max-w-5xl px-4">
+              <div className="flex justify-end">
+                <div className="inline-flex gap-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg border border-slate-200 shadow-sm">
+                  <button
+                    className="px-3 py-1.5 rounded border border-slate-300"
+                    disabled={index === 0}
+                    onClick={() => setTab(TABS[Math.max(0, index - 1)].key)}
+                  >
+                    Back
+                  </button>
+                  <button
+                    className="px-3 py-1.5 rounded border border-slate-300"
+                    onClick={saveDraft}
+                  >
+                    Save Draft
+                  </button>
+                  {index < total - 1 ? (
+                    <button
+                      className="px-3 py-1.5 rounded bg-black text-white hover:bg-black/80"
+                      onClick={() => setTab(TABS[Math.min(total - 1, index + 1)].key)}
+                    >
+                      Next
+                    </button>
+                  ) : (
+                    <button
+                      className="px-3 py-1.5 rounded bg-black text-white hover:bg-black/80"
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                    >
+                      Submit
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {message && (
             <div className="mb-6 p-4 rounded-lg bg-blue-100 text-blue-800 text-center">{message}</div>
           )}
@@ -111,26 +152,7 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
           </div>
         </div>
       </div>
-
-      <div className="modal__footer fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between">
-        <button className="btn" disabled={index === 0 || submitting} onClick={() => setTab(TABS[index - 1].key)}>
-          Back
-        </button>
-        <div className="flex gap-2">
-          <button className="btn" disabled={submitting} onClick={() => localStorage.setItem("asbApplyDraft:v1", JSON.stringify(form))}>
-            Save Draft
-          </button>
-          {index < TABS.length - 1 ? (
-            <button className="btn btn--primary" disabled={submitting} onClick={() => setTab(TABS[index + 1].key)}>
-              Next
-            </button>
-          ) : (
-            <button className="btn btn--primary" disabled={submitting} onClick={handleSubmit}>
-              Submit
-            </button>
-          )}
-        </div>
-      </div>
+      {/* Removed bottom fixed bar to prevent footer overlap */}
     </div>
   );
 }

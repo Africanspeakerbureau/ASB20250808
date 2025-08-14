@@ -7,7 +7,11 @@ export function toApplyV2Payload(form) {
     "Company": form.company,
     "Location": form.location,
     "Country": form.country,
-    "Profile Image": form.profileImage,
+    "Email": form.email,
+    "Phone": form.phone,
+    "Profile Image": form.profileImageUrl
+      ? [{ url: form.profileImageUrl }]
+      : undefined,
     "Industry": form.industry,
     "Expertise Level": form.expertiseLevel,
     "Years Experience": form.yearsExperience,

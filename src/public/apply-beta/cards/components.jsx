@@ -5,24 +5,30 @@ export function Grid({ children }) {
   return <div className="grid">{children}</div>;
 }
 
-export function Field({ label, hint, children }) {
+export function Field({ label, hint, children, required }) {
   return (
     <label className="field">
-      <div className="field__label">{label}</div>
+      <div className="field__label">
+        {label}
+        {required && <span className="text-red-500">*</span>}
+      </div>
       {children}
       {hint && <div className="field__hint">{hint}</div>}
     </label>
   );
 }
 
-export function Text({ form, setField, id, label }) {
+export function Text({ form, setField, id, label, required, type = "text", inputMode }) {
   return (
-    <Field label={label ?? id}>
+    <Field label={label ?? id} required={required}>
       <input
         className="input"
         value={form[id] ?? ""}
         onChange={e => setField(id, e.target.value)}
         placeholder={label ?? id}
+        required={required}
+        type={type}
+        inputMode={inputMode}
       />
     </Field>
   );
@@ -58,7 +64,7 @@ export function Select({ form, setField, id, options, label }) {
   );
 }
 
-export function Chips({ form, setField, id, options, allowMulti = true }) {
+export function Chips({ form, setField, id, options, allowMulti = true, label }) {
   const value = Array.isArray(form[id])
     ? form[id]
     : form[id]
@@ -73,7 +79,7 @@ export function Chips({ form, setField, id, options, allowMulti = true }) {
     }
   };
   return (
-    <Field label={id}>
+    <Field label={label ?? id}>
       <div className="chips">
         {options.map(v => (
           <button
