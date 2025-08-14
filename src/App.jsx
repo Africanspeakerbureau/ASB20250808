@@ -12,7 +12,6 @@ import {
   getSpeakerApplications,
   getClientInquiries,
   getQuickInquiries,
-  fetchPublishedSpeakers,
   fetchAllPublishedSpeakers,
 } from '@/lib/airtable'
 import fieldOptions from './FieldOptions.js'
@@ -145,9 +144,6 @@ function App() {
   const [apps, setApps] = useState([])
   const [clients, setClients] = useState([])
   const [quick, setQuick] = useState([])
-  const [featuredSpeakers, setFeaturedSpeakers] = useState([])
-  const [randomSpeakers, setRandomSpeakers] = useState([])
-  const [publishedSpeakers, setPublishedSpeakers] = useState([])
   const [speakers, setSpeakers] = useState([])
   const [selectedRecord, setSelectedRecord] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -317,19 +313,6 @@ function App() {
         setApps([]); setClients([]); setQuick([])
       } finally {
         if (alive) setLoading(false)
-      }
-    })()
-    return () => { alive = false }
-  }, [])
-
-  useEffect(() => {
-    let alive = true
-    ;(async () => {
-      try {
-        const rows = await fetchPublishedSpeakers({ limit: 8, excludeFeatured: true })
-        if (alive) setPublishedSpeakers(rows)
-      } catch (e) {
-        console.error('Fetch published speakers failed', e)
       }
     })()
     return () => { alive = false }
@@ -2566,8 +2549,8 @@ function App() {
         </div>
       </section>
       <div id="about" className="scroll-mt-24">
-        <FeaturedSpeakers speakers={publishedSpeakers} />
-        <MeetOurSpeakers speakers={publishedSpeakers} />
+        <FeaturedSpeakers />
+        <MeetOurSpeakers />
       </div>
       <PlanYourEvent appActions={appActions} />
 
