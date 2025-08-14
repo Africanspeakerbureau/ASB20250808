@@ -28,6 +28,7 @@ import { validateAdmin } from "./utils/auth"
 import ConsentBanner from "@/components/ConsentBanner"
 import { getConsent } from "@/lib/consent"
 import { useGeolocation } from "@/hooks/useGeolocation"
+import ApplyBeta from "./public/apply-beta/ApplyBeta"
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -259,6 +260,10 @@ function App() {
         setShowBookingForm(false)
       } else if (pathname === '/apply-v2') {
         setCurrentPage('speaker-application-v2')
+        setSelectedSpeakerId(null)
+        setShowBookingForm(false)
+      } else if (pathname === '/apply-beta') {
+        setCurrentPage('apply-beta')
         setSelectedSpeakerId(null)
         setShowBookingForm(false)
       } else if (pathname === '/book-a-speaker') {
@@ -1271,6 +1276,10 @@ function App() {
     )
   }
 
+  if (currentPage === 'apply-beta') {
+    return <ApplyBeta countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
+  }
+
   if (currentPage === 'speaker-application' || currentPage === 'speaker-application-v2') {
     const isV2 = currentPage === 'speaker-application-v2'
     return (
@@ -2182,7 +2191,7 @@ function App() {
                 The African Speaker Bureau is more than a business – we are a bridge between Africa and the world, a platform for authentic voices, and a catalyst for global understanding and exchange. Whether you're seeking African expertise for your global audience or international insights for your African community, we're here to connect you with the perfect speaker.
               </p>
               <a
-                href="/#/apply-v2"
+                href="/#/apply-beta"
                 className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg inline-block rounded"
               >
                 Partner With Us Today
