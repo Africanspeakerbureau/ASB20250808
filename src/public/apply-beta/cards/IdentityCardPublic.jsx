@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Text, Select, Field } from "./components.jsx";
-import UploadPublic from "@/components/UploadPublic.jsx";
+import { UploadPublic } from "@/components/upload/UploadPublic.jsx";
 import { COUNTRIES } from "@/admin/edit/options";
 
 export default function IdentityCardPublic({ form, setField }) {
@@ -32,8 +32,13 @@ export default function IdentityCardPublic({ form, setField }) {
       <Field label="Profile Image">
         <UploadPublic
           accept="image/*"
+          clientAllowedFormats={["jpg", "jpeg", "png"]}
           maxSizeMB={5}
-          onUploaded={({ url }) => setField("profileImageUrl", url)}
+          onUploaded={({ url, width, height, format, originalFilename }) => {
+            setField("profileImageUrl", url);
+            setField("profileImageMeta", { width, height, format, name: originalFilename });
+          }}
+          onError={err => setField("__uploadError", String(err?.message || err))}
         />
       </Field>
     </Grid>

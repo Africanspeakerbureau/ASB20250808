@@ -7,7 +7,7 @@ const TABLE = 'Speaker%20Applications';
 
 export async function submitApplication(fields) {
   const filtered = Object.fromEntries(
-    Object.entries(fields).filter(([_, v]) => v !== undefined && v !== '')
+    Object.entries(fields).filter(([, v]) => v !== undefined && v !== '')
   );
   filtered['Status'] = ['Pending'];
   const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE}`, {

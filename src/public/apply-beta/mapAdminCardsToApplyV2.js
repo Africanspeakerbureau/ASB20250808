@@ -33,7 +33,9 @@ export function toApplyV2Payload(form) {
     "What the audience will take home": form.whatTakeHome,
     "Benefits for the individual": form.benefitsIndividual,
     "Benefits for the organisation": form.benefitsOrganisation,
-    "Header Image": form.headerImage,
+    "Header Image": form.headerImageUrl
+      ? [{ url: form.headerImageUrl }]
+      : undefined,
     "Video Link 1": form.videoLink1,
     "Video Link 2": form.videoLink2,
     "Video Link 3": form.videoLink3,

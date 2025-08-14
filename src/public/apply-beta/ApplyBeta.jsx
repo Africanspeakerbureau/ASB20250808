@@ -54,6 +54,13 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
   }, [form]);
 
+  React.useEffect(() => {
+    const t = setTimeout(() => {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [form]);
+
   function setField(name, value) {
     setForm(f => ({ ...f, [name]: value }));
   }
@@ -65,6 +72,13 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
     try {
       setSubmitting(true);
       saveDraft();
+      if (
+        form.profileImageUrl?.startsWith("blob:") ||
+        form.headerImageUrl?.startsWith("blob:")
+      ) {
+        setMessage("Please finish upload before submitting.");
+        return;
+      }
       const payload = toApplyV2Payload(form);
       await submitApplication(payload);
       localStorage.removeItem(DRAFT_KEY);

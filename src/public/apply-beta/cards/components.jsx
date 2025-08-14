@@ -1,5 +1,4 @@
 import React from "react";
-import UploadWidget from "@/components/UploadWidget";
 
 export function Grid({ children }) {
   return <div className="grid">{children}</div>;
@@ -91,26 +90,6 @@ export function Chips({ form, setField, id, options, allowMulti = true, label })
             {v}
           </button>
         ))}
-      </div>
-    </Field>
-  );
-}
-
-export function Upload({ form, setField, id, label, hint }) {
-  const files = form[id];
-  return (
-    <Field label={label} hint={hint}>
-      <div className="upload-row">
-        <div className="upload-preview">
-          {Array.isArray(files) && files.length ? (
-            files.map((f, i) => <img key={i} src={f.url ?? f} alt="" className="thumb" />)
-          ) : (
-            <div className="empty">No file selected</div>
-          )}
-        </div>
-        <UploadWidget onUpload={uploaded => setField(id, uploaded)}>
-          <button className="btn btn--dark">Upload</button>
-        </UploadWidget>
       </div>
     </Field>
   );
