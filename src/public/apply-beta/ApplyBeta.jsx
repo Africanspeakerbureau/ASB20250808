@@ -107,19 +107,26 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
             </p>
           </div>
 
-          <div className="mt-4 sticky top-0 z-40">
+          {/* Actions — sticky, centered on blue background */}
+          <div className="mt-6 sticky top-14 sm:top-16 z-40">
             <div className="mx-auto max-w-5xl px-4">
-              <div className="flex justify-end">
-                <div className="inline-flex gap-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg border border-slate-200 shadow-sm">
+              <div className="flex justify-center">
+                <div
+                  className="inline-flex flex-wrap items-center gap-2 rounded-2xl px-4 py-2 shadow-sm
+                      bg-asb-navy/90 text-white backdrop-blur
+                      [@supports(color:color(display-p3 1 1 1))]:bg-asb-navy/85
+                      dark:bg-blue-900/90"
+                  style={{ backgroundColor: "var(--asb-navy, #0b3a75)" }}
+                >
                   <button
-                    className="px-3 py-1.5 rounded border border-slate-300"
+                    className="px-3 py-1.5 rounded border border-white/40 bg-white text-black"
                     disabled={index === 0}
                     onClick={() => setTab(TABS[Math.max(0, index - 1)].key)}
                   >
                     Back
                   </button>
                   <button
-                    className="px-3 py-1.5 rounded border border-slate-300"
+                    className="px-3 py-1.5 rounded border border-white/40 bg-white text-black"
                     onClick={saveDraft}
                   >
                     Save Draft
@@ -149,16 +156,19 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
             <div className="mb-6 p-4 rounded-lg bg-blue-100 text-blue-800 text-center">{message}</div>
           )}
 
-          <div className="tabs">
-            {TABS.map(t => (
-              <button
-                key={t.key}
-                className={`tab ${tab === t.key ? "tab--active" : ""}`}
-                onClick={() => setTab(t.key)}
-              >
-                {t.label}
-              </button>
-            ))}
+          {/* Keep a little gap between the blue bar and tabs */}
+          <div className="mt-5 overflow-x-auto">
+            <div className="tabs">
+              {TABS.map(t => (
+                <button
+                  key={t.key}
+                  className={`tab ${tab === t.key ? "tab--active" : ""}`}
+                  onClick={() => setTab(t.key)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="modal__body">

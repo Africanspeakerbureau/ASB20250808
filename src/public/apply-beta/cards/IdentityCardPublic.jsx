@@ -1,6 +1,6 @@
 import React from "react";
-import { Grid, Text, Select, Field } from "./components.jsx";
-import { UploadPublic } from "@/components/upload/UploadPublic.jsx";
+import { Grid, Text, Select } from "./components.jsx";
+import ImageUploadField from "@/public/apply-beta/components/ImageUploadField.jsx";
 import { COUNTRIES } from "@/admin/edit/options";
 
 export default function IdentityCardPublic({ form, setField }) {
@@ -29,18 +29,14 @@ export default function IdentityCardPublic({ form, setField }) {
       <Text form={form} setField={setField} id="company" label="Company/Organization" />
       <Text form={form} setField={setField} id="location" label="Location" />
       <Select form={form} setField={setField} id="country" options={COUNTRIES} label="Country" />
-      <Field label="Profile Image">
-        <UploadPublic
-          accept="image/*"
-          clientAllowedFormats={["jpg", "jpeg", "png"]}
-          maxSizeMB={5}
-          onUploaded={({ url, width, height, format, originalFilename }) => {
-            setField("profileImageUrl", url);
-            setField("profileImageMeta", { width, height, format, name: originalFilename });
-          }}
-          onError={err => setField("__uploadError", String(err?.message || err))}
-        />
-      </Field>
+      <ImageUploadField
+        label="Profile Image"
+        valueUrl={form.profileImageUrl}
+        onChange={(url, meta) => {
+          setField("profileImageUrl", url);
+          setField("profileImageMeta", meta);
+        }}
+      />
     </Grid>
   );
 }

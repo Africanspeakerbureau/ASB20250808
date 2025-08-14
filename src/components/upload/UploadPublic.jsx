@@ -5,6 +5,8 @@ export function UploadPublic({
   onError,
   clientAllowedFormats = ["jpg", "jpeg", "png"],
   maxSizeMB = 5,
+  buttonClassName = "btn btn--dark",
+  buttonLabel = "Upload",
 }) {
   const widgetRef = useRef(null);
   useEffect(() => {
@@ -41,8 +43,8 @@ export function UploadPublic({
   };
 
   return (
-    <button type="button" className="btn btn--dark" onClick={open}>
-      Upload
+    <button type="button" className={buttonClassName} onClick={open}>
+      {buttonLabel}
     </button>
   );
 }
