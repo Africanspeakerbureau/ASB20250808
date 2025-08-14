@@ -10,6 +10,7 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
   const [offset, setOffset] = useState('')
   const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const pageSize = 15
 
@@ -26,6 +27,9 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
       setItems((prev) => (reset ? records : [...prev, ...records]))
       setOffset(nextOffset || '')
       setHasMore(Boolean(nextOffset))
+      setError('')
+    } catch (e) {
+      setError(e.message || 'Failed to load speakers')
     } finally {
       setLoading(false)
     }
@@ -60,10 +64,15 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
           />
         </div>
 
+        {error && (
+          <div className="mb-4 text-center text-red-600">{error}</div>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {items.map((rec) => (
-            <SpeakerCard key={rec.id} speaker={normalizeSpeaker(rec)} />
-          ))}
+          {items.map((rec) => {
+            const s = normalizeSpeaker ? normalizeSpeaker(rec) : rec
+            return <SpeakerCard key={rec.id} speaker={s} />
+          })}
         </div>
 
         <div className="mt-8 flex justify-center">
@@ -81,7 +90,7 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
           )}
         </div>
 
-        {!loading && items.length === 0 && (
+        {!loading && !error && items.length === 0 && (
           <div className="mt-8 text-center text-slate-600">No speakers found.</div>
         )}
       </div>
