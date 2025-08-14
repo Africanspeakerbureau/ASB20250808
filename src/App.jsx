@@ -258,12 +258,12 @@ function App() {
         setCurrentPage('speaker-application')
         setSelectedSpeakerId(null)
         setShowBookingForm(false)
-      } else if (pathname === '/apply-v2') {
-        setCurrentPage('speaker-application-v2')
+      } else if (pathname === '/apply-card-v1') {
+        setCurrentPage('apply-beta')
         setSelectedSpeakerId(null)
         setShowBookingForm(false)
-      } else if (pathname === '/apply-beta') {
-        setCurrentPage('apply-beta')
+      } else if (pathname === '/apply-v2') {
+        setCurrentPage('speaker-application-v2')
         setSelectedSpeakerId(null)
         setShowBookingForm(false)
       } else if (pathname === '/book-a-speaker') {
@@ -2191,7 +2191,7 @@ function App() {
                 The African Speaker Bureau is more than a business – we are a bridge between Africa and the world, a platform for authentic voices, and a catalyst for global understanding and exchange. Whether you're seeking African expertise for your global audience or international insights for your African community, we're here to connect you with the perfect speaker.
               </p>
               <a
-                href="/#/apply-beta"
+                href="/#/apply-card-v1"
                 className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg inline-block rounded"
               >
                 Partner With Us Today
@@ -2521,7 +2521,7 @@ function App() {
                 Find Your Speaker
               </Button>
               <a
-                href="/#/apply-v2"
+                href="/#/apply-card-v1"
                 className="h-10 px-6 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-900"
               >
                 Join as Speaker

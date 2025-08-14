@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import { HashRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
 import App from './App.jsx'
 import FindSpeakersPage from './components/FindSpeakersPage.jsx'
@@ -18,6 +18,11 @@ createRoot(document.getElementById('root')).render(
           <Route path="/speakers/:slug" element={<SpeakerProfile />} />
           <Route path="/find-speakers" element={<FindSpeakersPage />} />
           <Route path="/book-a-speaker" element={<App />} />
+          {/* New canonical route for card-based application */}
+          <Route path="/apply-card-v1" element={<App />} />
+          {/* Back-compat: old beta path redirects to new */}
+          <Route path="/apply-beta" element={<Navigate to="/apply-card-v1" replace />} />
+          {/* Keep existing v2 route as-is */}
           <Route path="/apply-v2" element={<App />} />
           <Route path="/*" element={<App />} />
         </Routes>
