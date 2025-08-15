@@ -42,6 +42,34 @@ function buildSpeakerPayload(
   return { fields: out };
 }
 
+function useCaretLock(enabled: boolean) {
+  const lastFocused = React.useRef<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    if (!enabled) return;
+
+    const onFocusIn = (e: Event) => {
+      lastFocused.current = e.target as HTMLElement;
+    };
+
+    const onFocusOut = () => {
+      requestAnimationFrame(() => {
+        const active = document.activeElement as HTMLElement | null;
+        if (!active || active === document.body) {
+          lastFocused.current?.focus?.({ preventScroll: true });
+        }
+      });
+    };
+
+    document.addEventListener('focusin', onFocusIn, true);
+    document.addEventListener('focusout', onFocusOut, true);
+    return () => {
+      document.removeEventListener('focusin', onFocusIn, true);
+      document.removeEventListener('focusout', onFocusOut, true);
+    };
+  }, [enabled]);
+}
+
 type Props = {
   recordId: string;
   onClose: () => void;
@@ -63,6 +91,7 @@ type TabKey = typeof ALL_TABS[number];
 const TABS: TabKey[] = isAdmin ? [...ALL_TABS] : ALL_TABS.filter(t => t !== "Internal");
 
 export default function SpeakerEditDialog({ recordId, onClose }: Props) {
+  useCaretLock(true);
   const { push } = useToast();
   const [saving, setSaving] = React.useState(false);
   const [tab, setTab] = React.useState<TabKey>("Identity");
