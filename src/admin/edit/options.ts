@@ -16,6 +16,17 @@ export const NUMBER_OF_EVENTS = ["1-5 events","6-10 events","11-20 events","21-5
 export const LARGEST_AUDIENCE = ["1-50","51-200","201-500","500+"];
 export const VIRTUAL_EXPERIENCE = ["None","Limited","Moderate","Extensive"];
 
+export const PRESENTATION_FORMAT = ["In-Person", "Virtual", "Hybrid"];
+
+export const BUDGET_RANGE_USD = [
+  "Less than $1 000 / R20 000",
+  "$1 000 – $5 000",
+  "$5 000 – $10 000",
+  "$10 000 – $25 000",
+  "$25 000 – $50 000",
+  "$50 000+"
+];
+
 export const EXPERTISE_AREAS = [
   "Business / Management","Art / Culture","Cities / Environment","Economic / Finance",
   "Facilitator / Moderator","Future / Technology","Government / Politics","Innovation / Creativity",

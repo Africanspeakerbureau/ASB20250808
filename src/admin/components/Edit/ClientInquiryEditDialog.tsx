@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
 import ReactDOM from 'react-dom';
 import { getRecord, readSingleSelect, airtablePatchRecord } from '../../api/airtable';
 import { useToast } from '@/components/Toast';
 import './editDialog.css';
+import {
+  INDUSTRIES,
+  LARGEST_AUDIENCE,
+  PRESENTATION_FORMAT,
+  BUDGET_RANGE_USD
+} from '../../edit/options';
 
 type ClientFields = {
   'First Name'?: string;
@@ -31,6 +37,12 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<any>({});
   const { push } = useToast();
+
+  const bind = (name: string) => ({
+    value: form?.[name] ?? '',
+    onChange: (e: ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((f: any) => ({ ...f, [name]: e.target.value }))
+  });
 
   useEffect(() => {
     (async () => {
@@ -130,10 +142,16 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
               <label className="field__label">Job Title</label>
               <input className="input" value={form.jobTitle} onChange={e => setForm({ ...form, jobTitle: e.target.value })} />
             </div>
-            <div className="field">
-              <label className="field__label">Industry</label>
-              <input className="input" value={form.industry} onChange={e => setForm({ ...form, industry: e.target.value })} />
-            </div>
+            <Field label="Industry">
+              <select className="select" {...bind('industry')}>
+                <option value="">— Select industry —</option>
+                {INDUSTRIES.map(o => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <div className="field" style={{gridColumn:'1 / -1'}}>
               <label className="field__label">Company Website</label>
               <input className="input" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} />
@@ -150,22 +168,40 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
               <label className="field__label">Event Location</label>
               <input className="input" value={form.eventLocation} onChange={e => setForm({ ...form, eventLocation: e.target.value })} />
             </div>
-            <div className="field">
-              <label className="field__label">Audience Size</label>
-              <input className="input" value={form.audienceSize} onChange={e => setForm({ ...form, audienceSize: e.target.value })} />
-            </div>
+            <Field label="Audience Size">
+              <select className="select" {...bind('audienceSize')}>
+                <option value="">— Select audience —</option>
+                {LARGEST_AUDIENCE.map(o => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <div className="field" style={{gridColumn:'1 / -1'}}>
               <label className="field__label">Speaking Topic</label>
               <input className="input" value={form.speakingTopic} onChange={e => setForm({ ...form, speakingTopic: e.target.value })} />
             </div>
-            <div className="field">
-              <label className="field__label">Budget Range</label>
-              <input className="input" value={form.budgetRange} onChange={e => setForm({ ...form, budgetRange: e.target.value })} />
-            </div>
-            <div className="field">
-              <label className="field__label">Presentation Format</label>
-              <input className="input" value={form.format} onChange={e => setForm({ ...form, format: e.target.value })} />
-            </div>
+            <Field label="Budget Range (USD)">
+              <select className="select" {...bind('budgetRange')}>
+                <option value="">— Select budget —</option>
+                {BUDGET_RANGE_USD.map(o => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Presentation Format">
+              <select className="select" {...bind('format')}>
+                <option value="">— Select format —</option>
+                {PRESENTATION_FORMAT.map(o => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <div className="field" style={{gridColumn:'1 / -1'}}>
               <label className="field__label">Additional Requirements</label>
               <textarea className="textarea" value={form.requirements} onChange={e => setForm({ ...form, requirements: e.target.value })} />
@@ -192,5 +228,14 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
       </div>
     </div>,
     document.body
+  );
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="field">
+      <label className="field__label">{label}</label>
+      {children}
+    </div>
   );
 }
