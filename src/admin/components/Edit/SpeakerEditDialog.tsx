@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import {
   INDUSTRIES, YEARS_EXPERIENCE, SPEAKING_EXPERIENCE, NUMBER_OF_EVENTS, LARGEST_AUDIENCE,
@@ -63,31 +63,35 @@ const ALL_TABS = [
 type TabKey = typeof ALL_TABS[number];
 const TABS: TabKey[] = isAdmin ? [...ALL_TABS] : ALL_TABS.filter(t => t !== "Internal");
 
-export default function SpeakerEditDialog({ recordId, onClose }: Props) {
+function SpeakerEditDialog({ recordId, onClose }: Props) {
   const { push } = useToast();
-  const [saving, setSaving] = React.useState(false);
-  const [tab, setTab] = React.useState<TabKey>("Identity");
+  const [saving, setSaving] = useState(false);
+  const [tab, setTab] = useState<TabKey>("Identity");
   const { setEditing } = useEditing();
   const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
-  const [form, setForm] = React.useState<Record<string, any>>(() => ({ ...(record?.fields || {}) }));
+  const frozenRef = useRef<any>(null);
+  const [form, setForm] = useState<Record<string, any>>(() => ({ ...(record?.fields || {}) }));
 
-  React.useEffect(() => {
+  useEffect(() => {
     setEditing(true);
     return () => setEditing(false);
   }, [setEditing]);
 
-  React.useEffect(() => {
-    const initial = { ...(record?.fields || {}) } as Record<string, any>;
-    if (Array.isArray(initial["Key Messages"])) {
-      initial.keyMessagesText = initial["Key Messages"].join("\n");
-      if (!initial["Key Message"]) {
-        initial["Key Message"] = initial["Key Messages"].filter(Boolean)[0] || "";
+  useEffect(() => {
+    if (record?.id) {
+      frozenRef.current = JSON.parse(JSON.stringify(record));
+      const initial = { ...(frozenRef.current?.fields || {}) } as Record<string, any>;
+      if (Array.isArray(initial["Key Messages"])) {
+        initial.keyMessagesText = initial["Key Messages"].join("\n");
+        if (!initial["Key Message"]) {
+          initial["Key Message"] = initial["Key Messages"].filter(Boolean)[0] || "";
+        }
       }
+      if (Array.isArray(initial["Speaking Topics"])) {
+        initial.speakingTopicsText = initial["Speaking Topics"].join("\n");
+      }
+      setForm(initial);
     }
-    if (Array.isArray(initial["Speaking Topics"])) {
-      initial.speakingTopicsText = initial["Speaking Topics"].join("\n");
-    }
-    setForm(initial);
   }, [record?.id]);
 
   function setField(name: string, value: any) {
@@ -392,6 +396,8 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     return <div className="badge">{label}: <strong>{value ?? "—"}</strong></div>;
   }
 }
+
+export default React.memo(SpeakerEditDialog);
 
 // layout atoms
 function Grid({ children }: { children: React.ReactNode }) {
