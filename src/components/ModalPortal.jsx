@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { ignoreWhenTyping } from "@/lib/keyboard";
 
 function getFocusable(container) {
   if (!container) return [];
@@ -42,23 +43,15 @@ export default function ModalPortal({ children, onClose }) {
   // Esc to close
   useEffect(() => {
     const onKey = (e) => {
-      const el = e.target;
-      if (
-        el &&
-        (el.tagName === "INPUT" ||
-          el.tagName === "TEXTAREA" ||
-          el.isContentEditable)
-      ) {
-        return; // ignore keystrokes coming from form fields
-      }
       if (e.key === "Escape") {
         e.stopPropagation();
         onClose?.();
       }
     };
-    window.addEventListener("keydown", onKey);
+    const handler = ignoreWhenTyping(onKey);
+    window.addEventListener("keydown", handler);
     return () => {
-      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", handler);
     };
   }, [onClose]);
 
