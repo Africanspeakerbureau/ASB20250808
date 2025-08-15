@@ -10,6 +10,23 @@ import {
   BUDGET_RANGE_USD
 } from '../../edit/options';
 
+const COMPANY_SIZE_OPTIONS = [
+  '1 - 10 employees',
+  '11 - 50 employees',
+  '51 - 250 employees',
+  '251 - 500 employees',
+  '501 - 1000 employees',
+  '1000 + employees'
+];
+
+const STATUS_OPTIONS = [
+  'New',
+  'Responded',
+  'Closed',
+  'Follow Up',
+  'Assigned to Agent'
+];
+
 type ClientFields = {
   'First Name'?: string;
   'Last Name'?: string;
@@ -17,6 +34,7 @@ type ClientFields = {
   'Phone'?: string;
   'Company Name'?: string;
   'Job Title'?: string;
+  'Company Size'?: any;
   'Industry'?: any;
   'Company Website'?: string;
   'Event Name'?: string;
@@ -24,11 +42,12 @@ type ClientFields = {
   'Event Location'?: string;
   'Audience Size'?: any;
   'Speaking Topic'?: string;
-  'Budget Range'?: any;
+  'Budget Range (USD)'?: any;
   'Presentation Format'?: any;
   'Additional Requirements'?: string;
   'Status'?: any;
   'Created Date'?: string;
+  'Internal notes'?: string;
   'Notes'?: string;
 };
 
@@ -56,6 +75,7 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
         phone: f['Phone'] ?? '',
         company: f['Company Name'] ?? '',
         jobTitle: f['Job Title'] ?? '',
+        companySize: readSingleSelect(f['Company Size']),
         industry: readSingleSelect(f['Industry']),
         website: f['Company Website'] ?? '',
         eventName: f['Event Name'] ?? '',
@@ -63,12 +83,12 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
         eventLocation: f['Event Location'] ?? '',
         audienceSize: readSingleSelect(f['Audience Size']),
         speakingTopic: f['Speaking Topic'] ?? '',
-        budgetRange: readSingleSelect(f['Budget Range']),
+        budgetRange: readSingleSelect(f['Budget Range (USD)']),
         format: readSingleSelect(f['Presentation Format']),
         requirements: f['Additional Requirements'] ?? '',
         status: readSingleSelect(f['Status']),
         createdDate: f['Created Date'] ?? '',
-        notes: f['Notes'] ?? ''
+        notes: f['Internal notes'] ?? f['Notes'] ?? ''
       });
       setLoading(false);
     })();
@@ -84,6 +104,7 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
         'Phone': form.phone,
         'Company Name': form.company,
         'Job Title': form.jobTitle,
+        'Company Size': form.companySize,
         'Industry': form.industry,
         'Company Website': form.website,
         'Event Name': form.eventName,
@@ -91,13 +112,16 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
         'Event Location': form.eventLocation,
         'Audience Size': form.audienceSize,
         'Speaking Topic': form.speakingTopic,
-        'Budget Range': form.budgetRange,
+        'Budget Range (USD)': form.budgetRange,
         'Presentation Format': form.format,
         'Additional Requirements': form.requirements,
         'Status': form.status,
         'Created Date': form.createdDate ? new Date(form.createdDate).toISOString().slice(0,10) : '',
-        'Notes': form.notes,
+        'Internal notes': form.notes,
       };
+      if (Array.isArray(fields.Status)) {
+        fields.Status = fields.Status[0] ?? '';
+      }
       await airtablePatchRecord('Client Inquiries', recordId, fields);
       push({ text: 'Saved ✔︎', type: 'success' });
       if (closeAfter) onClose();
@@ -142,6 +166,14 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
               <label className="field__label">Job Title</label>
               <input className="input" value={form.jobTitle} onChange={e => setForm({ ...form, jobTitle: e.target.value })} />
             </div>
+            <Field label="Company Size">
+              <select className="select" {...bind('companySize')}>
+                <option value="">— Select company size —</option>
+                {COMPANY_SIZE_OPTIONS.map(o => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </select>
+            </Field>
             <Field label="Industry">
               <select className="select" {...bind('industry')}>
                 <option value="">— Select industry —</option>
@@ -206,18 +238,21 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: { recordI
               <label className="field__label">Additional Requirements</label>
               <textarea className="textarea" value={form.requirements} onChange={e => setForm({ ...form, requirements: e.target.value })} />
             </div>
-            <div className="field">
-              <label className="field__label">Status</label>
-              <input className="input" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} />
-            </div>
+            <Field label="Status">
+              <select className="select" {...bind('status')}>
+                <option value="">— Select status —</option>
+                {STATUS_OPTIONS.map(o => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </select>
+            </Field>
             <div className="field">
               <label className="field__label">Created Date</label>
               <input className="input" value={form.createdDate} onChange={e => setForm({ ...form, createdDate: e.target.value })} />
             </div>
-            <div className="field" style={{gridColumn:'1 / -1'}}>
-              <label className="field__label">Notes</label>
-              <textarea className="textarea" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
-            </div>
+            <Field label="Internal notes">
+              <textarea className="textarea" rows={4} {...bind('notes')} />
+            </Field>
           </div>
         </div>
           <div className="modal__footer">
