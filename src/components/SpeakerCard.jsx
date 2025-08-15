@@ -7,9 +7,13 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const langs = Array.isArray(langsArr) ? langsArr.join(', ') : String(langsArr);
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ');
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ');
-  const kmRaw = s.keyMessage || s.keyMessages || '';
-  const kmFull = Array.isArray(kmRaw) ? kmRaw.join(' ') : kmRaw;
-  const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
+  const kmRaw =
+    typeof s.keyMessage === 'string' && s.keyMessage
+      ? s.keyMessage
+      : Array.isArray(s.keyMessages) && s.keyMessages.length
+      ? s.keyMessages[0]
+      : '';
+  const km = kmRaw.length > 220 ? `${kmRaw.slice(0, 220)}…` : kmRaw;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
   const profilePath = `#/speaker/${encodeURIComponent(s.id || s.slug)}`;

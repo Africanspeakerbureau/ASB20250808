@@ -29,8 +29,9 @@ export default function MeetOurSpeakers({ speakers = [] }) {
     s.professionalTitle || s.titleText || "";
 
   const getMessage = (s) => {
-    const m = s.keyMessages || s.keyMessage || "";
-    return Array.isArray(m) ? m.join(" ") : m;
+    if (typeof s.keyMessage === "string" && s.keyMessage) return s.keyMessage;
+    if (Array.isArray(s.keyMessages) && s.keyMessages.length) return s.keyMessages[0];
+    return "";
   };
 
   if (!items.length) {

@@ -73,6 +73,12 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     const initial = { ...(record?.fields || {}) } as Record<string, any>;
     if (Array.isArray(initial["Key Messages"])) {
       initial.keyMessagesText = initial["Key Messages"].join("\n");
+      if (!initial["Key Message"]) {
+        initial["Key Message"] = initial["Key Messages"].filter(Boolean)[0] || "";
+      }
+    }
+    if (Array.isArray(initial["Speaking Topics"])) {
+      initial.speakingTopicsText = initial["Speaking Topics"].join("\n");
     }
     setForm(initial);
   }, [record?.id]);
@@ -91,19 +97,25 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     if (!record) return;
     try {
       setSaving(true);
-      const { keyMessagesText, ...rest } = form;
-      const payload = buildSpeakerPayload(
-        {
-          ...rest,
-          "Key Messages": keyMessagesText
-            ? keyMessagesText
-                .split(/\r?\n/)
-                .map((s: string) => s.trim())
-                .filter(Boolean)
-            : Array.isArray(rest["Key Messages"]) ? rest["Key Messages"] : [],
-        },
-        record
-      );
+      const { keyMessagesText, speakingTopicsText, ...rest } = form;
+      const payloadObj: Record<string, any> = { ...rest };
+      if (!payloadObj["Key Message"] && keyMessagesText) {
+        const first = keyMessagesText
+          .split(/\r?\n/)
+          .map((s: string) => s.trim())
+          .filter(Boolean)[0] || "";
+        payloadObj["Key Message"] = first;
+      }
+      if (speakingTopicsText) {
+        payloadObj["Speaking Topics"] = speakingTopicsText
+          .split(/\r?\n/)
+          .map((s: string) => s.trim())
+          .filter(Boolean);
+      }
+      if (!Array.isArray(payloadObj["Key Messages"]) && payloadObj["Key Message"]) {
+        payloadObj["Key Messages"] = [payloadObj["Key Message"]];
+      }
+      const payload = buildSpeakerPayload(payloadObj, record);
       if (Object.keys(payload.fields).length === 0) {
         push({ text: "No changes to save", type: "info" });
         if (closeAfter) onClose();
@@ -179,13 +191,21 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           {tab === "Expertise & Content" && (
             <Grid>
               <Chips id="Expertise Areas" options={EXPERTISE_AREAS} />
-              <TextArea id="Speaking Topics" />
+              <Text id="Key Message" label="Key Message" />
               <div className="field" style={{ gridColumn: "1 / -1" }}>
-                <div className="field__label">Key Messages (one per line)</div>
+                <div className="field__label">Speaking Topics (one per line)</div>
                 <textarea
                   className="textarea"
-                  rows={6}
-                  {...bind("keyMessagesText")}
+                  rows={8}
+                  value={
+                    form.speakingTopicsText ??
+                    (Array.isArray(form["Speaking Topics"])
+                      ? form["Speaking Topics"].join("\n")
+                      : Array.isArray(form.speakingTopics)
+                      ? form.speakingTopics.join("\n")
+                      : "")
+                  }
+                  onChange={(e) => setForm((f) => ({ ...f, speakingTopicsText: e.target.value }))}
                   style={{ resize: "vertical" }}
                 />
               </div>
