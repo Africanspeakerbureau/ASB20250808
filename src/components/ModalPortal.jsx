@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { ignoreWhenTyping } from "@/lib/keyboard";
 
 function getFocusable(container) {
   if (!container) return [];
@@ -18,9 +19,10 @@ function getFocusable(container) {
     });
 }
 
-export default function ModalPortal({ children, onClose }) {
+export default function ModalPortal({ children, onClose, open = true }) {
   const contentRef = useRef(null);
   const previouslyFocused = useRef(null);
+  const didInitialFocus = useRef(false);
 
   // Lock background scroll, make app inert, remember focus
   useEffect(() => {
@@ -47,11 +49,27 @@ export default function ModalPortal({ children, onClose }) {
         onClose?.();
       }
     };
-    window.addEventListener("keydown", onKey, { capture: true });
+    const handler = ignoreWhenTyping(onKey);
+    window.addEventListener("keydown", handler, true);
     return () => {
-      window.removeEventListener("keydown", onKey, { capture: true });
+      window.removeEventListener("keydown", handler, true);
     };
   }, [onClose]);
+
+  // focus first focusable once per open
+  useEffect(() => {
+    if (!open) {
+      didInitialFocus.current = false;
+      return;
+    }
+    if (didInitialFocus.current) return;
+    const id = requestAnimationFrame(() => {
+      const focusables = getFocusable(contentRef.current);
+      (focusables[0] || contentRef.current)?.focus();
+    });
+    didInitialFocus.current = true;
+    return () => cancelAnimationFrame(id);
+  }, [open]);
 
   // Trap focus inside
   useEffect(() => {

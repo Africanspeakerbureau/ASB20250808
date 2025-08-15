@@ -28,8 +28,11 @@ export default function MeetOurSpeakers({ speakers = [] }) {
   const getRole = (s) =>
     s.professionalTitle || s.titleText || "";
 
-  const getMessage = (s) =>
-    s.keyMessages || s.keyMessage || "";
+  const getMessage = (s) => {
+    if (typeof s.keyMessage === "string" && s.keyMessage) return s.keyMessage;
+    if (Array.isArray(s.keyMessages) && s.keyMessages.length) return s.keyMessages[0];
+    return "";
+  };
 
   if (!items.length) {
     return (

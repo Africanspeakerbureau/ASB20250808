@@ -48,9 +48,24 @@ export function normalizeSpeaker(record) {
     availability: travelWillingness,
     expertiseAreas: pickMulti('Expertise Areas'),
     expertise: pickMulti('Expertise Areas'),
-    speakingTopics: pickText('Speaking Topics'),
-    keyMessages: pickText('Key Messages'),
-    keyMessage: pickText('Key Messages'),
+    speakingTopics: Array.isArray(f['Speaking Topics'])
+      ? f['Speaking Topics'].filter(Boolean)
+      : pickText('Speaking Topics')
+      ? pickText('Speaking Topics')
+          .split(/\r?\n/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
+    keyMessage:
+      pickText('Key Message') ||
+      (Array.isArray(f['Key Messages'])
+        ? f['Key Messages'].filter(Boolean)[0]
+        : pickText('Key Messages')),
+    keyMessages: Array.isArray(f['Key Messages'])
+      ? f['Key Messages'].filter(Boolean)
+      : pickText('Key Message')
+      ? [pickText('Key Message')]
+      : [],
     bio: pickText('Professional Bio'),
     professionalBio: pickText('Professional Bio'),
     achievements: pickText('Achievements'),

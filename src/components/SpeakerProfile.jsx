@@ -2,13 +2,6 @@ import React, { useMemo, useEffect } from 'react'
 
 const placeholderAvatar = 'https://via.placeholder.com/160?text=ASB'
 
-function asList(str) {
-  if (!str) return []
-  return String(str)
-    .split(/\r?\n|;|•/g)
-    .map(s => s.trim())
-    .filter(Boolean)
-}
 
 function Chip({ children }) {
   return (
@@ -69,8 +62,8 @@ export default function SpeakerProfile({ id, speakers = [] }) {
   }
 
   const fullName = [speaker.titlePrefix, speaker.firstName, speaker.lastName].filter(Boolean).join(' ')
-  const topics = asList(speaker.speakingTopics)
-  const hasBulletTopics = topics.length > 1
+  const topics = Array.isArray(speaker.speakingTopics) ? speaker.speakingTopics : []
+  const hasBulletTopics = Array.isArray(speaker.speakingTopics)
   const videos = speaker.videos || []
 
   return (
@@ -128,10 +121,12 @@ export default function SpeakerProfile({ id, speakers = [] }) {
 
       <section className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {speaker.keyMessages && (
+          {(speaker.keyMessage || (Array.isArray(speaker.keyMessages) && speaker.keyMessages.length > 0)) && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-2">Key Messages</h2>
-              <p className="text-gray-700 whitespace-pre-line">{speaker.keyMessages}</p>
+              <h2 className="text-lg font-semibold mb-2">Key Message</h2>
+              <p className="text-gray-700 whitespace-pre-line">
+                {speaker.keyMessage || (Array.isArray(speaker.keyMessages) ? speaker.keyMessages[0] : "")}
+              </p>
             </div>
           )}
 
@@ -159,7 +154,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </div>
           )}
 
-          {topics.length > 0 && (
+          {(hasBulletTopics ? topics.length > 0 : Boolean(speaker.speakingTopics)) && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold mb-3">Speaking Topics</h2>
               {hasBulletTopics ? (
@@ -169,7 +164,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-700">{topics[0]}</p>
+                <p className="text-gray-700">{speaker.speakingTopics}</p>
               )}
             </div>
           )}

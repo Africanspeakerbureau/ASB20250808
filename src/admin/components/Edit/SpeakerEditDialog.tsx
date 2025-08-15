@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import {
   INDUSTRIES, YEARS_EXPERIENCE, SPEAKING_EXPERIENCE, NUMBER_OF_EVENTS, LARGEST_AUDIENCE,
@@ -9,6 +9,7 @@ import UploadWidget from "@/components/UploadWidget";
 import { useToast } from "@/components/Toast";
 import { useAirtableRecord } from "../../hooks/useAirtableRecord";
 import { airtablePatchRecord } from "../../api/airtable";
+import { useEditing } from "../../editingContext";
 import "./editDialog.css";
 
 // Computed/linked fields we never send back to Airtable
@@ -62,30 +63,95 @@ const ALL_TABS = [
 type TabKey = typeof ALL_TABS[number];
 const TABS: TabKey[] = isAdmin ? [...ALL_TABS] : ALL_TABS.filter(t => t !== "Internal");
 
-export default function SpeakerEditDialog({ recordId, onClose }: Props) {
+function SpeakerEditDialog({ recordId, onClose }: Props) {
   const { push } = useToast();
-  const [saving, setSaving] = React.useState(false);
-  const [tab, setTab] = React.useState<TabKey>("Identity");
+  const [saving, setSaving] = useState(false);
+  const [tab, setTab] = useState<TabKey>("Identity");
+  const { setEditing } = useEditing();
   const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
-  const [form, setForm] = React.useState<Record<string, any>>({});
-  const hydratedRef = React.useRef(false);
+  const frozenRef = useRef<any>(null);
+  const [form, setForm] = useState<Record<string, any>>(() => ({ ...(record?.fields || {}) }));
 
-  React.useEffect(() => {
-    if (!record?.id) return;
-    if (hydratedRef.current) return;
-    setForm({ ...(record.fields || {}) });
-    hydratedRef.current = true;
-  }, [record?.id, record]);
+  console.count('EditModal render');
+
+  useEffect(() => {
+    const onFocusIn = (e: any) => {
+      const t = e.target as HTMLElement;
+      console.log('[FOCUS-IN]', t?.tagName, t?.getAttribute('name') || t?.id);
+    };
+    const onFocusOut = (e: any) => {
+      const t = e.target as HTMLElement;
+      console.log('[FOCUS-OUT]', t?.tagName, t?.getAttribute('name') || t?.id);
+    };
+    const root = document.querySelector('#modal-root') || document.body;
+    root.addEventListener('focusin', onFocusIn);
+    root.addEventListener('focusout', onFocusOut);
+    return () => {
+      root.removeEventListener('focusin', onFocusIn);
+      root.removeEventListener('focusout', onFocusOut);
+    };
+  }, []);
+
+  useEffect(() => {
+    setEditing(true);
+    return () => setEditing(false);
+  }, [setEditing]);
+
+  useEffect(() => {
+    if (record?.id) {
+      frozenRef.current = JSON.parse(JSON.stringify(record));
+      const initial = { ...(frozenRef.current?.fields || {}) } as Record<string, any>;
+      if (Array.isArray(initial["Key Messages"])) {
+        initial.keyMessagesText = initial["Key Messages"].join("\n");
+        if (!initial["Key Message"]) {
+          initial["Key Message"] = initial["Key Messages"].filter(Boolean)[0] || "";
+        }
+      }
+      if (Array.isArray(initial["Speaking Topics"])) {
+        initial.speakingTopicsText = initial["Speaking Topics"].join("\n");
+      }
+      setForm(initial);
+    }
+  }, [record?.id]);
 
   function setField(name: string, value: any) {
     setForm((f) => ({ ...f, [name]: value }));
   }
 
+  const bind = (name: string) => ({
+    value: form?.[name] ?? "",
+    onChange: (
+      eOrVal: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | string
+    ) =>
+      setForm((f) => ({
+        ...f,
+        [name]: typeof eOrVal === "string" ? eOrVal : eOrVal?.target?.value ?? "",
+      })),
+  });
+
   async function handleSave(closeAfter = false) {
     if (!record) return;
     try {
       setSaving(true);
-      const payload = buildSpeakerPayload(form, record);
+      const { keyMessagesText, speakingTopicsText, ...rest } = form;
+      const payloadObj: Record<string, any> = { ...rest };
+      if (!payloadObj["Key Message"] && keyMessagesText) {
+        const first = keyMessagesText
+          .split(/\r?\n/)
+          .map((s: string) => s.trim())
+          .filter(Boolean)[0] || "";
+        payloadObj["Key Message"] = first;
+      }
+      if (speakingTopicsText) {
+        payloadObj["Speaking Topics"] = speakingTopicsText
+          .split(/\r?\n/)
+          .map((s: string) => s.trim())
+          .filter(Boolean);
+      }
+      if (!Array.isArray(payloadObj["Key Messages"]) && payloadObj["Key Message"]) {
+        payloadObj["Key Messages"] = [payloadObj["Key Message"]];
+      }
+      const payload = buildSpeakerPayload(payloadObj, record);
       if (Object.keys(payload.fields).length === 0) {
         push({ text: "No changes to save", type: "info" });
         if (closeAfter) onClose();
@@ -161,9 +227,34 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           {tab === "Expertise & Content" && (
             <Grid>
               <Chips id="Expertise Areas" options={EXPERTISE_AREAS} />
-              <TextArea id="Speaking Topics" />
-              <TextArea id="Key Messages" />
-              <TextArea id="Professional Bio" />
+              <TextArea id="Key Message" label="Key Message" rows={3} />
+              <div className="field" style={{ gridColumn: "1 / -1" }}>
+                <div className="field__label">Speaking Topics (one per line)</div>
+                <textarea
+                  className="textarea"
+                  rows={8}
+                  value={
+                    form.speakingTopicsText ??
+                    (Array.isArray(form["Speaking Topics"])
+                      ? form["Speaking Topics"].join("\n")
+                      : Array.isArray(form.speakingTopics)
+                      ? form.speakingTopics.join("\n")
+                      : "")
+                  }
+                  onChange={(e) => setForm((f) => ({ ...f, speakingTopicsText: e.target.value }))}
+                  style={{ resize: "vertical" }}
+                />
+              </div>
+              <div className="field" style={{ gridColumn: "1 / -1" }}>
+                <div className="field__label">Professional Bio</div>
+                <textarea
+                  className="textarea"
+                  rows={10}
+                  {...bind("Professional Bio")}
+                  style={{ resize: "vertical" }}
+                />
+                <div className="field__hint">Tip: use new lines for paragraphs or bullets.</div>
+              </div>
             </Grid>
           )}
 
@@ -248,21 +339,22 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       <Field label={label ?? id}>
         <input
           className="input"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
+          name={id}
+          {...bind(id)}
           placeholder={label ?? id}
         />
       </Field>
     );
   }
-  function TextArea({ id, label }: { id: string; label?: string }) {
+  function TextArea({ id, label, rows = 4 }: { id: string; label?: string; rows?: number }) {
     return (
       <Field label={label ?? id}>
         <textarea
           className="textarea"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
-          rows={4}
+          rows={rows}
+          name={id}
+          {...bind(id)}
+          style={{ resize: "vertical" }}
         />
       </Field>
     );
@@ -270,11 +362,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   function Select({ id, options, label }: { id: string; options: string[]; label?: string }) {
     return (
       <Field label={label ?? id}>
-        <select
-          className="select"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
-        >
+        <select className="select" name={id} {...bind(id)}>
           <option value="">— Select —</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
@@ -335,6 +423,11 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     return <div className="badge">{label}: <strong>{value ?? "—"}</strong></div>;
   }
 }
+
+export default React.memo(
+  SpeakerEditDialog,
+  (prev, next) => prev.recordId === next.recordId
+);
 
 // layout atoms
 function Grid({ children }: { children: React.ReactNode }) {
