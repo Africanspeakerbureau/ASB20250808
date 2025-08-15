@@ -84,9 +84,15 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     try {
       setSaving(true);
       const data: Record<string, any> = { ...buf.current };
-      if (typeof data['Speaking Topics'] === 'string') {
+      if (data.speakingTopicsText) {
+        data['Speaking Topics'] = data.speakingTopicsText
+          .split(/\r?\n/)
+          .map((s: string) => s.trim())
+          .filter(Boolean);
+        delete data.speakingTopicsText;
+      } else if (typeof data['Speaking Topics'] === 'string') {
         data['Speaking Topics'] = data['Speaking Topics']
-          .split(',')
+          .split(/\r?\n/)
           .map((s: string) => s.trim())
           .filter(Boolean);
       }
@@ -171,9 +177,38 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
               {tab === "Expertise & Content" && (
                 <Grid>
                   <Chips id="Expertise Areas" options={EXPERTISE_AREAS} />
-                  <TextArea id="Speaking Topics" />
-                  <TextArea id="Key Messages" />
-                  <TextArea id="Professional Bio" />
+                  {/* Key Message: compact 3–4 line box (half width) */}
+                  <TextArea id="Key Message" label="Key Message" rows={4} />
+
+                  {/* Speaking Topics: full-width, one per line */}
+                  <div className="field field--full">
+                    <div className="field__label">Speaking Topics (one per line)</div>
+                    <textarea
+                      className="textarea"
+                      rows={8}
+                      defaultValue={
+                        buf.current.speakingTopicsText ??
+                        (Array.isArray(buf.current["Speaking Topics"])
+                          ? buf.current["Speaking Topics"].join("\n")
+                          : "")
+                      }
+                      onChange={e => (buf.current.speakingTopicsText = e.target.value)}
+                      style={{ resize: "vertical" }}
+                    />
+                  </div>
+
+                  {/* Professional Bio: full-width, tall */}
+                  <div className="field field--full">
+                    <div className="field__label">Professional Bio</div>
+                    <textarea
+                      className="textarea"
+                      rows={12}
+                      defaultValue={buf.current["Professional Bio"] ?? ""}
+                      onChange={e => (buf.current["Professional Bio"] = e.target.value)}
+                      style={{ resize: "vertical" }}
+                    />
+                    <div className="field__hint">Tip: use new lines for paragraphs or bullets.</div>
+                  </div>
                 </Grid>
               )}
 
@@ -274,7 +309,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     );
   }
 
-  function TextArea({ id, label }: { id: string; label?: string }) {
+  function TextArea({ id, label, rows = 4 }: { id: string; label?: string; rows?: number }) {
     const inputId = makeId(id);
     return (
       <Field id={inputId} label={label ?? id}>
@@ -283,7 +318,8 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           className="textarea"
           defaultValue={buf.current[id] ?? ""}
           onChange={e => (buf.current[id] = e.target.value)}
-          rows={4}
+          rows={rows}
+          style={{ resize: "vertical" }}
         />
       </Field>
     );
