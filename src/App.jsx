@@ -28,6 +28,7 @@ import ConsentBanner from "@/components/ConsentBanner"
 import { getConsent } from "@/lib/consent"
 import { useGeolocation } from "@/hooks/useGeolocation"
 import ApplyBeta from "./public/apply-beta/ApplyBeta"
+import { EditingProvider, useEditing } from "@/admin/editingContext"
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -113,7 +114,7 @@ import heroExecutiveAI from './assets/hero_executive_ai_training.jpg'
 import heroCorporateLeadership from './assets/hero_corporate_leadership_conference.jpg'
 import heroVirtualSeminars from './assets/hero_virtual_seminars_webinars.jpg'
 
-function App() {
+function AppContent() {
   // Cloudinary configuration
   const cld = new Cloudinary({
     cloud: {
@@ -122,7 +123,9 @@ function App() {
   })
   
   const widgetRef = useRef()
-  
+
+  const { isEditing, startEditing, stopEditing } = useEditing()
+
   // State variables
   const [route, setRoute] = useState(() => window.location.hash.slice(1) || '/')
   const [isAuthed, setIsAuthed] = useState(() => sessionStorage.getItem('asb_admin') === '1')
@@ -170,10 +173,14 @@ function App() {
   const [editCtx, setEditCtx] = useState({ open: false, table: '', recordId: '' })
 
   const handleEdit = (table, recordId) => {
+    startEditing()
     setEditCtx({ open: true, table, recordId })
     toast('Edit opened')
   }
-  const closeEdit = () => setEditCtx({ open: false, table: '', recordId: '' })
+  const closeEdit = () => {
+    stopEditing()
+    setEditCtx({ open: false, table: '', recordId: '' })
+  }
 
   const data = activeTab === 'speakers' ? apps : activeTab === 'clients' ? clients : quick
 
@@ -221,6 +228,7 @@ function App() {
 
   useEffect(() => {
     const syncAndScroll = () => {
+      if (isEditing) return
       const fullHash = window.location.hash || ''
       const [pathPart, anchor] = fullHash.replace(/^#/, '').split('#')
       const pathname = pathPart || '/'
@@ -293,7 +301,7 @@ function App() {
       window.removeEventListener('popstate', syncAndScroll)
       window.removeEventListener('hashchange', syncAndScroll)
     }
-  }, [])
+  }, [isEditing])
 
   useEffect(() => {
     let alive = true
@@ -2695,5 +2703,11 @@ function App() {
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <EditingProvider>
+      <AppContent />
+    </EditingProvider>
+  )
+}
 
