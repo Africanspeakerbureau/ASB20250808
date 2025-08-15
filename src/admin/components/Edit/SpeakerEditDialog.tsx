@@ -72,6 +72,26 @@ function SpeakerEditDialog({ recordId, onClose }: Props) {
   const frozenRef = useRef<any>(null);
   const [form, setForm] = useState<Record<string, any>>(() => ({ ...(record?.fields || {}) }));
 
+  console.count('EditModal render');
+
+  useEffect(() => {
+    const onFocusIn = (e: any) => {
+      const t = e.target as HTMLElement;
+      console.log('[FOCUS-IN]', t?.tagName, t?.getAttribute('name') || t?.id);
+    };
+    const onFocusOut = (e: any) => {
+      const t = e.target as HTMLElement;
+      console.log('[FOCUS-OUT]', t?.tagName, t?.getAttribute('name') || t?.id);
+    };
+    const root = document.querySelector('#modal-root') || document.body;
+    root.addEventListener('focusin', onFocusIn);
+    root.addEventListener('focusout', onFocusOut);
+    return () => {
+      root.removeEventListener('focusin', onFocusIn);
+      root.removeEventListener('focusout', onFocusOut);
+    };
+  }, []);
+
   useEffect(() => {
     setEditing(true);
     return () => setEditing(false);
@@ -319,6 +339,7 @@ function SpeakerEditDialog({ recordId, onClose }: Props) {
       <Field label={label ?? id}>
         <input
           className="input"
+          name={id}
           {...bind(id)}
           placeholder={label ?? id}
         />
@@ -328,14 +349,20 @@ function SpeakerEditDialog({ recordId, onClose }: Props) {
   function TextArea({ id, label, rows = 4 }: { id: string; label?: string; rows?: number }) {
     return (
       <Field label={label ?? id}>
-        <textarea className="textarea" rows={rows} {...bind(id)} style={{ resize: "vertical" }} />
+        <textarea
+          className="textarea"
+          rows={rows}
+          name={id}
+          {...bind(id)}
+          style={{ resize: "vertical" }}
+        />
       </Field>
     );
   }
   function Select({ id, options, label }: { id: string; options: string[]; label?: string }) {
     return (
       <Field label={label ?? id}>
-        <select className="select" {...bind(id)}>
+        <select className="select" name={id} {...bind(id)}>
           <option value="">— Select —</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
@@ -397,7 +424,10 @@ function SpeakerEditDialog({ recordId, onClose }: Props) {
   }
 }
 
-export default React.memo(SpeakerEditDialog);
+export default React.memo(
+  SpeakerEditDialog,
+  (prev, next) => prev.recordId === next.recordId
+);
 
 // layout atoms
 function Grid({ children }: { children: React.ReactNode }) {

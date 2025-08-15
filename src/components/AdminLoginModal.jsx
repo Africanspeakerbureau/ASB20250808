@@ -59,7 +59,7 @@ export default function AdminLoginModal({ open, onClose, onSubmit }) {
   };
 
   return (
-    <ModalPortal onClose={onClose}>
+    <ModalPortal onClose={onClose} open={open}>
       <div ref={modalRef}>
         <Card className="w-full max-w-md mx-4">
           <CardHeader className="text-center">
