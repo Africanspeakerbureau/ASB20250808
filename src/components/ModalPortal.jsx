@@ -56,9 +56,9 @@ export default function ModalPortal({ children, onClose }) {
         onClose?.();
       }
     };
-    window.addEventListener("keydown", onKey, { capture: true });
+    window.addEventListener("keydown", onKey);
     return () => {
-      window.removeEventListener("keydown", onKey, { capture: true });
+      window.removeEventListener("keydown", onKey);
     };
   }, [onClose]);
 
