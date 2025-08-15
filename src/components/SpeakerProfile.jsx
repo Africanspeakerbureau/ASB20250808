@@ -131,7 +131,15 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           {speaker.keyMessages && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold mb-2">Key Messages</h2>
-              <p className="text-gray-700 whitespace-pre-line">{speaker.keyMessages}</p>
+              {Array.isArray(speaker.keyMessages) ? (
+                <ul className="list-disc pl-5 text-gray-700">
+                  {speaker.keyMessages.map((m, i) => (
+                    <li key={i}>{m}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-700 whitespace-pre-line">{speaker.keyMessages}</p>
+              )}
             </div>
           )}
 

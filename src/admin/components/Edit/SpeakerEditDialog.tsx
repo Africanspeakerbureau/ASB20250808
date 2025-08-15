@@ -67,25 +67,43 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const [saving, setSaving] = React.useState(false);
   const [tab, setTab] = React.useState<TabKey>("Identity");
   const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
-  const [form, setForm] = React.useState<Record<string, any>>({});
-  const hydratedRef = React.useRef(false);
+  const [form, setForm] = React.useState<Record<string, any>>(() => ({ ...(record?.fields || {}) }));
 
   React.useEffect(() => {
-    if (!record?.id) return;
-    if (hydratedRef.current) return;
-    setForm({ ...(record.fields || {}) });
-    hydratedRef.current = true;
-  }, [record?.id, record]);
+    const initial = { ...(record?.fields || {}) } as Record<string, any>;
+    if (Array.isArray(initial["Key Messages"])) {
+      initial.keyMessagesText = initial["Key Messages"].join("\n");
+    }
+    setForm(initial);
+  }, [record?.id]);
 
   function setField(name: string, value: any) {
     setForm((f) => ({ ...f, [name]: value }));
   }
 
+  const bind = (name: string) => ({
+    value: form?.[name] ?? "",
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [name]: e.target.value })),
+  });
+
   async function handleSave(closeAfter = false) {
     if (!record) return;
     try {
       setSaving(true);
-      const payload = buildSpeakerPayload(form, record);
+      const { keyMessagesText, ...rest } = form;
+      const payload = buildSpeakerPayload(
+        {
+          ...rest,
+          "Key Messages": keyMessagesText
+            ? keyMessagesText
+                .split(/\r?\n/)
+                .map((s: string) => s.trim())
+                .filter(Boolean)
+            : Array.isArray(rest["Key Messages"]) ? rest["Key Messages"] : [],
+        },
+        record
+      );
       if (Object.keys(payload.fields).length === 0) {
         push({ text: "No changes to save", type: "info" });
         if (closeAfter) onClose();
@@ -162,8 +180,25 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
             <Grid>
               <Chips id="Expertise Areas" options={EXPERTISE_AREAS} />
               <TextArea id="Speaking Topics" />
-              <TextArea id="Key Messages" />
-              <TextArea id="Professional Bio" />
+              <div className="field" style={{ gridColumn: "1 / -1" }}>
+                <div className="field__label">Key Messages (one per line)</div>
+                <textarea
+                  className="textarea"
+                  rows={6}
+                  {...bind("keyMessagesText")}
+                  style={{ resize: "vertical" }}
+                />
+              </div>
+              <div className="field" style={{ gridColumn: "1 / -1" }}>
+                <div className="field__label">Professional Bio</div>
+                <textarea
+                  className="textarea"
+                  rows={10}
+                  {...bind("Professional Bio")}
+                  style={{ resize: "vertical" }}
+                />
+                <div className="field__hint">Tip: use new lines for paragraphs or bullets.</div>
+              </div>
             </Grid>
           )}
 
@@ -248,8 +283,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       <Field label={label ?? id}>
         <input
           className="input"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
+          {...bind(id)}
           placeholder={label ?? id}
         />
       </Field>
@@ -258,23 +292,14 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   function TextArea({ id, label }: { id: string; label?: string }) {
     return (
       <Field label={label ?? id}>
-        <textarea
-          className="textarea"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
-          rows={4}
-        />
+        <textarea className="textarea" rows={4} {...bind(id)} />
       </Field>
     );
   }
   function Select({ id, options, label }: { id: string; options: string[]; label?: string }) {
     return (
       <Field label={label ?? id}>
-        <select
-          className="select"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
-        >
+        <select className="select" {...bind(id)}>
           <option value="">— Select —</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
