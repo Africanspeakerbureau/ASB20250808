@@ -89,8 +89,13 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
   const bind = (name: string) => ({
     value: form?.[name] ?? "",
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-      setForm((f) => ({ ...f, [name]: e.target.value })),
+    onChange: (
+      eOrVal: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | string
+    ) =>
+      setForm((f) => ({
+        ...f,
+        [name]: typeof eOrVal === "string" ? eOrVal : eOrVal?.target?.value ?? "",
+      })),
   });
 
   async function handleSave(closeAfter = false) {
@@ -191,7 +196,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           {tab === "Expertise & Content" && (
             <Grid>
               <Chips id="Expertise Areas" options={EXPERTISE_AREAS} />
-              <Text id="Key Message" label="Key Message" />
+              <TextArea id="Key Message" label="Key Message" rows={3} />
               <div className="field" style={{ gridColumn: "1 / -1" }}>
                 <div className="field__label">Speaking Topics (one per line)</div>
                 <textarea
@@ -309,10 +314,10 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       </Field>
     );
   }
-  function TextArea({ id, label }: { id: string; label?: string }) {
+  function TextArea({ id, label, rows = 4 }: { id: string; label?: string; rows?: number }) {
     return (
       <Field label={label ?? id}>
-        <textarea className="textarea" rows={4} {...bind(id)} />
+        <textarea className="textarea" rows={rows} {...bind(id)} style={{ resize: "vertical" }} />
       </Field>
     );
   }
