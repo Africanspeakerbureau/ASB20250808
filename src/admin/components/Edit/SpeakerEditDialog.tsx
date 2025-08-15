@@ -67,19 +67,17 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const [saving, setSaving] = React.useState(false);
   const [tab, setTab] = React.useState<TabKey>("Identity");
   const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
-  const [form, setForm] = React.useState<Record<string, any>>({});
-  const hydratedRef = React.useRef(false);
+  const [form, setForm] = React.useState<Record<string, any>>(() => ({ ...(record?.fields || {}) }));
 
   React.useEffect(() => {
-    if (!record?.id) return;
-    if (hydratedRef.current) return;
-    setForm({ ...(record.fields || {}) });
-    hydratedRef.current = true;
-  }, [record?.id, record]);
+    setForm(() => ({ ...(record?.fields || {}) }));
+  }, [record?.id]);
 
-  function setField(name: string, value: any) {
-    setForm((f) => ({ ...f, [name]: value }));
-  }
+  const bind = (name: string) => ({
+    value: form?.[name] ?? "",
+    onChange: (e: any) =>
+      setForm((f) => ({ ...f, [name]: e?.target?.value ?? "" })),
+  });
 
   async function handleSave(closeAfter = false) {
     if (!record) return;
@@ -161,8 +159,8 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           {tab === "Expertise & Content" && (
             <Grid>
               <Chips id="Expertise Areas" options={EXPERTISE_AREAS} />
-              <TextArea id="Speaking Topics" />
-              <TextArea id="Key Messages" />
+              <TextArea id="Speaking Topics" fullWidth />
+              <TextArea id="Key Messages" rows={4} />
               <TextArea id="Professional Bio" />
             </Grid>
           )}
@@ -246,35 +244,21 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   function Text({ id, label }: { id: string; label?: string }) {
     return (
       <Field label={label ?? id}>
-        <input
-          className="input"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
-          placeholder={label ?? id}
-        />
+        <input className="input" placeholder={label ?? id} {...bind(id)} />
       </Field>
     );
   }
-  function TextArea({ id, label }: { id: string; label?: string }) {
+  function TextArea({ id, label, rows = 4, fullWidth = false }: { id: string; label?: string; rows?: number; fullWidth?: boolean }) {
     return (
-      <Field label={label ?? id}>
-        <textarea
-          className="textarea"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
-          rows={4}
-        />
+      <Field label={label ?? id} style={fullWidth ? { gridColumn: '1 / -1' } : undefined}>
+        <textarea className="textarea" rows={rows} {...bind(id)} />
       </Field>
     );
   }
   function Select({ id, options, label }: { id: string; options: string[]; label?: string }) {
     return (
       <Field label={label ?? id}>
-        <select
-          className="select"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
-        >
+        <select className="select" {...bind(id)}>
           <option value="">— Select —</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
@@ -286,9 +270,9 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     const toggle = (v: string) => {
       if (allowMulti) {
         const next = value.includes(v) ? value.filter(x => x !== v) : [...value, v];
-        setField(id, next);
+        setForm((f) => ({ ...f, [id]: next }));
       } else {
-        setField(id, value.includes(v) ? "" : v);
+        setForm((f) => ({ ...f, [id]: value.includes(v) ? "" : v }));
       }
     };
     return (
@@ -315,7 +299,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           </div>
           <UploadWidget
             onUpload={(uploaded) => {
-              setField(id, uploaded);
+              setForm((f) => ({ ...f, [id]: uploaded }));
             }}
           >
             <button className="btn btn--dark">Upload</button>
@@ -340,9 +324,9 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 function Grid({ children }: { children: React.ReactNode }) {
   return <div className="grid">{children}</div>;
 }
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({ label, hint, style, children }: { label: string; hint?: string; style?: React.CSSProperties; children: React.ReactNode }) {
   return (
-    <label className="field">
+    <label className="field" style={style}>
       <div className="field__label">{label}</div>
       {children}
       {hint && <div className="field__hint">{hint}</div>}
