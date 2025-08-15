@@ -7,8 +7,7 @@ import {
 } from "../../edit/options";
 import UploadWidget from "@/components/UploadWidget";
 import { useToast } from "@/components/Toast";
-import { useAirtableRecord } from "../../hooks/useAirtableRecord";
-import { airtablePatchRecord } from "../../api/airtable";
+import { getRecord, airtablePatchRecord } from "../../api/airtable";
 import "./editDialog.css";
 
 // Computed/linked fields we never send back to Airtable
@@ -66,16 +65,25 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const { push } = useToast();
   const [saving, setSaving] = React.useState(false);
   const [tab, setTab] = React.useState<TabKey>("Identity");
-  const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
-  const [form, setForm] = React.useState<Record<string, any>>({});
-  const hydratedRef = React.useRef(false);
+  const [record, setRecord] = React.useState<any>();
+  const [loading, setLoading] = React.useState(true);
+  const [form, setForm] = React.useState<Record<string, any>>(() => ({ }));
 
   React.useEffect(() => {
-    if (!record?.id) return;
-    if (hydratedRef.current) return;
-    setForm({ ...(record.fields || {}) });
-    hydratedRef.current = true;
-  }, [record?.id, record]);
+    (async () => {
+      setLoading(true);
+      const r = await getRecord<any>("Speaker Applications", recordId);
+      setRecord(r);
+      setForm({ ...(r.fields || {}) });
+      setLoading(false);
+    })();
+  }, [recordId]);
+
+  const bind = (k: string) => ({
+    value: form?.[k] ?? "",
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setForm(f => ({ ...f, [k]: e.target.value }))
+  });
 
   function setField(name: string, value: any) {
     setForm((f) => ({ ...f, [name]: value }));
@@ -248,8 +256,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       <Field label={label ?? id}>
         <input
           className="input"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
+          {...bind(id)}
           placeholder={label ?? id}
         />
       </Field>
@@ -260,8 +267,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       <Field label={label ?? id}>
         <textarea
           className="textarea"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
+          {...bind(id)}
           rows={4}
         />
       </Field>
@@ -272,8 +278,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       <Field label={label ?? id}>
         <select
           className="select"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
+          {...bind(id)}
         >
           <option value="">— Select —</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
