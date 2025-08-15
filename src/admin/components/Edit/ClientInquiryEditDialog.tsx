@@ -1,276 +1,323 @@
-import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
-import ReactDOM from 'react-dom';
-import { getRecord, readSingleSelect, airtablePatchRecord } from '../../api/airtable';
-import { useToast } from '@/components/Toast';
-import './editDialog.css';
-import {
-  INDUSTRIES,
-  LARGEST_AUDIENCE,
-  PRESENTATION_FORMAT,
-  BUDGET_RANGE_USD
-} from '../../edit/options';
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
+import { airtablePatchRecord, getRecord } from "../../api/airtable";
+import "./editDialog.css";
 
-const COMPANY_SIZE_OPTIONS = [
-  '1 - 10 employees',
-  '11 - 50 employees',
-  '51 - 250 employees',
-  '251 - 500 employees',
-  '501 - 1000 employees',
-  '1000 + employees'
-];
-
-const STATUS_OPTIONS = [
-  'New',
-  'Responded',
-  'Closed',
-  'Follow Up',
-  'Assigned to Agent'
-];
-
-type ClientFields = {
-  'First Name'?: string;
-  'Last Name'?: string;
-  'Email'?: string;
-  'Phone'?: string;
-  'Company Name'?: string;
-  'Job Title'?: string;
-  'Company Size'?: any;
-  'Industry'?: any;
-  'Company Website'?: string;
-  'Event Name'?: string;
-  'Event Date'?: string;
-  'Event Location'?: string;
-  'Audience Size'?: any;
-  'Speaking Topic'?: string;
-  'Budget Range (USD)'?: any;
-  'Presentation Format'?: any;
-  'Additional Requirements'?: string;
-  'Status'?: any;
-  'Created Date'?: string;
-  'Internal notes'?: string;
-  'Notes'?: string;
+type Props = {
+  recordId: string;
+  onClose: () => void;
 };
 
-export default function ClientInquiryEditDialog({ recordId, onClose }: { recordId: string; onClose: () => void }) {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<any>({});
-  const { push } = useToast();
+// ===== Airtable-select options (must match Airtable exactly) =====
+const COMPANY_SIZE_OPTS = [
+  "1 - 10 employees",
+  "11 - 50 employees",
+  "51 - 250 employees",
+  "251 - 500 employees",
+  "501 - 1000 employees",
+  "1000 + employees",
+];
 
-  const bind = (name: string) => ({
-    value: form?.[name] ?? '',
-    onChange: (e: ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>) =>
-      setForm((f: any) => ({ ...f, [name]: e.target.value }))
-  });
+const INDUSTRY_OPTS = [
+  "Technology",
+  "Finance & Banking",
+  "Healthcare & Medical",
+  "Education",
+  "Government & Public Policy",
+  "Non Profit and NGO",
+  "Energy and Mining",
+  "Agriculture & Food",
+  "Manufacturing",
+  "Telecommunications",
+  "Transport & Logistics",
+  "Real Estate & Construction",
+  "Media & Entertainment",
+  "Tourism & Hospitality",
+  "Retail and Consumer Goods",
+  "Legal Services",
+  "Consulting",
+  "Research and Development",
+  "Arts and Cultures",
+  "IT & AI",
+  "Others",
+];
+
+const AUDIENCE_SIZE_OPTS = [
+  "Less than 50",
+  "50-100",
+  "100-500",
+  "500-1000",
+  "More than 1000",
+];
+
+const PRESENTATION_FORMAT_OPTS = ["In-Person", "Virtual", "Hybrid"];
+
+const BUDGET_RANGE_OPTS = [
+  "Less than $1 000 / R20 000",
+  "$1 000-$2 500 / R20 000 - R50 000",
+  "$2 500-$5 000 / R50000 - R100 000",
+  "$5 000 - $10 000 / R100 000 - R200 000",
+  "More than $10 000 / R200 000",
+];
+
+const STATUS_OPTS = [
+  "New",
+  "Contacted",
+  "Proposal Sent",
+  "Booked",
+  "Completed",
+  "Follow up Required",
+];
+
+// Only allow fields that exist in Airtable for this table
+const ALLOWED_FIELDS = new Set<string>([
+  "First Name",
+  "Last Name",
+  "Email",
+  "Phone",
+  "Company Name",
+  "Job Title",
+  "Company Size",
+  "Industry",
+  "Company Website",
+  "Event Name",
+  "Event Date",
+  "Event Location",
+  "Audience Size",
+  "Speaking Topic",
+  "Budget Range",
+  "Presentation Format",
+  "Additional Requirements",
+  "Status",
+  "Internal notes",
+]);
+
+function diffPayload(next: Record<string, any>, original: Record<string, any>) {
+  const fields: Record<string, any> = {};
+  for (const [k, v] of Object.entries(next || {})) {
+    if (!ALLOWED_FIELDS.has(k)) continue;
+    const prev = original?.[k];
+    const same = JSON.stringify(v ?? null) === JSON.stringify(prev ?? null);
+    if (!same && v !== undefined) fields[k] = v;
+  }
+  return { fields };
+}
+
+export default function ClientInquiryEditDialog({ recordId, onClose }: Props) {
+  const [record, setRecord] = useState<any>();
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState<Record<string, any>>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const r = await getRecord<ClientFields>('Client Inquiries', recordId);
-      const f = r.fields || {};
-      setForm({
-        firstName: f['First Name'] ?? '',
-        lastName: f['Last Name'] ?? '',
-        email: f['Email'] ?? '',
-        phone: f['Phone'] ?? '',
-        company: f['Company Name'] ?? '',
-        jobTitle: f['Job Title'] ?? '',
-        companySize: readSingleSelect(f['Company Size']),
-        industry: readSingleSelect(f['Industry']),
-        website: f['Company Website'] ?? '',
-        eventName: f['Event Name'] ?? '',
-        eventDate: f['Event Date'] ?? '',
-        eventLocation: f['Event Location'] ?? '',
-        audienceSize: readSingleSelect(f['Audience Size']),
-        speakingTopic: f['Speaking Topic'] ?? '',
-        budgetRange: readSingleSelect(f['Budget Range (USD)']),
-        format: readSingleSelect(f['Presentation Format']),
-        requirements: f['Additional Requirements'] ?? '',
-        status: readSingleSelect(f['Status']),
-        createdDate: f['Created Date'] ?? '',
-        notes: f['Internal notes'] ?? f['Notes'] ?? ''
-      });
+      const r = await getRecord<any>("Client Inquiries", recordId);
+      setRecord(r);
+      setForm({ ...(r?.fields || {}) });
       setLoading(false);
     })();
   }, [recordId]);
 
-  async function handleSave(closeAfter = true) {
+  const bind = (name: string) => ({
+    value: form?.[name] ?? "",
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [name]: e.target.value })),
+    name,
+  });
+
+  async function handleSave(closeAfter = false) {
+    if (!record) return;
     try {
       setSaving(true);
-      const fields: Record<string, any> = {
-        'First Name': form.firstName,
-        'Last Name': form.lastName,
-        'Email': form.email,
-        'Phone': form.phone,
-        'Company Name': form.company,
-        'Job Title': form.jobTitle,
-        'Company Size': form.companySize,
-        'Industry': form.industry,
-        'Company Website': form.website,
-        'Event Name': form.eventName,
-        'Event Date': form.eventDate ? new Date(form.eventDate).toISOString().slice(0,10) : '',
-        'Event Location': form.eventLocation,
-        'Audience Size': form.audienceSize,
-        'Speaking Topic': form.speakingTopic,
-        'Budget Range (USD)': form.budgetRange,
-        'Presentation Format': form.format,
-        'Additional Requirements': form.requirements,
-        'Status': form.status,
-        'Created Date': form.createdDate ? new Date(form.createdDate).toISOString().slice(0,10) : '',
-        'Internal notes': form.notes,
-      };
-      if (Array.isArray(fields.Status)) {
-        fields.Status = fields.Status[0] ?? '';
+      const payload = diffPayload(form, record.fields || {});
+      if (Object.keys(payload.fields).length === 0) {
+        if (closeAfter) onClose();
+        setSaving(false);
+        return;
       }
-      await airtablePatchRecord('Client Inquiries', recordId, fields);
-      push({ text: 'Saved ✔︎', type: 'success' });
+      await airtablePatchRecord("Client Inquiries", record.id, payload.fields);
       if (closeAfter) onClose();
-    } catch (e: any) {
-      push({ text: e?.message || 'Could not save', type: 'error' });
     } finally {
       setSaving(false);
     }
   }
+
+  if (!record && !loading) return null;
 
   return ReactDOM.createPortal(
     <div className="modal">
       <div className="modal__panel" role="dialog" aria-modal="true">
         <div className="modal__header">
           <h2>Client Inquiry</h2>
-          <button className="icon-btn" aria-label="Close" onClick={onClose}>✕</button>
+          <button className="icon-btn" aria-label="Close" onClick={onClose}>
+            ✕
+          </button>
         </div>
-        {loading && <div className="loading-bar">Loading record…</div>}
+
         <div className="modal__body">
           <div className="grid">
-            <div className="field">
-              <label className="field__label">First Name</label>
-              <input className="input" value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} />
-            </div>
-            <div className="field">
-              <label className="field__label">Last Name</label>
-              <input className="input" value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} />
-            </div>
-            <div className="field">
-              <label className="field__label">Email</label>
-              <input className="input" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-            </div>
-            <div className="field">
-              <label className="field__label">Phone</label>
-              <input className="input" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
-            </div>
-            <div className="field">
-              <label className="field__label">Company Name</label>
-              <input className="input" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} />
-            </div>
-            <div className="field">
-              <label className="field__label">Job Title</label>
-              <input className="input" value={form.jobTitle} onChange={e => setForm({ ...form, jobTitle: e.target.value })} />
-            </div>
-            <Field label="Company Size">
-              <select className="select" {...bind('companySize')}>
+            {/* Row 1 */}
+            <label className="field">
+              <div className="field__label">First Name</div>
+              <input className="input" {...bind("First Name")} />
+            </label>
+            <label className="field">
+              <div className="field__label">Last Name</div>
+              <input className="input" {...bind("Last Name")} />
+            </label>
+
+            {/* Row 2 */}
+            <label className="field">
+              <div className="field__label">Email</div>
+              <input className="input" type="email" {...bind("Email")} />
+            </label>
+            <label className="field">
+              <div className="field__label">Phone</div>
+              <input className="input" {...bind("Phone")} />
+            </label>
+
+            {/* Row 3 */}
+            <label className="field">
+              <div className="field__label">Company Name</div>
+              <input className="input" {...bind("Company Name")} />
+            </label>
+            <label className="field">
+              <div className="field__label">Job Title</div>
+              <input className="input" {...bind("Job Title")} />
+            </label>
+
+            {/* Row 4: Company Size (select) + Industry (select) */}
+            <label className="field">
+              <div className="field__label">Company Size</div>
+              <select className="select" {...bind("Company Size")}>
                 <option value="">— Select company size —</option>
-                {COMPANY_SIZE_OPTIONS.map(o => (
-                  <option key={o} value={o}>{o}</option>
+                {COMPANY_SIZE_OPTS.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
                 ))}
               </select>
-            </Field>
-            <Field label="Industry">
-              <select className="select" {...bind('industry')}>
+            </label>
+            <label className="field">
+              <div className="field__label">Industry</div>
+              <select className="select" {...bind("Industry")}>
                 <option value="">— Select industry —</option>
-                {INDUSTRIES.map(o => (
-                  <option key={o} value={o}>
-                    {o}
+                {INDUSTRY_OPTS.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
                   </option>
                 ))}
               </select>
-            </Field>
-            <div className="field" style={{gridColumn:'1 / -1'}}>
-              <label className="field__label">Company Website</label>
-              <input className="input" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} />
-            </div>
-            <div className="field">
-              <label className="field__label">Event Name</label>
-              <input className="input" value={form.eventName} onChange={e => setForm({ ...form, eventName: e.target.value })} />
-            </div>
-            <div className="field">
-              <label className="field__label">Event Date</label>
-              <input className="input" value={form.eventDate} onChange={e => setForm({ ...form, eventDate: e.target.value })} />
-            </div>
-            <div className="field">
-              <label className="field__label">Event Location</label>
-              <input className="input" value={form.eventLocation} onChange={e => setForm({ ...form, eventLocation: e.target.value })} />
-            </div>
-            <Field label="Audience Size">
-              <select className="select" {...bind('audienceSize')}>
-                <option value="">— Select audience —</option>
-                {LARGEST_AUDIENCE.map(o => (
-                  <option key={o} value={o}>
-                    {o}
+            </label>
+
+            {/* Row 5 */}
+            <label className="field">
+              <div className="field__label">Company Website</div>
+              <input className="input" {...bind("Company Website")} />
+            </label>
+
+            {/* Row 6 */}
+            <label className="field">
+              <div className="field__label">Event Name</div>
+              <input className="input" {...bind("Event Name")} />
+            </label>
+            <label className="field">
+              <div className="field__label">Event Date</div>
+              <input className="input" type="date" {...bind("Event Date")} />
+            </label>
+
+            {/* Row 7 */}
+            <label className="field">
+              <div className="field__label">Event Location</div>
+              <input className="input" {...bind("Event Location")} />
+            </label>
+            <label className="field">
+              <div className="field__label">Audience Size</div>
+              <select className="select" {...bind("Audience Size")}>
+                <option value="">— Select audience size —</option>
+                {AUDIENCE_SIZE_OPTS.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
                   </option>
                 ))}
               </select>
-            </Field>
-            <div className="field" style={{gridColumn:'1 / -1'}}>
-              <label className="field__label">Speaking Topic</label>
-              <input className="input" value={form.speakingTopic} onChange={e => setForm({ ...form, speakingTopic: e.target.value })} />
-            </div>
-            <Field label="Budget Range (USD)">
-              <select className="select" {...bind('budgetRange')}>
-                <option value="">— Select budget —</option>
-                {BUDGET_RANGE_USD.map(o => (
-                  <option key={o} value={o}>
-                    {o}
+            </label>
+
+            {/* Row 8 */}
+            <label className="field" style={{ gridColumn: "1 / -1" }}>
+              <div className="field__label">Speaking Topic</div>
+              <textarea className="textarea" rows={4} {...bind("Speaking Topic")} />
+            </label>
+
+            {/* Row 9: Budget Range (select) + Presentation Format (select) */}
+            <label className="field">
+              <div className="field__label">Budget Range</div>
+              <select className="select" {...bind("Budget Range")}>
+                <option value="">— Select budget range —</option>
+                {BUDGET_RANGE_OPTS.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
                   </option>
                 ))}
               </select>
-            </Field>
-            <Field label="Presentation Format">
-              <select className="select" {...bind('format')}>
+            </label>
+            <label className="field">
+              <div className="field__label">Presentation Format</div>
+              <select className="select" {...bind("Presentation Format")}>
                 <option value="">— Select format —</option>
-                {PRESENTATION_FORMAT.map(o => (
-                  <option key={o} value={o}>
-                    {o}
+                {PRESENTATION_FORMAT_OPTS.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
                   </option>
                 ))}
               </select>
-            </Field>
-            <div className="field" style={{gridColumn:'1 / -1'}}>
-              <label className="field__label">Additional Requirements</label>
-              <textarea className="textarea" value={form.requirements} onChange={e => setForm({ ...form, requirements: e.target.value })} />
-            </div>
-            <Field label="Status">
-              <select className="select" {...bind('status')}>
+            </label>
+
+            {/* Row 10 */}
+            <label className="field" style={{ gridColumn: "1 / -1" }}>
+              <div className="field__label">Additional Requirements</div>
+              <textarea className="textarea" rows={4} {...bind("Additional Requirements")} />
+            </label>
+
+            {/* Row 11: Status (single select) */}
+            <label className="field">
+              <div className="field__label">Status</div>
+              <select className="select" {...bind("Status")}>
                 <option value="">— Select status —</option>
-                {STATUS_OPTIONS.map(o => (
-                  <option key={o} value={o}>{o}</option>
+                {STATUS_OPTS.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
                 ))}
               </select>
-            </Field>
-            <div className="field">
-              <label className="field__label">Created Date</label>
-              <input className="input" value={form.createdDate} onChange={e => setForm({ ...form, createdDate: e.target.value })} />
-            </div>
-            <Field label="Internal notes">
-              <textarea className="textarea" rows={4} {...bind('notes')} />
-            </Field>
+            </label>
+
+            {/* Row 12: Internal notes */}
+            <label className="field" style={{ gridColumn: "1 / -1" }}>
+              <div className="field__label">Internal notes</div>
+              <textarea className="textarea" rows={4} {...bind("Internal notes")} />
+            </label>
           </div>
         </div>
-          <div className="modal__footer">
-            <button className="btn" disabled={saving} onClick={onClose}>Close</button>
-            <button className="btn" disabled={saving} onClick={() => handleSave(false)}>{saving ? 'Saving…' : 'Save'}</button>
-            <button className="btn btn--primary" disabled={saving} onClick={() => handleSave(true)}>{saving ? 'Saving…' : 'Save & Close'}</button>
-          </div>
+
+        <div className="modal__footer">
+          <button className="btn" disabled={saving} onClick={onClose}>
+            Close
+          </button>
+          <button className="btn" disabled={saving} onClick={() => handleSave(false)}>
+            {saving ? "Saving…" : "Save"}
+          </button>
+          <button
+            className="btn btn--primary"
+            disabled={saving}
+            onClick={() => handleSave(true)}
+          >
+            {saving ? "Saving…" : "Save & Close"}
+          </button>
+        </div>
       </div>
     </div>,
     document.body
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="field">
-      <label className="field__label">{label}</label>
-      {children}
-    </div>
   );
 }
