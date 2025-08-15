@@ -67,25 +67,33 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const [saving, setSaving] = React.useState(false);
   const [tab, setTab] = React.useState<TabKey>("Identity");
   const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
-  const [form, setForm] = React.useState<Record<string, any>>({});
+  const buf = React.useRef<Record<string, any>>({});
   const hydratedRef = React.useRef(false);
+  const [ready, setReady] = React.useState(false);
 
   React.useEffect(() => {
     if (!record?.id) return;
     if (hydratedRef.current) return;
-    setForm({ ...(record.fields || {}) });
+    buf.current = { ...(record.fields || {}) };
     hydratedRef.current = true;
+    setReady(true);
   }, [record?.id, record]);
-
-  function setField(name: string, value: any) {
-    setForm((f) => ({ ...f, [name]: value }));
-  }
 
   async function handleSave(closeAfter = false) {
     if (!record) return;
     try {
       setSaving(true);
-      const payload = buildSpeakerPayload(form, record);
+      const data: Record<string, any> = { ...buf.current };
+      if (typeof data['Speaking Topics'] === 'string') {
+        data['Speaking Topics'] = data['Speaking Topics']
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter(Boolean);
+      }
+      if (data['Key Message']) {
+        data['Key Messages'] = [data['Key Message']];
+      }
+      const payload = buildSpeakerPayload(data, record);
       if (Object.keys(payload.fields).length === 0) {
         push({ text: "No changes to save", type: "info" });
         if (closeAfter) onClose();
@@ -112,121 +120,125 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           <button className="icon-btn" aria-label="Close" onClick={onClose}>✕</button>
         </div>
         {loading && <div className="loading-bar">Loading record…</div>}
-        <div className="tabs">
-          {TABS.map(t => (
-            <button
-              key={t}
-              className={`tab ${tab === t ? "tab--active" : ""}`}
-              onClick={() => setTab(t)}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+        {ready && (
+          <>
+            <div className="tabs">
+              {TABS.map(t => (
+                <button
+                  key={t}
+                  className={`tab ${tab === t ? "tab--active" : ""}`}
+                  onClick={() => setTab(t)}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
 
-        <div className="modal__body">
-          {tab === "Identity" && (
-            <Grid>
-              <Text id="First Name" />
-              <Text id="Last Name" />
-              <Text id="Title" label="Title (Dr/Prof)" />
-              <Text id="Professional Title" />
-              <Text id="Company" label="Company/Organization" />
-              <Text id="Location" />
-              <Select id="Country" options={COUNTRIES} />
-              <Upload id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
-            </Grid>
-          )}
+            <div className="modal__body">
+              {tab === "Identity" && (
+                <Grid>
+                  <Text id="First Name" />
+                  <Text id="Last Name" />
+                  <Text id="Title" label="Title (Dr/Prof)" />
+                  <Text id="Professional Title" />
+                  <Text id="Company" label="Company/Organization" />
+                  <Text id="Location" />
+                  <Select id="Country" options={COUNTRIES} />
+                  <Upload id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
+                </Grid>
+              )}
 
-          {tab === "Background" && (
-            <Grid>
-              <Select id="Industry" options={INDUSTRIES} />
-              <Select id="Expertise Level" options={EXPERTISE_LEVEL} />
-              <Select id="Years Experience" options={YEARS_EXPERIENCE} />
-              <TextArea id="Notable Achievements" />
-              <TextArea id="Achievements" />
-              <TextArea id="Education" />
-            </Grid>
-          )}
+              {tab === "Background" && (
+                <Grid>
+                  <Select id="Industry" options={INDUSTRIES} />
+                  <Select id="Expertise Level" options={EXPERTISE_LEVEL} />
+                  <Select id="Years Experience" options={YEARS_EXPERIENCE} />
+                  <TextArea id="Notable Achievements" />
+                  <TextArea id="Achievements" />
+                  <TextArea id="Education" />
+                </Grid>
+              )}
 
-          {tab === "Experience" && (
-            <Grid>
-              <Select id="Speaking Experience" options={SPEAKING_EXPERIENCE} />
-              <Select id="Number of Events" options={NUMBER_OF_EVENTS} />
-              <Select id="Largest Audience" options={LARGEST_AUDIENCE} />
-              <Select id="Virtual Experience" options={VIRTUAL_EXPERIENCE} />
-            </Grid>
-          )}
+              {tab === "Experience" && (
+                <Grid>
+                  <Select id="Speaking Experience" options={SPEAKING_EXPERIENCE} />
+                  <Select id="Number of Events" options={NUMBER_OF_EVENTS} />
+                  <Select id="Largest Audience" options={LARGEST_AUDIENCE} />
+                  <Select id="Virtual Experience" options={VIRTUAL_EXPERIENCE} />
+                </Grid>
+              )}
 
-          {tab === "Expertise & Content" && (
-            <Grid>
-              <Chips id="Expertise Areas" options={EXPERTISE_AREAS} />
-              <TextArea id="Speaking Topics" />
-              <TextArea id="Key Messages" />
-              <TextArea id="Professional Bio" />
-            </Grid>
-          )}
+              {tab === "Expertise & Content" && (
+                <Grid>
+                  <Chips id="Expertise Areas" options={EXPERTISE_AREAS} />
+                  <TextArea id="Speaking Topics" />
+                  <TextArea id="Key Messages" />
+                  <TextArea id="Professional Bio" />
+                </Grid>
+              )}
 
-          {tab === "Why booking" && (
-            <Grid>
-              <TextArea id="Speakers Delivery Style" label="Speaker’s Delivery Style" />
-              <TextArea id="Why the audience should listen to these topics" />
-              <TextArea id="What the speeches will address" />
-              <TextArea id="What participants will learn" />
-              <TextArea id="What the audience will take home" />
-              <TextArea id="Benefits for the individual" />
-              <TextArea id="Benefits for the organisation" />
-            </Grid>
-          )}
+              {tab === "Why booking" && (
+                <Grid>
+                  <TextArea id="Speakers Delivery Style" label="Speaker’s Delivery Style" />
+                  <TextArea id="Why the audience should listen to these topics" />
+                  <TextArea id="What the speeches will address" />
+                  <TextArea id="What participants will learn" />
+                  <TextArea id="What the audience will take home" />
+                  <TextArea id="Benefits for the individual" />
+                  <TextArea id="Benefits for the organisation" />
+                </Grid>
+              )}
 
-          {tab === "Media & Languages" && (
-            <Grid>
-              <Upload id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
-              <Text id="Video Link 1" />
-              <Text id="Video Link 2" />
-              <Text id="Video Link 3" />
-              <Chips id="Spoken Languages" options={SPOKEN_LANGUAGES} />
-            </Grid>
-          )}
+              {tab === "Media & Languages" && (
+                <Grid>
+                  <Upload id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
+                  <Text id="Video Link 1" />
+                  <Text id="Video Link 2" />
+                  <Text id="Video Link 3" />
+                  <Chips id="Spoken Languages" options={SPOKEN_LANGUAGES} />
+                </Grid>
+              )}
 
-          {tab === "Logistics & Fees" && (
-            <Grid>
-              <Select id="Fee Range" options={FEE_RANGE} label="Fee Range (USD)" />
-              <Select id="Display Fee" options={DISPLAY_FEE} label="Display Fee on site?" />
-              <Select id="Travel Willingness" options={TRAVEL_WILLINGNESS} />
-              <TextArea id="Travel Requirements" />
-            </Grid>
-          )}
+              {tab === "Logistics & Fees" && (
+                <Grid>
+                  <Select id="Fee Range" options={FEE_RANGE} label="Fee Range (USD)" />
+                  <Select id="Display Fee" options={DISPLAY_FEE} label="Display Fee on site?" />
+                  <Select id="Travel Willingness" options={TRAVEL_WILLINGNESS} />
+                  <TextArea id="Travel Requirements" />
+                </Grid>
+              )}
 
-          {tab === "Contact & Admin" && (
-            <Grid>
-              <Text id="Website" />
-              <Text id="LinkedIn" label="LinkedIn Profile" />
-              <Text id="Twitter" label="Twitter/X Profile" />
-              <TextArea id="References" />
-              <Text id="PA Name" />
-              <Text id="PA Email" />
-              <Text id="PA Phone" />
-              <TextArea id="Banking Details" />
-              <TextArea id="Special Requirements" />
-              <TextArea id="Additional Info" />
-            </Grid>
-          )}
+              {tab === "Contact & Admin" && (
+                <Grid>
+                  <Text id="Website" />
+                  <Text id="LinkedIn" label="LinkedIn Profile" />
+                  <Text id="Twitter" label="Twitter/X Profile" />
+                  <TextArea id="References" />
+                  <Text id="PA Name" />
+                  <Text id="PA Email" />
+                  <Text id="PA Phone" />
+                  <TextArea id="Banking Details" />
+                  <TextArea id="Special Requirements" />
+                  <TextArea id="Additional Info" />
+                </Grid>
+              )}
 
-          {tab === "Internal" && (
-            <Grid>
-              <Chips id="Status" options={STATUS} allowMulti />
-              <Select id="Featured" options={FEATURED} />
-              <Readonly id="Created Date" />
-              <Readonly id="Client Inquiries" />
-              <Badge label="Experience Score" value={form["Experience Score"]} />
-              <Badge label="Total Events" value={form["Total Events (calc)"]} />
-              <Badge label="Potential Revenue" value={form["Potential Revenue"]} />
-              <Upload id="Header Image" label="Header Image" hint="This is the wide banner image" />
-              <TextArea id="Internal Notes" />
-            </Grid>
-          )}
-        </div>
+              {tab === "Internal" && (
+                <Grid>
+                  <Chips id="Status" options={STATUS} allowMulti />
+                  <Select id="Featured" options={FEATURED} />
+                  <Readonly id="Created Date" />
+                  <Readonly id="Client Inquiries" />
+                  <Badge label="Experience Score" value={buf.current["Experience Score"]} />
+                  <Badge label="Total Events" value={buf.current["Total Events (calc)"]} />
+                  <Badge label="Potential Revenue" value={buf.current["Potential Revenue"]} />
+                  <Upload id="Header Image" label="Header Image" hint="This is the wide banner image" />
+                  <TextArea id="Internal Notes" />
+                </Grid>
+              )}
+            </div>
+          </>
+        )}
 
         <div className="modal__footer">
           <button className="btn" disabled={saving} onClick={onClose}>Close</button>
@@ -243,59 +255,87 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   );
 
   // ————— helpers —————
+  function makeId(id: string) {
+    return `f-${id.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+  }
+
   function Text({ id, label }: { id: string; label?: string }) {
+    const inputId = makeId(id);
     return (
-      <Field label={label ?? id}>
+      <Field id={inputId} label={label ?? id}>
         <input
+          id={inputId}
           className="input"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
+          defaultValue={buf.current[id] ?? ""}
+          onChange={e => (buf.current[id] = e.target.value)}
           placeholder={label ?? id}
         />
       </Field>
     );
   }
+
   function TextArea({ id, label }: { id: string; label?: string }) {
+    const inputId = makeId(id);
     return (
-      <Field label={label ?? id}>
+      <Field id={inputId} label={label ?? id}>
         <textarea
+          id={inputId}
           className="textarea"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
+          defaultValue={buf.current[id] ?? ""}
+          onChange={e => (buf.current[id] = e.target.value)}
           rows={4}
         />
       </Field>
     );
   }
+
   function Select({ id, options, label }: { id: string; options: string[]; label?: string }) {
+    const inputId = makeId(id);
     return (
-      <Field label={label ?? id}>
+      <Field id={inputId} label={label ?? id}>
         <select
+          id={inputId}
           className="select"
-          value={form[id] ?? ""}
-          onChange={e => setField(id, e.target.value)}
+          defaultValue={buf.current[id] ?? ""}
+          onChange={e => (buf.current[id] = e.target.value)}
         >
           <option value="">— Select —</option>
-          {options.map(o => <option key={o} value={o}>{o}</option>)}
+          {options.map(o => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
         </select>
       </Field>
     );
   }
+
   function Chips({ id, options, allowMulti = true }: { id: string; options: string[]; allowMulti?: boolean }) {
-    const value: string[] = Array.isArray(form[id]) ? form[id] : (form[id] ? String(form[id]).split(",").map(s => s.trim()) : []);
+    const [, force] = React.useReducer(x => x + 1, 0);
+    const value: string[] = Array.isArray(buf.current[id])
+      ? buf.current[id]
+      : buf.current[id]
+      ? String(buf.current[id]).split(',').map(s => s.trim())
+      : [];
     const toggle = (v: string) => {
       if (allowMulti) {
         const next = value.includes(v) ? value.filter(x => x !== v) : [...value, v];
-        setField(id, next);
+        buf.current[id] = next;
       } else {
-        setField(id, value.includes(v) ? "" : v);
+        buf.current[id] = value.includes(v) ? '' : v;
       }
+      force();
     };
     return (
       <Field label={id}>
         <div className="chips">
           {options.map(v => (
-            <button type="button" key={v} className={`chip ${value.includes(v) ? "chip--on" : ""}`} onClick={() => toggle(v)}>
+            <button
+              type="button"
+              key={v}
+              className={`chip ${value.includes(v) ? 'chip--on' : ''}`}
+              onClick={() => toggle(v)}
+            >
               {v}
             </button>
           ))}
@@ -303,19 +343,24 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       </Field>
     );
   }
+
   function Upload({ id, label, hint }: { id: string; label: string; hint?: string }) {
-    const files = form[id] as any[];
+    const [, force] = React.useReducer(x => x + 1, 0);
+    const files = buf.current[id] as any[];
     return (
       <Field label={label} hint={hint}>
         <div className="upload-row">
           <div className="upload-preview">
-            {Array.isArray(files) && files.length ? files.map((f, i) => (
-              <img key={i} src={f.url ?? f} alt="" className="thumb" />
-            )) : <div className="empty">No file selected</div>}
+            {Array.isArray(files) && files.length ? (
+              files.map((f, i) => <img key={i} src={f.url ?? f} alt="" className="thumb" />)
+            ) : (
+              <div className="empty">No file selected</div>
+            )}
           </div>
           <UploadWidget
-            onUpload={(uploaded) => {
-              setField(id, uploaded);
+            onUpload={uploaded => {
+              buf.current[id] = uploaded;
+              force();
             }}
           >
             <button className="btn btn--dark">Upload</button>
@@ -324,15 +369,22 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       </Field>
     );
   }
+
   function Readonly({ id }: { id: string }) {
+    const inputId = makeId(id);
     return (
-      <Field label={id}>
-        <input className="input" readOnly value={form[id] ?? ""} />
+      <Field id={inputId} label={id}>
+        <input id={inputId} className="input" readOnly defaultValue={buf.current[id] ?? ''} />
       </Field>
     );
   }
+
   function Badge({ label, value }: { label: string; value: any }) {
-    return <div className="badge">{label}: <strong>{value ?? "—"}</strong></div>;
+    return (
+      <div className="badge">
+        {label}: <strong>{value ?? '—'}</strong>
+      </div>
+    );
   }
 }
 
@@ -340,12 +392,14 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 function Grid({ children }: { children: React.ReactNode }) {
   return <div className="grid">{children}</div>;
 }
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({ id, label, hint, children }: { id?: string; label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <label className="field">
-      <div className="field__label">{label}</div>
+    <div className="field">
+      <label className="field__label" htmlFor={id}>
+        {label}
+      </label>
       {children}
       {hint && <div className="field__hint">{hint}</div>}
-    </label>
+    </div>
   );
 }

@@ -42,6 +42,13 @@ export default function ModalPortal({ children, onClose }) {
   // Esc to close
   useEffect(() => {
     const onKey = (e) => {
+      const target = e.target
+      if (
+        target instanceof HTMLElement &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
+      ) {
+        return
+      }
       if (e.key === "Escape") {
         e.stopPropagation();
         onClose?.();

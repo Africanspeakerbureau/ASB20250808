@@ -221,6 +221,7 @@ function App() {
 
   useEffect(() => {
     const syncAndScroll = () => {
+      if (editCtx.open) return
       const fullHash = window.location.hash || ''
       const [pathPart, anchor] = fullHash.replace(/^#/, '').split('#')
       const pathname = pathPart || '/'
@@ -293,7 +294,7 @@ function App() {
       window.removeEventListener('popstate', syncAndScroll)
       window.removeEventListener('hashchange', syncAndScroll)
     }
-  }, [])
+  }, [editCtx.open])
 
   useEffect(() => {
     let alive = true
@@ -405,11 +406,12 @@ function App() {
   ]
 
   useEffect(() => {
+    if (editCtx.open) return
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
     }, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [editCtx.open])
 
   // Initialize currency conversion
   useEffect(() => {
