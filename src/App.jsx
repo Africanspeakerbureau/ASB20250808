@@ -498,12 +498,12 @@ function App() {
       const filteredData = Object.fromEntries(
         Object.entries(data).filter(([k]) => !['Status', 'Featured'].includes(k))
       );
-      
-      // Add default status for backend - must be array for multiselect
+
+      // Add default status for backend (array for multi-select, string for single-select)
       if (tableName === 'Speaker%20Applications') {
         filteredData['Status'] = ['Pending'];
       } else if (tableName === 'Client%20Inquiries' || tableName === 'Quick%20Inquiries') {
-        filteredData['Status'] = ['New'];
+        filteredData['Status'] = 'New';
       }
       
       console.log('Filtered data for submission:', filteredData);
@@ -557,12 +557,14 @@ function App() {
 
   const updateRecord = async (tableName, recordId, fields) => {
     try {
-      // Ensure Status field is sent as array for multiselect
+      // Airtable singleSelect expects a string that matches an option name.
+      // (If a caller accidentally passes an array, take the first item.)
       const processedFields = { ...fields };
-      if (processedFields.Status) {
+      if (processedFields.Status != null) {
         processedFields.Status = Array.isArray(processedFields.Status)
-          ? processedFields.Status
-          : [processedFields.Status];
+          ? String(processedFields.Status[0] ?? '')
+          : String(processedFields.Status);
+        if (!processedFields.Status) delete processedFields.Status; // let Airtable default (e.g. "New")
       }
       
       const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${tableName}/${recordId}`, {
