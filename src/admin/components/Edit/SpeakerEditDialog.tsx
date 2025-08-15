@@ -9,6 +9,7 @@ import UploadWidget from "@/components/UploadWidget";
 import { useToast } from "@/components/Toast";
 import { useAirtableRecord } from "../../hooks/useAirtableRecord";
 import { airtablePatchRecord } from "../../api/airtable";
+import { useEditing } from "../../editingContext";
 import "./editDialog.css";
 
 // Computed/linked fields we never send back to Airtable
@@ -66,8 +67,14 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const { push } = useToast();
   const [saving, setSaving] = React.useState(false);
   const [tab, setTab] = React.useState<TabKey>("Identity");
+  const { setEditing } = useEditing();
   const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
   const [form, setForm] = React.useState<Record<string, any>>(() => ({ ...(record?.fields || {}) }));
+
+  React.useEffect(() => {
+    setEditing(true);
+    return () => setEditing(false);
+  }, [setEditing]);
 
   React.useEffect(() => {
     const initial = { ...(record?.fields || {}) } as Record<string, any>;

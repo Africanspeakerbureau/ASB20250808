@@ -28,6 +28,7 @@ import ConsentBanner from "@/components/ConsentBanner"
 import { getConsent } from "@/lib/consent"
 import { useGeolocation } from "@/hooks/useGeolocation"
 import ApplyBeta from "./public/apply-beta/ApplyBeta"
+import { EditingProvider, useEditing } from "@/admin/editingContext"
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -113,7 +114,7 @@ import heroExecutiveAI from './assets/hero_executive_ai_training.jpg'
 import heroCorporateLeadership from './assets/hero_corporate_leadership_conference.jpg'
 import heroVirtualSeminars from './assets/hero_virtual_seminars_webinars.jpg'
 
-function App() {
+function AppContent() {
   // Cloudinary configuration
   const cld = new Cloudinary({
     cloud: {
@@ -168,6 +169,7 @@ function App() {
     Object.entries(hashToService).map(([k, v]) => [v, k])
   )
   const [editCtx, setEditCtx] = useState({ open: false, table: '', recordId: '' })
+  const { isEditing } = useEditing()
 
   const handleEdit = (table, recordId) => {
     setEditCtx({ open: true, table, recordId })
@@ -405,11 +407,12 @@ function App() {
   ]
 
   useEffect(() => {
+    if (isEditing) return
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
     }, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [isEditing])
 
   // Initialize currency conversion
   useEffect(() => {
@@ -539,6 +542,7 @@ function App() {
 
   // Admin Functions
   const loadAdminData = async () => {
+    if (isEditing) return
     setLoading(true)
     try {
       const [a, c, q] = await Promise.all([
@@ -554,6 +558,13 @@ function App() {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    if (route === '/admin' && isAuthed && !isEditing) {
+      const t = setInterval(() => loadAdminData(), 30000)
+      return () => clearInterval(t)
+    }
+  }, [route, isAuthed, isEditing])
 
   const updateRecord = async (tableName, recordId, fields) => {
     try {
@@ -2693,5 +2704,11 @@ function App() {
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <EditingProvider>
+      <AppContent />
+    </EditingProvider>
+  )
+}
 
