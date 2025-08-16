@@ -39,10 +39,10 @@ function buildSpeakerPayload(
 ) {
   const out: Record<string, any> = {};
   for (const [key, val] of Object.entries(form)) {
-    // Normalize attachments into Airtable's shape: [{url, filename?}]
+    // Normalize attachments into Airtable's shape
     if (ATTACHMENT_FIELDS.has(key)) {
-      const list = Array.isArray(val) ? val : val ? [val] : [];
-      // If any item is a local blob or missing URL, refuse save
+      const toArray = (v: any) => (Array.isArray(v) ? v : v ? [v] : []);
+      const list = toArray(val);
       if (list.some((a: any) => !a || !a.url || String(a.url).startsWith("blob:"))) {
         throw Object.assign(
           new Error(
@@ -51,15 +51,19 @@ function buildSpeakerPayload(
           { code: "ATTACHMENT_IN_PROGRESS" }
         );
       }
-      const attachments = list
-        .filter(Boolean)
-        .map((a: any) => ({
-          url: a.url || a.secure_url,
-          filename: a.filename || a.name || undefined,
-        }));
-      if (!isEqualShallow(attachments, original?.fields?.[key] ?? [])) {
-        out[key] = attachments;
-      }
+      const normalized = list
+        .map((x: any) => {
+          if (typeof x === "string") return { url: x };
+          if (x.secure_url) return { url: x.secure_url, filename: x.original_filename };
+          if (x.url) return { url: x.url, filename: x.filename || undefined };
+          return null;
+        })
+        .filter(Boolean);
+      const prev = toArray(original?.fields?.[key]).map((x: any) => ({
+        url: x.url,
+        filename: x.filename,
+      }));
+      if (!isEqualShallow(normalized, prev)) out[key] = normalized;
       continue;
     }
     if (READ_ONLY_FIELDS.has(key)) continue;
@@ -190,13 +194,17 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                     <Select id="Country" options={COUNTRIES} />
                     <Field label="Profile Image" hint="JPG/PNG, max 5MB">
                       <UploadWidget
-                        label="Upload"
-                        initialUrl={buf.current["Profile Image"]?.[0]?.url || ""}
-                        onUploaded={(att) => {
-                          buf.current["Profile Image"] = att ? [att] : [];
+                        value={buf.current["Profile Image"] || []}
+                        onChange={(arr) => {
+                          buf.current["Profile Image"] = arr || [];
                         }}
-                        onUploadStart={() => setUploading(u => ({ ...u, ["Profile Image"]: true }))}
-                        onUploadEnd={() => setUploading(u => ({ ...u, ["Profile Image"]: false }))}
+                        onUploadStart={() =>
+                          setUploading((u) => ({ ...u, ["Profile Image"]: true }))
+                        }
+                        onUploadEnd={() =>
+                          setUploading((u) => ({ ...u, ["Profile Image"]: false }))
+                        }
+                        label="Upload"
                       />
                     </Field>
                 </Grid>
@@ -259,13 +267,17 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                 <Grid>
                     <Field label="Header Image" hint="Wide aspect recommended; JPG/PNG">
                       <UploadWidget
-                        label="Upload"
-                        initialUrl={buf.current["Header Image"]?.[0]?.url || ""}
-                        onUploaded={(att) => {
-                          buf.current["Header Image"] = att ? [att] : [];
+                        value={buf.current["Header Image"] || []}
+                        onChange={(arr) => {
+                          buf.current["Header Image"] = arr || [];
                         }}
-                        onUploadStart={() => setUploading(u => ({ ...u, ["Header Image"]: true }))}
-                        onUploadEnd={() => setUploading(u => ({ ...u, ["Header Image"]: false }))}
+                        onUploadStart={() =>
+                          setUploading((u) => ({ ...u, ["Header Image"]: true }))
+                        }
+                        onUploadEnd={() =>
+                          setUploading((u) => ({ ...u, ["Header Image"]: false }))
+                        }
+                        label="Upload"
                       />
                     </Field>
                   <Text id="Video Link 1" />
