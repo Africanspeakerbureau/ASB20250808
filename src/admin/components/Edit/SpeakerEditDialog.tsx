@@ -21,7 +21,7 @@ const READ_ONLY_FIELDS = new Set<string>([
   "Client Inquiries",
 ]);
 
-// Attachment placeholders (handled later)
+// Attachment fields we save to Airtable
 const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
 
 function normalizeMultiline(out: any) {
@@ -39,8 +39,34 @@ function buildSpeakerPayload(
 ) {
   const out: Record<string, any> = {};
   for (const [key, val] of Object.entries(form)) {
+    // Normalize attachments into Airtable's shape
+    if (ATTACHMENT_FIELDS.has(key)) {
+      const toArray = (v: any) => (Array.isArray(v) ? v : v ? [v] : []);
+      const list = toArray(val);
+      if (list.some((a: any) => !a || !a.url || String(a.url).startsWith("blob:"))) {
+        throw Object.assign(
+          new Error(
+            `Upload still in progress for “${key}”. Please finish the upload (a real URL) before saving.`
+          ),
+          { code: "ATTACHMENT_IN_PROGRESS" }
+        );
+      }
+      const normalized = list
+        .map((x: any) => {
+          if (typeof x === "string") return { url: x };
+          if (x.secure_url) return { url: x.secure_url, filename: x.original_filename };
+          if (x.url) return { url: x.url, filename: x.filename || undefined };
+          return null;
+        })
+        .filter(Boolean);
+      const prev = toArray(original?.fields?.[key]).map((x: any) => ({
+        url: x.url,
+        filename: x.filename,
+      }));
+      if (!isEqualShallow(normalized, prev)) out[key] = normalized;
+      continue;
+    }
     if (READ_ONLY_FIELDS.has(key)) continue;
-    if (ATTACHMENT_FIELDS.has(key)) continue;
     const prev = original?.fields?.[key];
     if (!isEqualShallow(val, prev)) out[key] = val;
   }
@@ -75,6 +101,9 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const buf = React.useRef<Record<string, any>>({});
   const hydratedRef = React.useRef(false);
   const [ready, setReady] = React.useState(false);
+  // Track per-field uploading state so Save can be blocked
+  const [uploading, setUploading] = React.useState<Record<string, boolean>>({});
+  const uploadBusy = Object.values(uploading).some(Boolean);
 
   React.useEffect(() => {
     if (!record?.id) return;
@@ -94,6 +123,12 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   async function handleSave(closeAfter = false) {
     if (!record) return;
     try {
+      // Hard block if any attachment still uploading
+      const busy = Object.values(uploading).some(Boolean);
+      if (busy) {
+        push({ text: "Please wait—image upload still in progress.", type: "error" });
+        return;
+      }
       setSaving(true);
       const data: Record<string, any> = { ...buf.current };
       const { speakingTopicsText, keyMessagesText, ...rest } = data;
@@ -112,8 +147,12 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       push({ text: "Saved ✔︎", type: "success" });
       if (closeAfter) onClose();
     } catch (e: any) {
-      push({ text: e?.message || "Could not save", type: "error" });
-      console.error("[Save error]", e);
+      if (e?.code === "ATTACHMENT_IN_PROGRESS") {
+        push({ text: e.message, type: "error" });
+      } else {
+        push({ text: e?.message || "Could not save", type: "error" });
+        console.error("[Save error]", e);
+      }
     } finally {
       setSaving(false);
     }
@@ -151,9 +190,23 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Text id="Title" label="Title (Dr/Prof)" />
                   <Text id="Professional Title" />
                   <Text id="Company" label="Company/Organization" />
-                  <Text id="Location" />
-                  <Select id="Country" options={COUNTRIES} />
-                  <Upload id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
+                    <Text id="Location" />
+                    <Select id="Country" options={COUNTRIES} />
+                    <Field label="Profile Image" hint="JPG/PNG, max 5MB">
+                      <UploadWidget
+                        value={buf.current["Profile Image"] || []}
+                        onChange={(arr) => {
+                          buf.current["Profile Image"] = arr || [];
+                        }}
+                        onUploadStart={() =>
+                          setUploading((u) => ({ ...u, ["Profile Image"]: true }))
+                        }
+                        onUploadEnd={() =>
+                          setUploading((u) => ({ ...u, ["Profile Image"]: false }))
+                        }
+                        label="Upload"
+                      />
+                    </Field>
                 </Grid>
               )}
 
@@ -212,7 +265,21 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
               {tab === "Media & Languages" && (
                 <Grid>
-                  <Upload id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
+                    <Field label="Header Image" hint="Wide aspect recommended; JPG/PNG">
+                      <UploadWidget
+                        value={buf.current["Header Image"] || []}
+                        onChange={(arr) => {
+                          buf.current["Header Image"] = arr || [];
+                        }}
+                        onUploadStart={() =>
+                          setUploading((u) => ({ ...u, ["Header Image"]: true }))
+                        }
+                        onUploadEnd={() =>
+                          setUploading((u) => ({ ...u, ["Header Image"]: false }))
+                        }
+                        label="Upload"
+                      />
+                    </Field>
                   <Text id="Video Link 1" />
                   <Text id="Video Link 2" />
                   <Text id="Video Link 3" />
@@ -244,32 +311,31 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                 </Grid>
               )}
 
-              {tab === "Internal" && (
-                <Grid>
-                  <Chips id="Status" options={STATUS} allowMulti />
-                  <Select id="Featured" options={FEATURED} />
-                  <Readonly id="Created Date" />
-                  <Readonly id="Client Inquiries" />
-                  <Badge label="Experience Score" value={buf.current["Experience Score"]} />
-                  <Badge label="Total Events" value={buf.current["Total Events (calc)"]} />
-                  <Badge label="Potential Revenue" value={buf.current["Potential Revenue"]} />
-                  <Upload id="Header Image" label="Header Image" hint="This is the wide banner image" />
-                  <TextArea id="Internal Notes" />
-                </Grid>
-              )}
+                {tab === "Internal" && (
+                  <Grid>
+                    <Chips id="Status" options={STATUS} allowMulti />
+                    <Select id="Featured" options={FEATURED} />
+                    <Readonly id="Created Date" />
+                    <Readonly id="Client Inquiries" />
+                    <Badge label="Experience Score" value={buf.current["Experience Score"]} />
+                    <Badge label="Total Events" value={buf.current["Total Events (calc)"]} />
+                    <Badge label="Potential Revenue" value={buf.current["Potential Revenue"]} />
+                    <TextArea id="Internal Notes" />
+                  </Grid>
+                )}
             </div>
           </>
         )}
 
-        <div className="modal__footer">
-          <button className="btn" disabled={saving} onClick={onClose}>Close</button>
-          <button className="btn" disabled={saving} onClick={() => handleSave(false)}>
-            {saving ? "Saving…" : "Save"}
-          </button>
-          <button className="btn btn--primary" disabled={saving} onClick={() => handleSave(true)}>
-            {saving ? "Saving…" : "Save & Close"}
-          </button>
-        </div>
+          <div className="modal__footer">
+            <button className="btn" disabled={saving || uploadBusy} onClick={onClose}>Close</button>
+            <button className="btn" disabled={saving || uploadBusy} onClick={() => handleSave(false)}>
+              {saving ? "Saving…" : "Save"}
+            </button>
+            <button className="btn btn--primary" disabled={saving || uploadBusy} onClick={() => handleSave(true)}>
+              {saving ? "Saving…" : "Save & Close"}
+            </button>
+          </div>
       </div>
     </div>,
     document.body
@@ -366,31 +432,6 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     );
   }
 
-  function Upload({ id, label, hint }: { id: string; label: string; hint?: string }) {
-    const [, force] = React.useReducer(x => x + 1, 0);
-    const files = buf.current[id] as any[];
-    return (
-      <Field label={label} hint={hint}>
-        <div className="upload-row">
-          <div className="upload-preview">
-            {Array.isArray(files) && files.length ? (
-              files.map((f, i) => <img key={i} src={f.url ?? f} alt="" className="thumb" />)
-            ) : (
-              <div className="empty">No file selected</div>
-            )}
-          </div>
-          <UploadWidget
-            onUpload={uploaded => {
-              buf.current[id] = uploaded;
-              force();
-            }}
-          >
-            <button className="btn btn--dark">Upload</button>
-          </UploadWidget>
-        </div>
-      </Field>
-    );
-  }
 
   function Readonly({ id }: { id: string }) {
     const inputId = makeId(id);
