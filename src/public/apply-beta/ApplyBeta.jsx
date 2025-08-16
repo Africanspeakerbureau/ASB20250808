@@ -14,6 +14,11 @@ import { toApplyV2Payload } from "./mapAdminCardsToApplyV2";
 import { submitApplication } from "@/lib/apply";
 import "@/admin/components/Edit/editDialog.css";
 
+function normalizeMultiline(out) {
+  if (Array.isArray(out)) return out.filter(Boolean).join("\n");
+  return String(out ?? "").replace(/\r\n/g, "\n");
+}
+
 const TABS = [
   { key: "identity", label: "Identity" },
   { key: "background", label: "Background" },
@@ -79,7 +84,16 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
         setMessage("Please finish upload before submitting.");
         return;
       }
-      const payload = toApplyV2Payload(form);
+      const prepared = { ...form };
+      delete prepared.speakingTopicsText;
+      delete prepared.keyMessagesText;
+      const payload = toApplyV2Payload(prepared);
+      payload["Speaking Topics"] = normalizeMultiline(
+        form.speakingTopicsText ?? form["Speaking Topics"]
+      );
+      payload["Key Messages"] = normalizeMultiline(
+        form.keyMessagesText ?? form["Key Messages"] ?? form.keyMessage
+      );
       await submitApplication(payload);
       localStorage.removeItem(DRAFT_KEY);
       setMessage("Application submitted successfully!");

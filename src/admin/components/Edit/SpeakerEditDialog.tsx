@@ -24,6 +24,11 @@ const READ_ONLY_FIELDS = new Set<string>([
 // Attachment placeholders (handled later)
 const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
 
+function normalizeMultiline(out: any) {
+  if (Array.isArray(out)) return out.filter(Boolean).join("\n");
+  return String(out ?? "").replace(/\r\n/g, "\n");
+}
+
 function isEqualShallow(a: any, b: any) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
@@ -75,6 +80,13 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     if (!record?.id) return;
     if (hydratedRef.current) return;
     buf.current = { ...(record.fields || {}) };
+    const f = buf.current;
+    buf.current.speakingTopicsText = Array.isArray(f["Speaking Topics"])
+      ? f["Speaking Topics"].filter(Boolean).join("\n")
+      : String(f["Speaking Topics"] ?? "");
+    buf.current.keyMessagesText = Array.isArray(f["Key Messages"])
+      ? f["Key Messages"].filter(Boolean).join("\n")
+      : String(f["Key Messages"] ?? "");
     hydratedRef.current = true;
     setReady(true);
   }, [record?.id, record]);
@@ -84,22 +96,13 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     try {
       setSaving(true);
       const data: Record<string, any> = { ...buf.current };
-      if (data.speakingTopicsText) {
-        data['Speaking Topics'] = data.speakingTopicsText
-          .split(/\r?\n/)
-          .map((s: string) => s.trim())
-          .filter(Boolean);
-        delete data.speakingTopicsText;
-      } else if (typeof data['Speaking Topics'] === 'string') {
-        data['Speaking Topics'] = data['Speaking Topics']
-          .split(/\r?\n/)
-          .map((s: string) => s.trim())
-          .filter(Boolean);
-      }
-      if (data['Key Message']) {
-        data['Key Messages'] = [data['Key Message']];
-      }
-      const payload = buildSpeakerPayload(data, record);
+      const { speakingTopicsText, keyMessagesText, ...rest } = data;
+      const prepared = {
+        ...rest,
+        'Speaking Topics': normalizeMultiline(speakingTopicsText ?? rest['Speaking Topics']),
+        'Key Messages': normalizeMultiline(keyMessagesText ?? rest['Key Messages']),
+      };
+      const payload = buildSpeakerPayload(prepared, record);
       if (Object.keys(payload.fields).length === 0) {
         push({ text: "No changes to save", type: "info" });
         if (closeAfter) onClose();
@@ -177,38 +180,21 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
               {tab === "Expertise & Content" && (
                 <Grid>
                   <Chips id="Expertise Areas" options={EXPERTISE_AREAS} />
-                  {/* Key Message: compact 3–4 line box (half width) */}
-                  <TextArea id="Key Message" label="Key Message" rows={4} />
-
                   {/* Speaking Topics: full-width, one per line */}
-                  <div className="field field--full">
-                    <div className="field__label">Speaking Topics (one per line)</div>
+                  <Field label="Speaking Topics (one per line)" full>
                     <textarea
                       className="textarea"
-                      rows={8}
-                      defaultValue={
-                        buf.current.speakingTopicsText ??
-                        (Array.isArray(buf.current["Speaking Topics"])
-                          ? buf.current["Speaking Topics"].join("\n")
-                          : "")
-                      }
+                      rows={10}
+                      defaultValue={buf.current.speakingTopicsText ?? ""}
                       onChange={e => (buf.current.speakingTopicsText = e.target.value)}
                       style={{ resize: "vertical" }}
                     />
-                  </div>
+                  </Field>
 
-                  {/* Professional Bio: full-width, tall */}
-                  <div className="field field--full">
-                    <div className="field__label">Professional Bio</div>
-                    <textarea
-                      className="textarea"
-                      rows={12}
-                      defaultValue={buf.current["Professional Bio"] ?? ""}
-                      onChange={e => (buf.current["Professional Bio"] = e.target.value)}
-                      style={{ resize: "vertical" }}
-                    />
-                    <div className="field__hint">Tip: use new lines for paragraphs or bullets.</div>
-                  </div>
+                  <TextArea id="keyMessagesText" label="Key Messages" rows={8} full />
+                  <TextArea id="Professional Bio" label="Professional Bio" rows={12} full />
+                  {/* Key Message: compact 3–4 line box (half width) */}
+                  <TextArea id="Key Message" label="Key Message" rows={4} />
                 </Grid>
               )}
 
@@ -309,10 +295,10 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     );
   }
 
-  function TextArea({ id, label, rows = 4 }: { id: string; label?: string; rows?: number }) {
+  function TextArea({ id, label, rows = 4, full = false }: { id: string; label?: string; rows?: number; full?: boolean }) {
     const inputId = makeId(id);
     return (
-      <Field id={inputId} label={label ?? id}>
+      <Field id={inputId} label={label ?? id} full={full}>
         <textarea
           id={inputId}
           className="textarea"
@@ -428,9 +414,9 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 function Grid({ children }: { children: React.ReactNode }) {
   return <div className="grid">{children}</div>;
 }
-function Field({ id, label, hint, children }: { id?: string; label: string; hint?: string; children: React.ReactNode }) {
+function Field({ id, label, hint, children, full = false }: { id?: string; label: string; hint?: string; children: React.ReactNode; full?: boolean }) {
   return (
-    <div className="field">
+    <div className="field" style={full ? { gridColumn: "1 / -1" } : undefined}>
       <label className="field__label" htmlFor={id}>
         {label}
       </label>
