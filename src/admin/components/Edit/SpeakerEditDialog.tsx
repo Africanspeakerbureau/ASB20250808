@@ -7,8 +7,7 @@ import {
 } from "../../edit/options";
 import UploadWidget from "@/components/UploadWidget";
 import { useToast } from "@/components/Toast";
-import { useAirtableRecord } from "../../hooks/useAirtableRecord";
-import { airtablePatchRecord } from "../../api/airtable";
+import { getRecord, airtablePatchRecord } from "../../api/airtable";
 import "./editDialog.css";
 
 // Computed/linked fields we never send back to Airtable
@@ -21,7 +20,7 @@ const READ_ONLY_FIELDS = new Set<string>([
   "Client Inquiries",
 ]);
 
-// Attachment placeholders (handled later)
+// Treat these as Airtable attachments
 const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
 
 function normalizeMultiline(out: any) {
@@ -33,34 +32,38 @@ function isEqualShallow(a: any, b: any) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
-// ---------- attachment helpers ----------
-function isBlobLikeUrl(u: any) {
-  const s = typeof u === "string" ? u : u?.secure_url || u?.url || u?.href || "";
-  return typeof s === "string" && (s.startsWith("blob:") || s.startsWith("data:"));
+// --- attachment helpers ----------------------------------------------------
+// Convert whatever the UI stored into a valid Airtable attachment array.
+// Accepts:
+//  - string URL                  -> [{ url }]
+//  - { url, name/filename }      -> [{ url, filename }]
+//  - { secure_url, original_* }  -> [{ url, filename }]
+//  - already-an-array            -> maps each item similarly
+function toAirtableAttachments(input: any): Array<{ url: string; filename?: string }> {
+  const castOne = (v: any) => {
+    if (!v) return null;
+    if (typeof v === "string") {
+      return v.startsWith("http") ? { url: v } : null;
+    }
+    if (v.url && typeof v.url === "string" && v.url.startsWith("http")) {
+      return { url: v.url, filename: v.filename || v.name };
+    }
+    if (v.secure_url && typeof v.secure_url === "string") {
+      return { url: v.secure_url, filename: v.original_filename || v.public_id };
+    }
+    return null; // blob:, data:, File, etc.
+  };
+  const arr = Array.isArray(input) ? input : [input];
+  return arr.map(castOne).filter(Boolean) as Array<{ url: string; filename?: string }>;
 }
 
-function containsPendingUpload(val: any) {
-  if (!val) return false;
-  const arr = Array.isArray(val) ? val : [val];
-  for (const v of arr) {
-    const url = typeof v === "string" ? v : v?.secure_url || v?.url || v?.href || "";
-    if (isBlobLikeUrl(url)) return true;
-  }
-  return false;
-}
-
-function toAttachmentArray(val: any): Array<{ url: string; filename?: string }> {
-  if (!val) return [];
-  // already airtable-shaped?
-  if (Array.isArray(val) && val.length && typeof val[0] === "object" && "url" in val[0]) {
-    // guard against blob in structured shape
-    if (isBlobLikeUrl(val[0].url)) return [];
-    return val as Array<{ url: string; filename?: string }>;
-  }
-  // cloudinary / generic object / plain url
-  const url = (typeof val === "string" ? val : val?.secure_url || val?.url || val?.href || "") as string;
-  if (!url || isBlobLikeUrl(url)) return [];
-  return [{ url }];
+// Reject obviously bad attachment values before save
+function hasUnfinishedUpload(val: any): boolean {
+  const checkOne = (v: any) => {
+    const url = typeof v === "string" ? v : v?.url || v?.secure_url;
+    return !url || typeof url !== "string" || url.startsWith("blob:") || url.startsWith("data:");
+  };
+  return Array.isArray(val) ? val.some(checkOne) : checkOne(val);
 }
 
 function buildSpeakerPayload(
@@ -70,18 +73,33 @@ function buildSpeakerPayload(
   const out: Record<string, any> = {};
   for (const [key, val] of Object.entries(form)) {
     if (READ_ONLY_FIELDS.has(key)) continue;
-    let next = val;
-    if (ATTACHMENT_FIELDS.has(key)) {
-      // Convert to Airtable shape, but if it’s still a blob preview, skip writing (preserve current)
-      const maybe = toAttachmentArray(val);
-      if (!maybe.length && containsPendingUpload(val)) {
-        // leave field out of payload so Airtable keeps existing attachment
-        continue;
+
+    // Normalize Speaking Topics (Airtable field is multiline text)
+    if (key === "Speaking Topics") {
+      const normalized =
+        typeof val === "string"
+          ? val
+          : Array.isArray(val)
+          ? val.join("\n")
+          : val ?? "";
+      if (!isEqualShallow(normalized, original?.fields?.[key])) {
+        out[key] = normalized;
       }
-      next = maybe;
+      continue;
     }
-    const prev = original?.fields?.[key];
-    if (!isEqualShallow(next, prev)) out[key] = next;
+
+    // Normalize attachments up-front
+    if (ATTACHMENT_FIELDS.has(key)) {
+      const attachments = toAirtableAttachments(val);
+      if (!isEqualShallow(attachments, original?.fields?.[key])) {
+        out[key] = attachments;
+      }
+      continue;
+    }
+
+    if (!isEqualShallow(val, original?.fields?.[key])) {
+      out[key] = val;
+    }
   }
   return { fields: out };
 }
@@ -110,36 +128,45 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const { push } = useToast();
   const [saving, setSaving] = React.useState(false);
   const [tab, setTab] = React.useState<TabKey>("Identity");
-  const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
+  const [record, setRecord] = React.useState<any>();
+  const [loading, setLoading] = React.useState(true);
   const buf = React.useRef<Record<string, any>>({});
-  const hydratedRef = React.useRef(false);
   const [ready, setReady] = React.useState(false);
 
   React.useEffect(() => {
-    if (!record?.id) return;
-    if (hydratedRef.current) return;
-    buf.current = { ...(record.fields || {}) };
-    const f = buf.current;
-    buf.current.speakingTopicsText = Array.isArray(f["Speaking Topics"])
-      ? f["Speaking Topics"].filter(Boolean).join("\n")
-      : String(f["Speaking Topics"] ?? "");
-    buf.current.keyMessagesText = Array.isArray(f["Key Messages"])
-      ? f["Key Messages"].filter(Boolean).join("\n")
-      : String(f["Key Messages"] ?? "");
-    hydratedRef.current = true;
-    setReady(true);
-  }, [record?.id, record]);
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const rec = await getRecord("Speaker Applications", recordId);
+      if (cancelled) return;
+      setRecord(rec);
+      buf.current = { ...(rec.fields || {}) };
+      const f = buf.current;
+      buf.current.speakingTopicsText = Array.isArray(f["Speaking Topics"])
+        ? f["Speaking Topics"].filter(Boolean).join("\n")
+        : String(f["Speaking Topics"] ?? "");
+      buf.current.keyMessagesText = Array.isArray(f["Key Messages"])
+        ? f["Key Messages"].filter(Boolean).join("\n")
+        : String(f["Key Messages"] ?? "");
+      setReady(true);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [recordId]);
 
   async function handleSave(closeAfter = false) {
     if (!record) return;
     try {
-      // block save if any attachment is still a local blob (preview), which Airtable will reject
+      // Guard: block save if an attachment is still a blob/data URL
       for (const key of ATTACHMENT_FIELDS) {
-        if (containsPendingUpload(buf.current[key])) {
+        if (hasUnfinishedUpload(buf.current[key])) {
           push({
-            text: `Upload still in progress for “${key}”. Please finish the upload (you should receive a real URL) before saving.`,
+            text: `Upload still in progress for “${key}”. Please finish the upload so it has a real https URL.`,
             type: "error",
           });
+          setSaving(false);
           return;
         }
       }
@@ -203,7 +230,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Text id="Company" label="Company/Organization" />
                   <Text id="Location" />
                   <Select id="Country" options={COUNTRIES} />
-                  <Upload id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
+                  <Attachment id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
                 </Grid>
               )}
 
@@ -262,7 +289,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
               {tab === "Media & Languages" && (
                 <Grid>
-                  <Upload id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
+                  <Attachment id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
                   <Text id="Video Link 1" />
                   <Text id="Video Link 2" />
                   <Text id="Video Link 3" />
@@ -415,18 +442,19 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     );
   }
 
-  function Upload({ id, label, hint }: { id: string; label: string; hint?: string }) {
+  // Small adapter around UploadWidget to always store something we can normalize
+  function Attachment({ id, label, hint }: { id: string; label: string; hint?: string }) {
     const [, force] = React.useReducer(x => x + 1, 0);
     const raw = buf.current[id];
-    const files = containsPendingUpload(raw)
+    const files = hasUnfinishedUpload(raw)
       ? (Array.isArray(raw) ? raw : [raw])
-      : toAttachmentArray(raw);
+      : toAirtableAttachments(raw);
     return (
       <Field label={label} hint={hint}>
         <div className="upload-row">
           <div className="upload-preview">
             {Array.isArray(files) && files.length ? (
-              files.map((f, i) => <img key={i} src={f.url ?? f} alt="" className="thumb" />)
+              files.map((f, i) => <img key={i} src={typeof f === 'string' ? f : f.url} alt="" className="thumb" />)
             ) : (
               <div className="empty">No file selected</div>
             )}
