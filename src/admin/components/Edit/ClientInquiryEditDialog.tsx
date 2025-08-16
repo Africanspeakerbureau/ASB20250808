@@ -89,7 +89,7 @@ const ALLOWED_FIELDS = new Set<string>([
   "Presentation Format",
   "Additional Requirements",
   "Status",
-  "Internal notes",
+  "Internal Notes",
 ]);
 
 function diffPayload(next: Record<string, any>, original: Record<string, any>) {
@@ -133,7 +133,6 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: Props) {
       const payload = diffPayload(form, record.fields || {});
       if (Object.keys(payload.fields).length === 0) {
         if (closeAfter) onClose();
-        setSaving(false);
         return;
       }
       await airtablePatchRecord("Client Inquiries", record.id, payload.fields);
@@ -293,10 +292,10 @@ export default function ClientInquiryEditDialog({ recordId, onClose }: Props) {
               </select>
             </label>
 
-            {/* Row 12: Internal notes */}
+            {/* Row 12: Internal Notes */}
             <label className="field" style={{ gridColumn: "1 / -1" }}>
-              <div className="field__label">Internal notes</div>
-              <textarea className="textarea" rows={4} {...bind("Internal notes")} />
+              <div className="field__label">Internal Notes</div>
+              <textarea className="textarea" rows={4} {...bind("Internal Notes")} />
             </label>
           </div>
         </div>
