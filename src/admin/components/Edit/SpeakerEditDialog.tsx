@@ -7,8 +7,7 @@ import {
 } from "../../edit/options";
 import UploadWidget from "@/components/UploadWidget";
 import { useToast } from "@/components/Toast";
-import { useAirtableRecord } from "../../hooks/useAirtableRecord";
-import { airtablePatchRecord } from "../../api/airtable";
+import { getRecord, airtablePatchRecord } from "../../api/airtable";
 import "./editDialog.css";
 
 // Computed/linked fields we never send back to Airtable
@@ -21,7 +20,7 @@ const READ_ONLY_FIELDS = new Set<string>([
   "Client Inquiries",
 ]);
 
-// Attachment placeholders (handled later)
+// Treat these as Airtable attachments
 const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
 
 function normalizeMultiline(out: any) {
@@ -33,6 +32,40 @@ function isEqualShallow(a: any, b: any) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
+// --- attachment helpers ----------------------------------------------------
+// Convert whatever the UI stored into a valid Airtable attachment array.
+// Accepts:
+//  - string URL                  -> [{ url }]
+//  - { url, name/filename }      -> [{ url, filename }]
+//  - { secure_url, original_* }  -> [{ url, filename }]
+//  - already-an-array            -> maps each item similarly
+function toAirtableAttachments(input: any): Array<{ url: string; filename?: string }> {
+  const castOne = (v: any) => {
+    if (!v) return null;
+    if (typeof v === "string") {
+      return v.startsWith("http") ? { url: v } : null;
+    }
+    if (v.url && typeof v.url === "string" && v.url.startsWith("http")) {
+      return { url: v.url, filename: v.filename || v.name };
+    }
+    if (v.secure_url && typeof v.secure_url === "string") {
+      return { url: v.secure_url, filename: v.original_filename || v.public_id };
+    }
+    return null; // blob:, data:, File, etc.
+  };
+  const arr = Array.isArray(input) ? input : [input];
+  return arr.map(castOne).filter(Boolean) as Array<{ url: string; filename?: string }>;
+}
+
+// Reject obviously bad attachment values before save
+function hasUnfinishedUpload(val: any): boolean {
+  const checkOne = (v: any) => {
+    const url = typeof v === "string" ? v : v?.url || v?.secure_url;
+    return !url || typeof url !== "string" || url.startsWith("blob:") || url.startsWith("data:");
+  };
+  return Array.isArray(val) ? val.some(checkOne) : checkOne(val);
+}
+
 function buildSpeakerPayload(
   form: Record<string, any>,
   original: { fields?: Record<string, any> } | undefined
@@ -40,9 +73,33 @@ function buildSpeakerPayload(
   const out: Record<string, any> = {};
   for (const [key, val] of Object.entries(form)) {
     if (READ_ONLY_FIELDS.has(key)) continue;
-    if (ATTACHMENT_FIELDS.has(key)) continue;
-    const prev = original?.fields?.[key];
-    if (!isEqualShallow(val, prev)) out[key] = val;
+
+    // Normalize Speaking Topics (Airtable field is multiline text)
+    if (key === "Speaking Topics") {
+      const normalized =
+        typeof val === "string"
+          ? val
+          : Array.isArray(val)
+          ? val.join("\n")
+          : val ?? "";
+      if (!isEqualShallow(normalized, original?.fields?.[key])) {
+        out[key] = normalized;
+      }
+      continue;
+    }
+
+    // Normalize attachments up-front
+    if (ATTACHMENT_FIELDS.has(key)) {
+      const attachments = toAirtableAttachments(val);
+      if (!isEqualShallow(attachments, original?.fields?.[key])) {
+        out[key] = attachments;
+      }
+      continue;
+    }
+
+    if (!isEqualShallow(val, original?.fields?.[key])) {
+      out[key] = val;
+    }
   }
   return { fields: out };
 }
@@ -71,29 +128,49 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const { push } = useToast();
   const [saving, setSaving] = React.useState(false);
   const [tab, setTab] = React.useState<TabKey>("Identity");
-  const { record, loading } = useAirtableRecord<any>("Speaker Applications", recordId);
+  const [record, setRecord] = React.useState<any>();
+  const [loading, setLoading] = React.useState(true);
   const buf = React.useRef<Record<string, any>>({});
-  const hydratedRef = React.useRef(false);
   const [ready, setReady] = React.useState(false);
 
   React.useEffect(() => {
-    if (!record?.id) return;
-    if (hydratedRef.current) return;
-    buf.current = { ...(record.fields || {}) };
-    const f = buf.current;
-    buf.current.speakingTopicsText = Array.isArray(f["Speaking Topics"])
-      ? f["Speaking Topics"].filter(Boolean).join("\n")
-      : String(f["Speaking Topics"] ?? "");
-    buf.current.keyMessagesText = Array.isArray(f["Key Messages"])
-      ? f["Key Messages"].filter(Boolean).join("\n")
-      : String(f["Key Messages"] ?? "");
-    hydratedRef.current = true;
-    setReady(true);
-  }, [record?.id, record]);
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const rec = await getRecord("Speaker Applications", recordId);
+      if (cancelled) return;
+      setRecord(rec);
+      buf.current = { ...(rec.fields || {}) };
+      const f = buf.current;
+      buf.current.speakingTopicsText = Array.isArray(f["Speaking Topics"])
+        ? f["Speaking Topics"].filter(Boolean).join("\n")
+        : String(f["Speaking Topics"] ?? "");
+      buf.current.keyMessagesText = Array.isArray(f["Key Messages"])
+        ? f["Key Messages"].filter(Boolean).join("\n")
+        : String(f["Key Messages"] ?? "");
+      setReady(true);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [recordId]);
 
   async function handleSave(closeAfter = false) {
     if (!record) return;
     try {
+      // Guard: block save if an attachment is still a blob/data URL
+      for (const key of ATTACHMENT_FIELDS) {
+        if (hasUnfinishedUpload(buf.current[key])) {
+          push({
+            text: `Upload still in progress for “${key}”. Please finish the upload so it has a real https URL.`,
+            type: "error",
+          });
+          setSaving(false);
+          return;
+        }
+      }
+
       setSaving(true);
       const data: Record<string, any> = { ...buf.current };
       const { speakingTopicsText, keyMessagesText, ...rest } = data;
@@ -153,7 +230,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Text id="Company" label="Company/Organization" />
                   <Text id="Location" />
                   <Select id="Country" options={COUNTRIES} />
-                  <Upload id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
+                  <Attachment id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
                 </Grid>
               )}
 
@@ -212,7 +289,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
               {tab === "Media & Languages" && (
                 <Grid>
-                  <Upload id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
+                  <Attachment id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
                   <Text id="Video Link 1" />
                   <Text id="Video Link 2" />
                   <Text id="Video Link 3" />
@@ -253,7 +330,6 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Badge label="Experience Score" value={buf.current["Experience Score"]} />
                   <Badge label="Total Events" value={buf.current["Total Events (calc)"]} />
                   <Badge label="Potential Revenue" value={buf.current["Potential Revenue"]} />
-                  <Upload id="Header Image" label="Header Image" hint="This is the wide banner image" />
                   <TextArea id="Internal Notes" />
                 </Grid>
               )}
@@ -366,15 +442,19 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     );
   }
 
-  function Upload({ id, label, hint }: { id: string; label: string; hint?: string }) {
+  // Small adapter around UploadWidget to always store something we can normalize
+  function Attachment({ id, label, hint }: { id: string; label: string; hint?: string }) {
     const [, force] = React.useReducer(x => x + 1, 0);
-    const files = buf.current[id] as any[];
+    const raw = buf.current[id];
+    const files = hasUnfinishedUpload(raw)
+      ? (Array.isArray(raw) ? raw : [raw])
+      : toAirtableAttachments(raw);
     return (
       <Field label={label} hint={hint}>
         <div className="upload-row">
           <div className="upload-preview">
             {Array.isArray(files) && files.length ? (
-              files.map((f, i) => <img key={i} src={f.url ?? f} alt="" className="thumb" />)
+              files.map((f, i) => <img key={i} src={typeof f === 'string' ? f : f.url} alt="" className="thumb" />)
             ) : (
               <div className="empty">No file selected</div>
             )}
