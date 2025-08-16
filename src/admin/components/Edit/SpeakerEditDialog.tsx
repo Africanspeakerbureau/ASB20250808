@@ -33,6 +33,19 @@ function isEqualShallow(a: any, b: any) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
+function toAttachmentArray(val: any): Array<{ url: string; filename?: string }> {
+  if (!val) return [];
+  if (Array.isArray(val) && val.length && typeof val[0] === "object" && "url" in val[0]) {
+    return val as Array<{ url: string; filename?: string }>;
+  }
+  const url =
+    (typeof val === "string" && val) ||
+    (typeof val === "object" && (val.secure_url || val.url || val.href)) ||
+    (Array.isArray(val) && val.length && (val[0].secure_url || val[0].url)) ||
+    "";
+  return url ? [{ url }] : [];
+}
+
 function buildSpeakerPayload(
   form: Record<string, any>,
   original: { fields?: Record<string, any> } | undefined
@@ -40,9 +53,12 @@ function buildSpeakerPayload(
   const out: Record<string, any> = {};
   for (const [key, val] of Object.entries(form)) {
     if (READ_ONLY_FIELDS.has(key)) continue;
-    if (ATTACHMENT_FIELDS.has(key)) continue;
+    let next = val;
+    if (ATTACHMENT_FIELDS.has(key)) {
+      next = toAttachmentArray(val);
+    }
     const prev = original?.fields?.[key];
-    if (!isEqualShallow(val, prev)) out[key] = val;
+    if (!isEqualShallow(next, prev)) out[key] = next;
   }
   return { fields: out };
 }
@@ -253,7 +269,6 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Badge label="Experience Score" value={buf.current["Experience Score"]} />
                   <Badge label="Total Events" value={buf.current["Total Events (calc)"]} />
                   <Badge label="Potential Revenue" value={buf.current["Potential Revenue"]} />
-                  <Upload id="Header Image" label="Header Image" hint="This is the wide banner image" />
                   <TextArea id="Internal Notes" />
                 </Grid>
               )}
@@ -381,7 +396,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           </div>
           <UploadWidget
             onUpload={uploaded => {
-              buf.current[id] = uploaded;
+              buf.current[id] = toAttachmentArray(uploaded);
               force();
             }}
           >
