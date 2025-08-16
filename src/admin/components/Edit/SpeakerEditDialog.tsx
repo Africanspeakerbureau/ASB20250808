@@ -24,6 +24,24 @@ const READ_ONLY_FIELDS = new Set<string>([
 // Attachment placeholders (handled later)
 const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
 
+// Common aliases that may be used by UploadWidget or older code
+const ATTACHMENT_ALIASES: Record<string, string[]> = {
+  "Profile Image": [
+    "Profile Image",
+    "profileImageUrl",
+    "ProfileImageUrl",
+    "ProfileImageURL",
+    "ProfileImage",
+  ],
+  "Header Image": [
+    "Header Image",
+    "headerImageUrl",
+    "HeaderImageUrl",
+    "HeaderImageURL",
+    "HeaderImage",
+  ],
+};
+
 function normalizeMultiline(out: any) {
   if (Array.isArray(out)) return out.filter(Boolean).join("\n");
   return String(out ?? "").replace(/\r\n/g, "\n");
@@ -33,17 +51,59 @@ function isEqualShallow(a: any, b: any) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
+// Normalize anything (Cloudinary response, url string, existing array) to Airtable attachments
+function toAttachmentArray(input: any): Array<{ url: string; filename?: string }> {
+  if (!input) return [];
+  const normOne = (v: any) => {
+    // Cloudinary-like
+    if (v?.secure_url || v?.url) {
+      const url = v.secure_url || v.url;
+      const filename =
+        v.original_filename ||
+        v.public_id ||
+        (typeof url === "string" ? url.split("/").pop() : undefined);
+      return { url, filename };
+    }
+    // Airtable attachment already
+    if (v?.url) return { url: v.url, filename: v.filename };
+    // Plain string URL
+    if (typeof v === "string") return { url: v, filename: v.split("/").pop() };
+    return undefined;
+  };
+  const arr = Array.isArray(input) ? input : [input];
+  return arr.map(normOne).filter(Boolean) as Array<{ url: string; filename?: string }>;
+}
+
 function buildSpeakerPayload(
   form: Record<string, any>,
   original: { fields?: Record<string, any> } | undefined
 ) {
   const out: Record<string, any> = {};
+
+  // 1) First, copy “normal” fields (non-attachments)
   for (const [key, val] of Object.entries(form)) {
     if (READ_ONLY_FIELDS.has(key)) continue;
-    if (ATTACHMENT_FIELDS.has(key)) continue;
+    if (ATTACHMENT_FIELDS.has(key)) continue; // handled separately
     const prev = original?.fields?.[key];
     if (!isEqualShallow(val, prev)) out[key] = val;
   }
+
+  // 2) Then, handle attachment fields with alias mapping
+  for (const canonical of ATTACHMENT_FIELDS) {
+    const aliases = ATTACHMENT_ALIASES[canonical] || [canonical];
+    const aliasWithValue = aliases.find(a => form[a] != null && form[a] !== "");
+    const raw = aliasWithValue
+      ? form[aliasWithValue as keyof typeof form]
+      : form[canonical];
+    const next = toAttachmentArray(raw);
+    const prev = original?.fields?.[canonical];
+    if (next && next.length > 0) {
+      if (!isEqualShallow(next, prev)) out[canonical] = next;
+    } else {
+      if (Array.isArray(prev) && prev.length > 0) out[canonical] = [];
+    }
+  }
+
   return { fields: out };
 }
 
@@ -153,7 +213,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Text id="Company" label="Company/Organization" />
                   <Text id="Location" />
                   <Select id="Country" options={COUNTRIES} />
-                  <Upload id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
+                  <Attachment id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
                 </Grid>
               )}
 
@@ -212,7 +272,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
               {tab === "Media & Languages" && (
                 <Grid>
-                  <Upload id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
+                  <Attachment id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
                   <Text id="Video Link 1" />
                   <Text id="Video Link 2" />
                   <Text id="Video Link 3" />
@@ -253,7 +313,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Badge label="Experience Score" value={buf.current["Experience Score"]} />
                   <Badge label="Total Events" value={buf.current["Total Events (calc)"]} />
                   <Badge label="Potential Revenue" value={buf.current["Potential Revenue"]} />
-                  <Upload id="Header Image" label="Header Image" hint="This is the wide banner image" />
+                  <Attachment id="Header Image" label="Header Image" hint="This is the wide banner image" />
                   <TextArea id="Internal Notes" />
                 </Grid>
               )}
@@ -366,22 +426,22 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     );
   }
 
-  function Upload({ id, label, hint }: { id: string; label: string; hint?: string }) {
+  function Attachment({ id, label, hint }: { id: string; label?: string; hint?: string }) {
     const [, force] = React.useReducer(x => x + 1, 0);
-    const files = buf.current[id] as any[];
+    const value = toAttachmentArray(buf.current[id]);
     return (
-      <Field label={label} hint={hint}>
+      <Field label={label ?? id} hint={hint}>
         <div className="upload-row">
           <div className="upload-preview">
-            {Array.isArray(files) && files.length ? (
-              files.map((f, i) => <img key={i} src={f.url ?? f} alt="" className="thumb" />)
+            {Array.isArray(value) && value.length ? (
+              value.map((f, i) => <img key={i} src={f.url} alt="" className="thumb" />)
             ) : (
               <div className="empty">No file selected</div>
             )}
           </div>
           <UploadWidget
             onUpload={uploaded => {
-              buf.current[id] = uploaded;
+              buf.current[id] = toAttachmentArray(uploaded);
               force();
             }}
           >
