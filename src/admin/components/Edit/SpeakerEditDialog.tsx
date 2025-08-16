@@ -24,6 +24,21 @@ const READ_ONLY_FIELDS = new Set<string>([
 // Attachment placeholders (handled later)
 const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
 
+function toAttachmentArray(v: any) {
+  if (!v) return [];
+  const normOne = (x: any) => {
+    if (!x) return null;
+    if (typeof x === "object" && (x as any).secure_url) return { url: (x as any).secure_url };
+    if (typeof x === "object" && (x as any).url) return { url: (x as any).url };
+    if (typeof x === "string") return { url: x };
+    return null;
+  };
+  if (Array.isArray(v)) {
+    return v.map(normOne).filter(Boolean);
+  }
+  return [normOne(v)].filter(Boolean);
+}
+
 function normalizeMultiline(out: any) {
   if (Array.isArray(out)) return out.filter(Boolean).join("\n");
   return String(out ?? "").replace(/\r\n/g, "\n");
@@ -38,11 +53,14 @@ function buildSpeakerPayload(
   original: { fields?: Record<string, any> } | undefined
 ) {
   const out: Record<string, any> = {};
-  for (const [key, val] of Object.entries(form)) {
+  for (const [key, rawVal] of Object.entries(form)) {
     if (READ_ONLY_FIELDS.has(key)) continue;
-    if (ATTACHMENT_FIELDS.has(key)) continue;
+    let next = rawVal;
+    if (ATTACHMENT_FIELDS.has(key)) {
+      next = toAttachmentArray(rawVal);
+    }
     const prev = original?.fields?.[key];
-    if (!isEqualShallow(val, prev)) out[key] = val;
+    if (!isEqualShallow(prev, next)) out[key] = next;
   }
   return { fields: out };
 }
