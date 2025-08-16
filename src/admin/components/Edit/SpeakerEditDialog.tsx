@@ -33,17 +33,34 @@ function isEqualShallow(a: any, b: any) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
+// ---------- attachment helpers ----------
+function isBlobLikeUrl(u: any) {
+  const s = typeof u === "string" ? u : u?.secure_url || u?.url || u?.href || "";
+  return typeof s === "string" && (s.startsWith("blob:") || s.startsWith("data:"));
+}
+
+function containsPendingUpload(val: any) {
+  if (!val) return false;
+  const arr = Array.isArray(val) ? val : [val];
+  for (const v of arr) {
+    const url = typeof v === "string" ? v : v?.secure_url || v?.url || v?.href || "";
+    if (isBlobLikeUrl(url)) return true;
+  }
+  return false;
+}
+
 function toAttachmentArray(val: any): Array<{ url: string; filename?: string }> {
   if (!val) return [];
+  // already airtable-shaped?
   if (Array.isArray(val) && val.length && typeof val[0] === "object" && "url" in val[0]) {
+    // guard against blob in structured shape
+    if (isBlobLikeUrl(val[0].url)) return [];
     return val as Array<{ url: string; filename?: string }>;
   }
-  const url =
-    (typeof val === "string" && val) ||
-    (typeof val === "object" && (val.secure_url || val.url || val.href)) ||
-    (Array.isArray(val) && val.length && (val[0].secure_url || val[0].url)) ||
-    "";
-  return url ? [{ url }] : [];
+  // cloudinary / generic object / plain url
+  const url = (typeof val === "string" ? val : val?.secure_url || val?.url || val?.href || "") as string;
+  if (!url || isBlobLikeUrl(url)) return [];
+  return [{ url }];
 }
 
 function buildSpeakerPayload(
@@ -55,7 +72,13 @@ function buildSpeakerPayload(
     if (READ_ONLY_FIELDS.has(key)) continue;
     let next = val;
     if (ATTACHMENT_FIELDS.has(key)) {
-      next = toAttachmentArray(val);
+      // Convert to Airtable shape, but if it’s still a blob preview, skip writing (preserve current)
+      const maybe = toAttachmentArray(val);
+      if (!maybe.length && containsPendingUpload(val)) {
+        // leave field out of payload so Airtable keeps existing attachment
+        continue;
+      }
+      next = maybe;
     }
     const prev = original?.fields?.[key];
     if (!isEqualShallow(next, prev)) out[key] = next;
@@ -110,6 +133,17 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   async function handleSave(closeAfter = false) {
     if (!record) return;
     try {
+      // block save if any attachment is still a local blob (preview), which Airtable will reject
+      for (const key of ATTACHMENT_FIELDS) {
+        if (containsPendingUpload(buf.current[key])) {
+          push({
+            text: `Upload still in progress for “${key}”. Please finish the upload (you should receive a real URL) before saving.`,
+            type: "error",
+          });
+          return;
+        }
+      }
+
       setSaving(true);
       const data: Record<string, any> = { ...buf.current };
       const { speakingTopicsText, keyMessagesText, ...rest } = data;
@@ -383,7 +417,10 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
   function Upload({ id, label, hint }: { id: string; label: string; hint?: string }) {
     const [, force] = React.useReducer(x => x + 1, 0);
-    const files = buf.current[id] as any[];
+    const raw = buf.current[id];
+    const files = containsPendingUpload(raw)
+      ? (Array.isArray(raw) ? raw : [raw])
+      : toAttachmentArray(raw);
     return (
       <Field label={label} hint={hint}>
         <div className="upload-row">
@@ -396,7 +433,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
           </div>
           <UploadWidget
             onUpload={uploaded => {
-              buf.current[id] = toAttachmentArray(uploaded);
+              buf.current[id] = uploaded;
               force();
             }}
           >
