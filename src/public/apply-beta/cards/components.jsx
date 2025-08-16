@@ -4,9 +4,9 @@ export function Grid({ children }) {
   return <div className="grid">{children}</div>;
 }
 
-export function Field({ label, hint, children, required }) {
+export function Field({ label, hint, children, required, className = "" }) {
   return (
-    <label className="field">
+    <label className={`field ${className}`}>
       <div className="field__label">
         {label}
         {required && <span className="text-red-500">*</span>}
@@ -33,14 +33,15 @@ export function Text({ form, setField, id, label, required, type = "text", input
   );
 }
 
-export function TextArea({ form, setField, id, label }) {
+export function TextArea({ form, setField, id, label, rows = 4 }) {
   return (
     <Field label={label ?? id}>
       <textarea
         className="textarea"
         value={form[id] ?? ""}
         onChange={e => setField(id, e.target.value)}
-        rows={4}
+        rows={rows}
+        style={{ resize: "vertical" }}
       />
     </Field>
   );

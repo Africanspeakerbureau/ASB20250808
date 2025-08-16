@@ -23,8 +23,13 @@ export function toApplyV2Payload(form) {
     "Largest Audience": form.largestAudience,
     "Virtual Experience": form.virtualExperience,
     "Expertise Areas": form.expertiseAreas,
-    "Speaking Topics": form.speakingTopics,
-    "Key Messages": form.keyMessages,
+    "Speaking Topics": form.speakingTopicsText
+      ? form.speakingTopicsText
+          .split(/\r?\n/)
+          .map(s => s.trim())
+          .filter(Boolean)
+      : form.speakingTopics,
+    "Key Messages": form.keyMessage ? [form.keyMessage] : undefined,
     "Professional Bio": form.professionalBio,
     "Speakers Delivery Style": form.speakersDeliveryStyle,
     "Why the audience should listen to these topics": form.whyAudience,

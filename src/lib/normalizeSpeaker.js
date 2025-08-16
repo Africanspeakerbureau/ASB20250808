@@ -1,7 +1,6 @@
 export function normalizeSpeaker(record) {
   if (!record) return null;
   const f = record.fields || {};
-  console.log(Object.keys(f || {}));
 
   const pickText = (k) => (typeof f[k] === 'string' ? f[k].trim() : '');
   const pickMulti = (k) => (Array.isArray(f[k]) ? f[k].filter(Boolean) : []);
@@ -48,9 +47,33 @@ export function normalizeSpeaker(record) {
     availability: travelWillingness,
     expertiseAreas: pickMulti('Expertise Areas'),
     expertise: pickMulti('Expertise Areas'),
-    speakingTopics: pickText('Speaking Topics'),
-    keyMessages: pickText('Key Messages'),
-    keyMessage: pickText('Key Messages'),
+    // Display convenience: convert stored strings into arrays for UI/lists
+    speakingTopics: (() => {
+      const v = f['Speaking Topics'];
+      if (Array.isArray(v)) return v.filter(Boolean);
+      return String(v ?? '')
+        .split(/\r?\n/)
+        .map(s => s.trim())
+        .filter(Boolean);
+    })(),
+    keyMessages: (() => {
+      const v = f['Key Messages'];
+      if (Array.isArray(v)) return v.filter(Boolean);
+      const lines = String(v ?? '')
+        .split(/\r?\n/)
+        .map(s => s.trim())
+        .filter(Boolean);
+      return lines;
+    })(),
+    keyMessage: (() => {
+      const arr = Array.isArray(f['Key Messages'])
+        ? f['Key Messages']
+        : String(f['Key Messages'] ?? '')
+            .split(/\r?\n/)
+            .map(s => s.trim())
+            .filter(Boolean);
+      return arr[0] || '';
+    })(),
     bio: pickText('Professional Bio'),
     professionalBio: pickText('Professional Bio'),
     achievements: pickText('Achievements'),
