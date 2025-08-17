@@ -29,6 +29,7 @@ import ConsentBanner from "@/components/ConsentBanner"
 import { getConsent } from "@/lib/consent"
 import { useGeolocation } from "@/hooks/useGeolocation"
 import ApplyBeta from "./public/apply-beta/ApplyBeta"
+import { airtableCreate } from '@/lib/airtableSubmit'
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -540,6 +541,45 @@ function App() {
     }
   }
 
+async function submitQuickInquiry({ firstName, lastName, email, message }) {
+  const fields = {
+    'First Name': firstName?.trim() || '',
+    'Last Name': lastName?.trim() || '',
+    'Email': email?.trim() || '',
+    'Message': message?.trim() || '',
+    'Status': ['New'],
+    'Created Date': new Date().toISOString(),
+  }
+  const rec = await airtableCreate('Quick Inquiries', fields)
+  return rec.id
+}
+
+async function submitClientInquiry(fieldsIn) {
+  const fields = {
+    'First Name': fieldsIn.firstName?.trim() || '',
+    'Last Name': fieldsIn.lastName?.trim() || '',
+    'Email': fieldsIn.email?.trim() || '',
+    'Phone': fieldsIn.phone?.trim() || '',
+    'Company Name': fieldsIn.companyName?.trim() || '',
+    'Job Title': fieldsIn.jobTitle?.trim() || '',
+    'Company Size': fieldsIn.companySize?.trim() || '',
+    'Industry': fieldsIn.industry?.trim() || '',
+    'Company Website': fieldsIn.website?.trim() || '',
+    'Event Name': fieldsIn.eventName?.trim() || '',
+    'Event Date': fieldsIn.eventDate?.trim() || '',
+    'Event Location': fieldsIn.eventLocation?.trim() || '',
+    'Audience Size': fieldsIn.audienceSize?.trim() || '',
+    'Speaking Topic': fieldsIn.topic?.trim() || '',
+    'Budget Range': fieldsIn.budget?.trim() || '',
+    'Presentation Format': fieldsIn.format?.trim() || '',
+    'Additional Requirements': fieldsIn.requirements?.trim() || '',
+    'Status': ['New'],
+    'Created Date': new Date().toISOString(),
+  }
+  const rec = await airtableCreate('Client Inquiries', fields)
+  return rec.id
+}
+
   // Admin Functions
   const loadAdminData = async () => {
     setLoading(true)
@@ -859,60 +899,61 @@ function App() {
     setBookingStatus('loading')
     setBookingError('')
     const formData = new FormData(e.target)
-    const data = {
-      "First Name": formData.get('firstName'),
-      "Last Name": formData.get('lastName'),
-      "Email": formData.get('email'),
-      "Phone": formData.get('phone'),
-      "Company Name": formData.get('companyName'),
-      "Job Title": formData.get('jobTitle'),
-      "Company Size": formData.get('companySize') || '',
-      "Industry": formData.get('industry'),
-      "Company Website": formData.get('website'),
-      "Event Name": formData.get('eventName'),
-      "Event Date": formData.get('eventDate'),
-      "Event Location": formData.get('eventLocation'),
-      "Audience Size": formData.get('audienceSize') || '',
-      "Speaking Topic": formData.get('topic'),
-      "Budget Range": formData.get('budget') || '',
-      "Presentation Format": formData.get('format') || '',
-      "Additional Requirements": formData.get('requirements'),
-      "Status": "New"
+    const fieldsIn = {
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      companyName: formData.get('companyName'),
+      jobTitle: formData.get('jobTitle'),
+      companySize: formData.get('companySize') || '',
+      industry: formData.get('industry'),
+      website: formData.get('website'),
+      eventName: formData.get('eventName'),
+      eventDate: formData.get('eventDate'),
+      eventLocation: formData.get('eventLocation'),
+      audienceSize: formData.get('audienceSize') || '',
+      topic: formData.get('topic'),
+      budget: formData.get('budget') || '',
+      format: formData.get('format') || '',
+      requirements: formData.get('requirements'),
     }
 
     try {
-      await submitToAirtable('Client%20Inquiries', data)
+      await submitClientInquiry(fieldsIn)
       setBookingStatus('success')
       e.target.reset()
     } catch (err) {
+      console.error(err)
       setBookingError(err?.message || 'Something went wrong. Please try again.')
       setBookingStatus('error')
     }
   }
 
+
   const handleQuickSubmit = async (e) => {
     e.preventDefault()
     setQuickStatus('loading')
     setQuickError('')
-
     const formData = new FormData(e.target)
-    const data = {
-      "First Name": formData.get('firstName'),
-      "Last Name": formData.get('lastName'),
-      "Email": formData.get('email'),
-      "Message": formData.get('message'),
-      "Status": "New"
+    const fieldsIn = {
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      email: formData.get('email'),
+      message: formData.get('message'),
     }
 
     try {
-      await submitToAirtable('Quick%20Inquiries', data)
+      await submitQuickInquiry(fieldsIn)
       setQuickStatus('success')
       e.target.reset()
     } catch (err) {
+      console.error(err)
       setQuickError(err?.message || 'Something went wrong. Please try again.')
       setQuickStatus('error')
     }
   }
+
 
   const handleAdminSubmit = async (username, password) => {
     if (await validateAdmin(username, password)) {
