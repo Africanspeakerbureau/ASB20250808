@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { CLOUDINARY } from "@/config/cloudinary";
 
 export function UploadPublic({
   onUploaded,
@@ -13,8 +14,8 @@ export function UploadPublic({
     if (window.cloudinary) {
       widgetRef.current = window.cloudinary.createUploadWidget(
         {
-          cloudName: "dimtwmk1v",
-          uploadPreset: "unsigned_speaker_upload",
+          cloudName: CLOUDINARY.cloudName,
+          uploadPreset: CLOUDINARY.uploadPreset,
           sources: ["local", "url", "camera"],
           multiple: false,
           clientAllowedFormats,
@@ -25,13 +26,7 @@ export function UploadPublic({
           if (error) {
             onError?.(error);
           } else if (result && result.event === "success") {
-            onUploaded({
-              url: result.info.secure_url,
-              width: result.info.width,
-              height: result.info.height,
-              format: result.info.format,
-              originalFilename: result.info.original_filename,
-            });
+            onUploaded(result.info);
           }
         }
       );

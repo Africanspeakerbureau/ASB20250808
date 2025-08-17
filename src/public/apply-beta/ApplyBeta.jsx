@@ -78,8 +78,8 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
       setSubmitting(true);
       saveDraft();
       if (
-        form.profileImageUrl?.startsWith("blob:") ||
-        form.headerImageUrl?.startsWith("blob:")
+        form["Profile Image"]?.[0]?.url?.startsWith("blob:") ||
+        form["Header Image"]?.[0]?.url?.startsWith("blob:")
       ) {
         setMessage("Please finish upload before submitting.");
         return;
