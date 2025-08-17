@@ -31,10 +31,9 @@ export default function IdentityCardPublic({ form, setField }) {
       <Select form={form} setField={setField} id="country" options={COUNTRIES} label="Country" />
       <ImageUploadField
         label="Profile Image"
-        valueUrl={form.profileImageUrl}
-        onChange={(url, meta) => {
-          setField("profileImageUrl", url);
-          setField("profileImageMeta", meta);
+        value={form["Profile Image"]}
+        onChange={attachment => {
+          setField("Profile Image", attachment);
         }}
       />
     </Grid>

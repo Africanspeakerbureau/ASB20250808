@@ -18,6 +18,7 @@ import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
+import { CLOUDINARY } from "@/config/cloudinary";
 import AdminLoginModal from "./components/AdminLoginModal"
 import SpeakerEditDialog from "./admin/components/Edit/SpeakerEditDialog"
 import QuickInquiryEditDialog from "./admin/components/Edit/QuickInquiryEditDialog"
@@ -117,8 +118,8 @@ function App() {
   // Cloudinary configuration
   const cld = new Cloudinary({
     cloud: {
-      cloudName: "dimtwmk1v"
-    }
+      cloudName: CLOUDINARY.cloudName,
+    },
   })
   
   const widgetRef = useRef()
@@ -432,8 +433,8 @@ function App() {
   useEffect(() => {
     if (window.cloudinary) {
       widgetRef.current = window.cloudinary.createUploadWidget({
-        cloudName: "dimtwmk1v",
-        uploadPreset: "unsigned_speaker_upload",
+        cloudName: CLOUDINARY.cloudName,
+        uploadPreset: CLOUDINARY.uploadPreset,
         sources: ["local", "url", "camera"],
         multiple: false,
         cropping: false,

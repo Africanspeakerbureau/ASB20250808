@@ -9,9 +9,7 @@ export function toApplyV2Payload(form) {
     "Country": form.country,
     "Email": form.email,
     "Phone": form.phone,
-    "Profile Image": form.profileImageUrl
-      ? [{ url: form.profileImageUrl }]
-      : undefined,
+    "Profile Image": form["Profile Image"],
     "Industry": form.industry,
     "Expertise Level": form.expertiseLevel,
     "Years Experience": form.yearsExperience,
@@ -38,9 +36,7 @@ export function toApplyV2Payload(form) {
     "What the audience will take home": form.whatTakeHome,
     "Benefits for the individual": form.benefitsIndividual,
     "Benefits for the organisation": form.benefitsOrganisation,
-    "Header Image": form.headerImageUrl
-      ? [{ url: form.headerImageUrl }]
-      : undefined,
+    "Header Image": form["Header Image"],
     "Video Link 1": form.videoLink1,
     "Video Link 2": form.videoLink2,
     "Video Link 3": form.videoLink3,

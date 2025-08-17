@@ -21,8 +21,6 @@ const READ_ONLY_FIELDS = new Set<string>([
   "Client Inquiries",
 ]);
 
-// Attachment placeholders (handled later)
-const ATTACHMENT_FIELDS = new Set<string>(["Profile Image", "Header Image"]);
 
 function normalizeMultiline(out: any) {
   if (Array.isArray(out)) return out.filter(Boolean).join("\n");
@@ -40,7 +38,6 @@ function buildSpeakerPayload(
   const out: Record<string, any> = {};
   for (const [key, val] of Object.entries(form)) {
     if (READ_ONLY_FIELDS.has(key)) continue;
-    if (ATTACHMENT_FIELDS.has(key)) continue;
     const prev = original?.fields?.[key];
     if (!isEqualShallow(val, prev)) out[key] = val;
   }
@@ -75,6 +72,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const buf = React.useRef<Record<string, any>>({});
   const hydratedRef = React.useRef(false);
   const [ready, setReady] = React.useState(false);
+  const [uploading, setUploading] = React.useState(false);
 
   React.useEffect(() => {
     if (!record?.id) return;
@@ -93,6 +91,10 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
   async function handleSave(closeAfter = false) {
     if (!record) return;
+    if (uploading) {
+      push({ text: "Upload still in progress…", type: "error" });
+      return;
+    }
     try {
       setSaving(true);
       const data: Record<string, any> = { ...buf.current };
@@ -253,7 +255,6 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Badge label="Experience Score" value={buf.current["Experience Score"]} />
                   <Badge label="Total Events" value={buf.current["Total Events (calc)"]} />
                   <Badge label="Potential Revenue" value={buf.current["Potential Revenue"]} />
-                  <Upload id="Header Image" label="Header Image" hint="This is the wide banner image" />
                   <TextArea id="Internal Notes" />
                 </Grid>
               )}
@@ -262,11 +263,11 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
         )}
 
         <div className="modal__footer">
-          <button className="btn" disabled={saving} onClick={onClose}>Close</button>
-          <button className="btn" disabled={saving} onClick={() => handleSave(false)}>
+          <button className="btn" disabled={saving || uploading} onClick={onClose}>Close</button>
+          <button className="btn" disabled={saving || uploading} onClick={() => handleSave(false)}>
             {saving ? "Saving…" : "Save"}
           </button>
-          <button className="btn btn--primary" disabled={saving} onClick={() => handleSave(true)}>
+          <button className="btn btn--primary" disabled={saving || uploading} onClick={() => handleSave(true)}>
             {saving ? "Saving…" : "Save & Close"}
           </button>
         </div>
@@ -384,6 +385,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
               buf.current[id] = uploaded;
               force();
             }}
+            onUploadingChange={setUploading}
           >
             <button className="btn btn--dark">Upload</button>
           </UploadWidget>

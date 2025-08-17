@@ -8,10 +8,9 @@ export default function MediaLanguagesCardPublic({ form, setField }) {
     <Grid>
       <ImageUploadField
         label="Header Image"
-        valueUrl={form.headerImageUrl}
-        onChange={(url, meta) => {
-          setField("headerImageUrl", url);
-          setField("headerImageMeta", meta);
+        value={form["Header Image"]}
+        onChange={attachment => {
+          setField("Header Image", attachment);
         }}
         help="Wide aspect recommended; JPG/PNG"
       />

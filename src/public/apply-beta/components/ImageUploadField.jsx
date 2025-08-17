@@ -1,17 +1,16 @@
 import React from "react";
-import { UploadPublic } from "@/components/upload/UploadPublic.jsx"; // same uploader as apply-v2
+import { UploadPublic } from "@/components/upload/UploadPublic.jsx";
 
 export default function ImageUploadField({
   label = "Image",
-  valueUrl,
-  onChange, // (url, meta) => void
+  value,
+  onChange,
   help = "JPG/PNG, max 5MB",
 }) {
+  const valueUrl = Array.isArray(value) && value.length ? value[0].url : undefined;
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="w-full text-left font-medium text-slate-800">{label}</div>
-
-      {/* Preview (square thumb) */}
       {valueUrl ? (
         <img
           src={valueUrl}
@@ -21,23 +20,24 @@ export default function ImageUploadField({
       ) : (
         <div className="h-16 w-16 rounded-lg bg-slate-100 ring-1 ring-slate-200" />
       )}
-
-      {/* Centered Upload button */}
       <UploadPublic
         accept="image/*"
         clientAllowedFormats={["jpg", "jpeg", "png"]}
         maxSizeMB={5}
         buttonClassName="px-4 py-2 rounded-lg bg-black text-white hover:bg-black/80"
-        onUploaded={({ url, width, height, format, originalFilename }) => {
-          onChange(url, { width, height, format, name: originalFilename });
+        onUploaded={info => {
+          const { secure_url, original_filename, bytes, resource_type, format } = info;
+          const attachment = [{
+            url: secure_url,
+            filename: `${original_filename}.${format ?? ""}`.replace(/\.$/, ""),
+            type: resource_type === "image" ? "image/*" : "application/octet-stream",
+            size: bytes,
+          }];
+          onChange(attachment);
         }}
       />
-
       <div className="text-xs text-slate-500">{help}</div>
-      {valueUrl && (
-        <div className="text-xs text-emerald-600 font-medium">Uploaded ✓</div>
-      )}
+      {valueUrl && <div className="text-xs text-emerald-600 font-medium">Uploaded ✓</div>}
     </div>
   );
 }
-
