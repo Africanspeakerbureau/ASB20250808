@@ -4,22 +4,40 @@ export function Grid({ children }) {
   return <div className="grid">{children}</div>;
 }
 
-export function Field({ label, hint, children, required, className = "" }) {
+export function Field({
+  label,
+  hint,
+  children,
+  required,
+  className = "",
+  error,
+  id,
+}) {
   return (
-    <label className={`field ${className}`}>
+    <label className={`field ${className}`} data-field={id}>
       <div className="field__label">
         {label}
         {required && <span className="text-red-500">*</span>}
       </div>
       {children}
+      {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
       {hint && <div className="field__hint">{hint}</div>}
     </label>
   );
 }
 
-export function Text({ form, setField, id, label, required, type = "text", inputMode }) {
+export function Text({
+  form,
+  setField,
+  id,
+  label,
+  required,
+  type = "text",
+  inputMode,
+  error,
+}) {
   return (
-    <Field label={label ?? id} required={required}>
+    <Field label={label ?? id} required={required} error={error} id={id}>
       <input
         className="input"
         value={form[id] ?? ""}
@@ -28,6 +46,7 @@ export function Text({ form, setField, id, label, required, type = "text", input
         required={required}
         type={type}
         inputMode={inputMode}
+        aria-invalid={!!error}
       />
     </Field>
   );

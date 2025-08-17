@@ -3,11 +3,25 @@ import { Grid, Text, Select } from "./components.jsx";
 import ImageUploadField from "@/public/apply-beta/components/ImageUploadField.jsx";
 import { COUNTRIES } from "@/admin/edit/options";
 
-export default function IdentityCardPublic({ form, setField }) {
+export default function IdentityCardPublic({ form, setField, errors = {} }) {
   return (
     <Grid>
-      <Text form={form} setField={setField} id="firstName" label="First Name" required />
-      <Text form={form} setField={setField} id="lastName" label="Last Name" required />
+      <Text
+        form={form}
+        setField={setField}
+        id="firstName"
+        label="First Name"
+        required
+        error={errors.firstName}
+      />
+      <Text
+        form={form}
+        setField={setField}
+        id="lastName"
+        label="Last Name"
+        required
+        error={errors.lastName}
+      />
       <Text
         form={form}
         setField={setField}
@@ -15,6 +29,7 @@ export default function IdentityCardPublic({ form, setField }) {
         label="Email Address"
         type="email"
         required
+        error={errors.email}
       />
       <Text
         form={form}
@@ -23,6 +38,7 @@ export default function IdentityCardPublic({ form, setField }) {
         label="Phone Number"
         inputMode="tel"
         required
+        error={errors.phone}
       />
       <Text form={form} setField={setField} id="title" label="Title (Dr/Prof)" />
       <Text form={form} setField={setField} id="professionalTitle" label="Professional Title" />

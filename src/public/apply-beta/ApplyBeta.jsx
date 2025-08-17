@@ -1,5 +1,6 @@
 import React from "react";
 import Header from "@/components/Header.jsx";
+import { toast } from "@/lib/toast";
 import {
   IdentityCardPublic,
   BackgroundCardPublic,
@@ -54,6 +55,9 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
   });
   const [submitting, setSubmitting] = React.useState(false);
   const [message, setMessage] = React.useState(null);
+  const [errors, setErrors] = React.useState({});
+
+  const REQUIRED = ["firstName", "lastName", "email", "phone"];
 
   const saveDraft = React.useCallback(() => {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
@@ -66,14 +70,35 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
     return () => clearTimeout(t);
   }, [form]);
 
+  function validateRequired(nextForm = form) {
+    const nextErrors = {};
+    for (const key of REQUIRED) {
+      const v = nextForm?.[key];
+      if (v == null || String(v).trim() === "")
+        nextErrors[key] = "This field is required";
+    }
+    setErrors(nextErrors);
+    return nextErrors;
+  }
+
   function setField(name, value) {
-    setForm(f => ({ ...f, [name]: value }));
+    setForm(f => {
+      const nf = { ...f, [name]: value };
+      if (errors[name]) {
+        setErrors(e => {
+          const ne = { ...e };
+          if (String(value ?? "").trim() !== "") delete ne[name];
+          return ne;
+        });
+      }
+      return nf;
+    });
   }
 
   const index = TABS.findIndex(t => t.key === tab);
   const total = TABS.length;
 
-  async function handleSubmit() {
+  async function onSubmit() {
     try {
       setSubmitting(true);
       saveDraft();
@@ -105,6 +130,21 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
   }
 
   const Card = CARD_COMPONENTS[tab];
+
+  async function handleSubmit(e) {
+    e?.preventDefault?.();
+    const nextErrors = validateRequired();
+    if (Object.keys(nextErrors).length) {
+      const first = Object.keys(nextErrors)[0];
+      const el = document.querySelector(
+        `[data-field="${first}"] input, [data-field="${first}"] textarea, [data-field="${first}"] select`
+      );
+      if (el) el.focus();
+      toast("Please complete the required fields.");
+      return;
+    }
+    return onSubmit();
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -186,7 +226,7 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
           </div>
 
           <div className="modal__body">
-            <Card form={form} setField={setField} />
+            <Card form={form} setField={setField} errors={errors} />
           </div>
         </div>
       </div>
