@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { getPostBySlug, isPostVisible } from '@/lib/airtable';
+import { getPostBySlug, isPostVisible } from '../../lib/airtable';
 
 function useQuery() { return new URLSearchParams(useLocation().search); }
 
