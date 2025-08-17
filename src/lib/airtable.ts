@@ -57,3 +57,32 @@ export async function deletePost(id: string) {
   await at('DELETE', `?records[]=${encodeURIComponent(id)}`);
 }
 
+
+// Is a post allowed to be shown publicly?
+export function isPostVisible(rec: any, preview: boolean) {
+  if (preview) return true; // admins viewing ?preview=1
+  if (rec?.Status !== 'Published') return false;
+  if (rec?.['Publish Date']) {
+    const pub = new Date(rec['Publish Date']);
+    if (pub > new Date()) return false;
+  }
+  return true;
+}
+
+// Fetch one post by slug
+export async function getPostBySlug(slug: string) {
+  const filterByFormula = `LOWER({Slug})='${String(slug || '').toLowerCase()}'`;
+  const params = new URLSearchParams({
+    filterByFormula,
+    maxRecords: '1'
+  });
+  const data = await fetch(
+    `https://api.airtable.com/v0/${import.meta.env.VITE_AIRTABLE_BASE_ID}/${encodeURIComponent(import.meta.env.VITE_AIRTABLE_TABLE_BLOG || 'Blog')}?${params.toString()}`,
+    { headers: { Authorization: `Bearer ${import.meta.env.VITE_AIRTABLE_API_KEY}` } }
+  ).then(r => r.json());
+
+  const rec = data.records?.[0];
+  if (!rec) return null;
+  return { id: rec.id, ...rec.fields } as any;
+}
+
