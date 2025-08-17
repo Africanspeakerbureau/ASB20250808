@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { listPosts, deletePost } from '@/lib/airtable';
+import { listPosts, deletePost } from '@/lib/airtable.ts';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminBlogList() {

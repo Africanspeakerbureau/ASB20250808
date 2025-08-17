@@ -6,6 +6,7 @@ import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import BookingForm from './components/BookingForm'
 import Header from './components/Header.jsx'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
 import {
@@ -947,6 +948,9 @@ function App() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
+                <Button variant="outline" asChild>
+                  <Link to="/admin/blog">Blog</Link>
+                </Button>
                 <Button variant="outline" onClick={() => loadAdminData()}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh

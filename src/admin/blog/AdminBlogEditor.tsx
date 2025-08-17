@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createPost, getPost, updatePost } from '@/lib/airtable';
+import { createPost, getPost, updatePost } from '@/lib/airtable.ts';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 import { useNavigate, useParams } from 'react-router-dom';
 
