@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { getPostBySlug, isPostVisible } from '@/lib/airtable';
 
-declare global { interface Window { DOMPurify: any } }
-
 function useQuery() { return new URLSearchParams(useLocation().search); }
 
 function toYouTubeEmbed(url?: string) {
@@ -50,7 +48,10 @@ export default function BlogPost() {
 
   const videoEmbed = toYouTubeEmbed(post['Hero Video URL']);
 
-  const safeBody = window.DOMPurify ? window.DOMPurify.sanitize(post.Body || '') : (post.Body || '');
+  const safeBody =
+    (typeof window !== 'undefined' && window.DOMPurify)
+      ? window.DOMPurify.sanitize(post.Body || '')
+      : (post.Body || '');
 
   return (
     <article className="max-w-3xl mx-auto p-6 space-y-6">
