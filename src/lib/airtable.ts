@@ -1,6 +1,8 @@
+// src/lib/airtable.ts
 const API_KEY = import.meta.env.VITE_AIRTABLE_API_KEY as string;
 const BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID as string;
 const TABLE = import.meta.env.VITE_AIRTABLE_TABLE_BLOG || 'Blog';
+
 const BASE_URL = `https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE)}`;
 
 type Fields = Record<string, any>;
@@ -21,6 +23,7 @@ async function at(method: 'GET'|'POST'|'PATCH'|'DELETE', path = '', body?: any) 
   return res.json();
 }
 
+// ---- Admin (list/edit) helpers ----
 export async function listPosts(params: { search?: string; status?: string } = {}) {
   const filter: string[] = [];
   if (params.status) filter.push(`{Status} = '${params.status}'`);
@@ -57,3 +60,29 @@ export async function deletePost(id: string) {
   await at('DELETE', `?records[]=${encodeURIComponent(id)}`);
 }
 
+// ---- Public read-side helpers ----
+export function isPostVisible(rec: any, preview: boolean) {
+  if (preview) return true;
+  if (rec?.Status !== 'Published') return false;
+  if (rec?.['Publish Date']) {
+    const pub = new Date(rec['Publish Date']);
+    if (pub > new Date()) return false;
+  }
+  return true;
+}
+
+export async function getPostBySlug(slug: string) {
+  const s = String(slug || '').toLowerCase();
+  const formula = `LOWER({Slug})='${s}'`;
+  const params = new URLSearchParams({ filterByFormula: formula, maxRecords: '1' });
+  const res = await fetch(`${BASE_URL}?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${API_KEY}` }
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Airtable GET by slug failed: ${res.status} ${text}`);
+  }
+  const data = await res.json();
+  const rec = data.records?.[0];
+  return rec ? ({ id: rec.id, ...rec.fields } as any) : null;
+}

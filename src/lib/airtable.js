@@ -8,6 +8,8 @@ const BASE_ID =
   import.meta.env.AIRTABLE_BASE_ID;
 const API = `https://api.airtable.com/v0/${BASE_ID}`;
 const TBL_SPEAKERS = encodeURIComponent('Speaker Applications');
+const TBL_BLOG = encodeURIComponent(import.meta.env.VITE_AIRTABLE_TABLE_BLOG || 'Blog');
+const BLOG_BASE_URL = `${API}/${TBL_BLOG}`;
 
 function ensureEnv() {
   if (!BASE_ID || !API_KEY) {
@@ -158,4 +160,83 @@ export async function updateSpeaker(recordId, fields) {
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
+}
+
+async function blogAt(method, path = '', body) {
+  const res = await fetch(`${BLOG_BASE_URL}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Airtable ${method} ${path} failed: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+// ---- Blog helpers ----
+export async function listPosts(params = {}) {
+  const filter = [];
+  if (params.status) filter.push(`{Status} = '${params.status}'`);
+  if (params.search) filter.push(`FIND(LOWER('${params.search}'), LOWER({Name}))`);
+  const filterByFormula = filter.length ? filter.join(' AND ') : undefined;
+
+  const urlParams = new URLSearchParams();
+  if (filterByFormula) urlParams.set('filterByFormula', filterByFormula);
+  urlParams.set('sort[0][field]', 'Publish Date');
+  urlParams.set('sort[0][direction]', 'desc');
+
+  const data = await blogAt('GET', `?${urlParams.toString()}`);
+  return (data.records || []).map((r) => ({ id: r.id, ...r.fields }));
+}
+
+export async function getPost(id) {
+  const data = await blogAt('GET', `/${id}`);
+  return { id: data.id, ...data.fields };
+}
+
+export async function createPost(fields) {
+  const data = await blogAt('POST', '', { records: [{ fields }] });
+  const r = data.records[0];
+  return { id: r.id, ...r.fields };
+}
+
+export async function updatePost(id, fields) {
+  const data = await blogAt('PATCH', '', { records: [{ id, fields }] });
+  const r = data.records[0];
+  return { id: r.id, ...r.fields };
+}
+
+export async function deletePost(id) {
+  await blogAt('DELETE', `?records[]=${encodeURIComponent(id)}`);
+}
+
+export function isPostVisible(rec, preview) {
+  if (preview) return true;
+  if (rec?.Status !== 'Published') return false;
+  if (rec?.['Publish Date']) {
+    const pub = new Date(rec['Publish Date']);
+    if (pub > new Date()) return false;
+  }
+  return true;
+}
+
+export async function getPostBySlug(slug) {
+  const s = String(slug || '').toLowerCase();
+  const formula = `LOWER({Slug})='${s}'`;
+  const params = new URLSearchParams({ filterByFormula: formula, maxRecords: '1' });
+  const res = await fetch(`${BLOG_BASE_URL}?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${API_KEY}` }
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Airtable GET by slug failed: ${res.status} ${text}`);
+  }
+  const data = await res.json();
+  const rec = data.records?.[0];
+  return rec ? { id: rec.id, ...rec.fields } : null;
 }
