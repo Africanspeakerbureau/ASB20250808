@@ -40,7 +40,20 @@ function buildSpeakerPayload(
   const out: Record<string, any> = {};
   for (const [key, val] of Object.entries(form)) {
     if (READ_ONLY_FIELDS.has(key)) continue;
-    if (ATTACHMENT_FIELDS.has(key)) continue;
+    if (ATTACHMENT_FIELDS.has(key)) {
+      const arr = Array.isArray(val) ? val : val ? [val] : [];
+      const normalized = arr
+        .map((x: any) => {
+          if (!x) return null;
+          if (typeof x === "string") return { url: x };
+          if (x.url) return { url: x.url, filename: x.filename || undefined };
+          return null;
+        })
+        .filter(Boolean);
+      const prev = Array.isArray(original?.fields?.[key]) ? original!.fields![key] : [];
+      if (!isEqualShallow(normalized, prev)) out[key] = normalized;
+      continue;
+    }
     const prev = original?.fields?.[key];
     if (!isEqualShallow(val, prev)) out[key] = val;
   }
@@ -75,6 +88,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const buf = React.useRef<Record<string, any>>({});
   const hydratedRef = React.useRef(false);
   const [ready, setReady] = React.useState(false);
+  const [uploading, setUploading] = React.useState(0);
 
   React.useEffect(() => {
     if (!record?.id) return;
@@ -153,7 +167,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Text id="Company" label="Company/Organization" />
                   <Text id="Location" />
                   <Select id="Country" options={COUNTRIES} />
-                  <Upload id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
+                  <Attachment id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
                 </Grid>
               )}
 
@@ -212,7 +226,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
               {tab === "Media & Languages" && (
                 <Grid>
-                  <Upload id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
+                  <Attachment id="Header Image" label="Header Image" hint="Wide aspect recommended; JPG/PNG" />
                   <Text id="Video Link 1" />
                   <Text id="Video Link 2" />
                   <Text id="Video Link 3" />
@@ -253,7 +267,6 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Badge label="Experience Score" value={buf.current["Experience Score"]} />
                   <Badge label="Total Events" value={buf.current["Total Events (calc)"]} />
                   <Badge label="Potential Revenue" value={buf.current["Potential Revenue"]} />
-                  <Upload id="Header Image" label="Header Image" hint="This is the wide banner image" />
                   <TextArea id="Internal Notes" />
                 </Grid>
               )}
@@ -263,10 +276,10 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
         <div className="modal__footer">
           <button className="btn" disabled={saving} onClick={onClose}>Close</button>
-          <button className="btn" disabled={saving} onClick={() => handleSave(false)}>
+          <button className="btn" disabled={saving || uploading > 0} onClick={() => handleSave(false)}>
             {saving ? "Saving…" : "Save"}
           </button>
-          <button className="btn btn--primary" disabled={saving} onClick={() => handleSave(true)}>
+          <button className="btn btn--primary" disabled={saving || uploading > 0} onClick={() => handleSave(true)}>
             {saving ? "Saving…" : "Save & Close"}
           </button>
         </div>
@@ -366,7 +379,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     );
   }
 
-  function Upload({ id, label, hint }: { id: string; label: string; hint?: string }) {
+  function Attachment({ id, label, hint }: { id: string; label: string; hint?: string }) {
     const [, force] = React.useReducer(x => x + 1, 0);
     const files = buf.current[id] as any[];
     return (
@@ -380,13 +393,13 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
             )}
           </div>
           <UploadWidget
-            onUpload={uploaded => {
+            value={files || null}
+            onChange={uploaded => {
               buf.current[id] = uploaded;
               force();
             }}
-          >
-            <button className="btn btn--dark">Upload</button>
-          </UploadWidget>
+            onBusy={busy => setUploading(u => (busy ? u + 1 : Math.max(0, u - 1)))}
+          />
         </div>
       </Field>
     );
