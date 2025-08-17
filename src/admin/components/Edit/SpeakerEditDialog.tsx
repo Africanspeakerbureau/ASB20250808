@@ -194,8 +194,10 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Text id="Title" label="Title (Dr/Prof)" />
                   <Text id="Professional Title" />
                   <Text id="Company" label="Company/Organization" />
-                  <Text id="Location" />
                   <Select id="Country" options={COUNTRIES} />
+                  <Text id="Location" />
+                  <Text id="Email" type="email" />
+                  <Text id="Phone" label="Phone Number" type="tel" />
                   <Upload id="Profile Image" label="Profile Image" hint="JPG/PNG, max 5MB" />
                 </Grid>
               )}
@@ -236,8 +238,6 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
                   <TextArea id="keyMessagesText" label="Key Messages" rows={8} full />
                   <TextArea id="Professional Bio" label="Professional Bio" rows={12} full />
-                  {/* Key Message: compact 3–4 line box (half width) */}
-                  <TextArea id="Key Message" label="Key Message" rows={4} />
                 </Grid>
               )}
 
@@ -291,11 +291,11 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                 <Grid>
                   <Chips id="Status" options={STATUS} allowMulti />
                   <Select id="Featured" options={FEATURED} />
-                  <Readonly id="Created Date" />
+                  <Readonly id="Full Name" />
+                  <Readonly id="Experience Score" />
+                  <Readonly id="Total Events" />
+                  <Readonly id="Potential Revenue" />
                   <Readonly id="Client Inquiries" />
-                  <Badge label="Experience Score" value={buf.current["Experience Score"]} />
-                  <Badge label="Total Events" value={buf.current["Total Events (calc)"]} />
-                  <Badge label="Potential Revenue" value={buf.current["Potential Revenue"]} />
                   <TextArea id="Internal Notes" />
                 </Grid>
               )}
@@ -322,13 +322,14 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     return `f-${id.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
   }
 
-  function Text({ id, label }: { id: string; label?: string }) {
+  function Text({ id, label, type = "text" }: { id: string; label?: string; type?: string }) {
     const inputId = makeId(id);
     return (
       <Field id={inputId} label={label ?? id}>
         <input
           id={inputId}
           className="input"
+          type={type}
           defaultValue={buf.current[id] ?? ""}
           onChange={e => (buf.current[id] = e.target.value)}
           placeholder={label ?? id}
@@ -441,14 +442,6 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
       <Field id={inputId} label={id}>
         <input id={inputId} className="input" readOnly defaultValue={buf.current[id] ?? ''} />
       </Field>
-    );
-  }
-
-  function Badge({ label, value }: { label: string; value: any }) {
-    return (
-      <div className="badge">
-        {label}: <strong>{value ?? '—'}</strong>
-      </div>
     );
   }
 }
