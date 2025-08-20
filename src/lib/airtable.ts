@@ -1,4 +1,3 @@
-// src/lib/airtable.ts
 const API_KEY = import.meta.env.VITE_AIRTABLE_API_KEY as string;
 const BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID as string;
 const TABLE = import.meta.env.VITE_AIRTABLE_TABLE_BLOG || 'Blog';
