@@ -5,8 +5,8 @@ import Footer from '@/components/Footer.jsx';
 import { getLocationAndRate } from '@/lib/geo.js';
 
 export default function PublicLayout() {
-  const [countryCode, setCountryCode] = useState<'ZA' | string>('ZA');
-  const [currency, setCurrency] = useState<'ZAR' | string>('ZAR');
+  const [countryCode, setCountryCode] = useState('ZA');
+  const [currency, setCurrency] = useState('ZAR');
 
   useEffect(() => {
     let alive = true;
@@ -16,13 +16,9 @@ export default function PublicLayout() {
         if (!alive) return;
         if (r?.countryCode) setCountryCode(r.countryCode);
         if (r?.currency) setCurrency(r.currency);
-      } catch {
-        /* ignore */
-      }
+      } catch {}
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, []);
 
   return (

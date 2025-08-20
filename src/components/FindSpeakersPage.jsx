@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchAllApprovedPublishedSpeakers } from '../lib/airtable'
-import Header from './Header.jsx'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
@@ -131,7 +130,7 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
 
   return (
     <>
-      <Header countryCode={countryCode} currency={currency} />
+      {/* Header provided by PublicLayout */}
       <div className="max-w-6xl mx-auto px-4 py-12 mb-16">
         <header className="text-center mb-8">
           <h1 className="text-4xl font-bold">Find Your Perfect Speaker</h1>

@@ -5,7 +5,6 @@ import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import BookingForm from './components/BookingForm'
-import Header from './components/Header.jsx'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -1261,7 +1260,7 @@ function App() {
   if (currentPage === 'speaker-profile') {
     return (
       <>
-        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
+        {/* Header provided by PublicLayout */}
         <SpeakerProfile id={selectedSpeakerId} speakers={speakers} onBack={() => go('/find-speakers')} />
         {banner}
       </>
@@ -1276,7 +1275,7 @@ function App() {
     const isV2 = currentPage === 'speaker-application-v2'
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
+        {/* Header provided by PublicLayout */}
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
@@ -1992,7 +1991,7 @@ function App() {
     if (currentPage === 'about') {
       return (
         <div className="min-h-screen bg-white">
-        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
+        {/* Header provided by PublicLayout */}
 
           <div className="container mx-auto px-4 py-12">
             <div className="text-center mb-16">
@@ -2317,7 +2316,7 @@ function App() {
 
     return (
       <div className="min-h-screen bg-white">
-        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
+        {/* Header provided by PublicLayout */}
 
         <div className="container mx-auto px-4 py-12">
           <div className="text-center mb-12">
@@ -2419,7 +2418,7 @@ function App() {
   if (currentPage === 'quick-inquiry') {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
+        {/* Header provided by PublicLayout */}
 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
@@ -2477,7 +2476,7 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <Header countryCode={countryCode || 'ZA'} currency={currency || 'ZAR'} />
+      {/* Header provided by PublicLayout */}
 
       {/* Hero Section */}
       <section id="home-hero" className="relative overflow-hidden min-h-[720px] sm:min-h-[760px] pb-20 sm:pb-24">
