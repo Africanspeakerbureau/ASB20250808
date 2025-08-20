@@ -70,7 +70,7 @@ export default function BlogPost(){
       state==='loading' ? 'Loading…' :
       state==='notfound' ? 'Post not found.' :
       'This post is not published yet.';
-    return <div className="asb-blog"><div className="blog-article">{msg}</div></div>;
+    return <article className="asb-blog blog-article">{msg}</article>;
   }
 
   const heroImage =
@@ -84,8 +84,7 @@ export default function BlogPost(){
       : (post.Body || '');
 
   return (
-    <div className="asb-blog">
-    <article className="blog-article">
+    <article className="asb-blog blog-article">
       <header className="blog-header">
         <h1 className="blog-title">{post.Name}</h1>
         {post['Publish Date'] && (
@@ -111,6 +110,5 @@ export default function BlogPost(){
 
       <div className="rich-content" dangerouslySetInnerHTML={{ __html: safeBody }} />
     </article>
-    </div>
   );
 }
