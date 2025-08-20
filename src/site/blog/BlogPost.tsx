@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { getPostBySlug, isPostVisible } from '../../lib/airtable';
+import BlogSidebar from './BlogSidebar';
 import './blog.css';
 
 declare global { interface Window { DOMPurify: any } }
@@ -14,17 +15,12 @@ function toYouTubeEmbed(url?: string){
   }catch{}
   return url;
 }
-
-// add Cloudinary auto-optimizations if possible
-function cld(url?: string, transform='f_auto,q_auto'){
-  if(!url) return url;
-  if(url.includes('res.cloudinary.com') && url.includes('/upload/')){
-    return url.replace('/upload/','/upload/'+transform+'/');
-  }
-  return url;
+function cld(url?: string, transform='f_auto,q_auto'){ 
+  if(!url) return url; 
+  return (url.includes('res.cloudinary.com') && url.includes('/upload/')) ? url.replace('/upload/','/upload/'+transform+'/') : url;
 }
+function textOnly(html:string){ return html.replace(/<[^>]+>/g,' '); }
 
-// basic SEO without extra libs
 function upsertMeta(name:string, content:string){
   let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
   if(!el){ el=document.createElement('meta'); el.setAttribute('name',name); document.head.appendChild(el); }
@@ -51,13 +47,14 @@ export default function BlogPost(){
     setPost(rec); setState('ready');
   })(); },[slug,preview]);
 
+  // SEO
   useEffect(()=>{ if(!post) return;
     const title = post['OG Title'] || post.Name;
     const desc = post['OG Description'] || post.Excerpt || '';
-    const hero = typeof post['Hero Image']==='string' ? post['Hero Image'] :
+    const heroRaw =
+      typeof post['Hero Image']==='string' ? post['Hero Image'] :
       (Array.isArray(post['Hero Image']) && post['Hero Image'][0]?.url) ? post['Hero Image'][0].url : '';
-    const ogImage = post['OG Image'] || cld(hero, 'w_1200,h_630,c_fill,f_auto,q_auto');
-
+    const ogImage = post['OG Image'] || cld(heroRaw, 'w_1200,h_630,c_fill,f_auto,q_auto');
     document.title = `${title} — African Speaker Bureau`;
     upsertMeta('description', desc);
     upsertOG('og:title', title);
@@ -65,50 +62,60 @@ export default function BlogPost(){
     if(ogImage) upsertOG('og:image', ogImage);
   },[post]);
 
-  if(state!=='ready'){
-    const msg =
-      state==='loading' ? 'Loading…' :
-      state==='notfound' ? 'Post not found.' :
-      'This post is not published yet.';
-    return <article className="asb-blog blog-article">{msg}</article>;
-  }
+  const readMinutes = useMemo(()=>{
+    const words = post ? textOnly(post.Body||'').trim().split(/\s+/).filter(Boolean).length : 0;
+    return Math.max(1, Math.round(words/200));
+  },[post]);
+
+  if(state==='loading') return <div className="asb-blog"><div className="blog-shell"><div className="blog-article">Loading…</div></div></div>;
+  if(state==='notfound') return <div className="asb-blog"><div className="blog-shell"><div className="blog-article">Post not found.</div></div></div>;
+  if(state==='forbidden') return <div className="asb-blog"><div className="blog-shell"><div className="blog-article">This post is not published yet.</div></div></div>;
 
   const heroImage =
     typeof post['Hero Image'] === 'string' ? post['Hero Image'] :
     (Array.isArray(post['Hero Image']) && post['Hero Image'][0]?.url) ? post['Hero Image'][0].url : null;
-
   const videoEmbed = toYouTubeEmbed(post['Hero Video URL']);
   const safeBody =
     (typeof window!=='undefined' && window.DOMPurify)
       ? window.DOMPurify.sanitize(post.Body || '')
       : (post.Body || '');
 
+  const author = post.Author || 'ASB Editorial';
+  const dateStr = post['Publish Date'] ? new Date(post['Publish Date']).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) : '';
+
   return (
-    <article className="asb-blog blog-article">
-      <header className="blog-header">
-        <h1 className="blog-title">{post.Name}</h1>
-        {post['Publish Date'] && (
-          <div className="blog-date">
-            {new Date(post['Publish Date']).toLocaleDateString(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric'})}
-          </div>
-        )}
-        {post.Excerpt && <p className="blog-excerpt">{post.Excerpt}</p>}
-      </header>
+    <div className="asb-blog">
+      <div className="blog-shell">
+        {/* MAIN */}
+        <article className="blog-article">
+          <header className="blog-header">
+            <h1 className="blog-title">{post.Name}</h1>
+            <div className="blog-byline">
+              By {author} • {dateStr}{readMinutes ? ` • ${readMinutes} min read` : ''}{post.Type?` • ${post.Type}`:''}
+            </div>
+            {post.Excerpt && <p className="blog-excerpt">{post.Excerpt}</p>}
+          </header>
 
-      {post.Type==='Video' && videoEmbed && (
-        <div className="blog-hero aspect-video">
-          <iframe
-            src={videoEmbed} title="Video"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen />
-        </div>
-      )}
+          {post.Type==='Video' && videoEmbed && (
+            <div className="blog-hero aspect-video">
+              <iframe
+                src={videoEmbed} title="Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen />
+            </div>
+          )}
 
-      {post.Type!=='Video' && heroImage && (
-        <img className="blog-hero" src={cld(heroImage,'w_1600,f_auto,q_auto')} alt="" loading="lazy" />
-      )}
+          {post.Type!=='Video' && heroImage && (
+            <img className="blog-hero" src={cld(heroImage,'w_1600,f_auto,q_auto')} alt="" loading="lazy" />
+          )}
 
-      <div className="rich-content" dangerouslySetInnerHTML={{ __html: safeBody }} />
-    </article>
+          <div className="rich-content" dangerouslySetInnerHTML={{ __html: safeBody }} />
+        </article>
+
+        {/* SIDEBAR */}
+        <BlogSidebar currentSlug={post.Slug} />
+      </div>
+    </div>
   );
 }
+
