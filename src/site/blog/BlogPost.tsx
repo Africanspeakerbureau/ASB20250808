@@ -1,84 +1,110 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { getPostBySlug, isPostVisible } from '../../lib/airtable';
+import './blog.css';
 
 declare global { interface Window { DOMPurify: any } }
-function useQuery() { return new URLSearchParams(useLocation().search); }
+function useQuery(){ return new URLSearchParams(useLocation().search); }
 
-function toYouTubeEmbed(url?: string) {
-  if (!url) return null;
-  try {
-    if (url.includes('watch?v=')) {
-      const u = new URL(url);
-      const id = u.searchParams.get('v');
-      return id ? `https://www.youtube.com/embed/${id}` : url;
-    }
-    if (url.includes('youtu.be/')) {
-      const id = url.split('youtu.be/')[1].split(/[?&]/)[0];
-      return `https://www.youtube.com/embed/${id}`;
-    }
-  } catch {}
+function toYouTubeEmbed(url?: string){
+  if(!url) return null;
+  try{
+    if(url.includes('watch?v=')){ const u=new URL(url); const id=u.searchParams.get('v'); return id?`https://www.youtube.com/embed/${id}`:url; }
+    if(url.includes('youtu.be/')){ const id=url.split('youtu.be/')[1].split(/[?&]/)[0]; return `https://www.youtube.com/embed/${id}`; }
+  }catch{}
   return url;
 }
 
-export default function BlogPost() {
+// add Cloudinary auto-optimizations if possible
+function cld(url?: string, transform='f_auto,q_auto'){
+  if(!url) return url;
+  if(url.includes('res.cloudinary.com') && url.includes('/upload/')){
+    return url.replace('/upload/','/upload/'+transform+'/');
+  }
+  return url;
+}
+
+// basic SEO without extra libs
+function upsertMeta(name:string, content:string){
+  let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
+  if(!el){ el=document.createElement('meta'); el.setAttribute('name',name); document.head.appendChild(el); }
+  el.setAttribute('content',content);
+}
+function upsertOG(property:string, content:string){
+  let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
+  if(!el){ el=document.createElement('meta'); el.setAttribute('property',property); document.head.appendChild(el); }
+  el.setAttribute('content',content);
+}
+
+export default function BlogPost(){
   const { slug } = useParams();
   const q = useQuery();
-  const preview = q.get('preview') === '1';
+  const preview = q.get('preview')==='1';
 
-  const [post, setPost] = useState<any | null>(null);
+  const [post, setPost] = useState<any|null>(null);
   const [state, setState] = useState<'loading'|'notfound'|'forbidden'|'ready'>('loading');
 
-  useEffect(() => {
-    (async () => {
-      const rec = await getPostBySlug(slug || '');
-      if (!rec) return setState('notfound');
-      if (!isPostVisible(rec, preview)) return setState('forbidden');
-      setPost(rec);
-      setState('ready');
-    })();
-  }, [slug, preview]);
+  useEffect(()=>{ (async()=>{
+    const rec = await getPostBySlug(slug||'');
+    if(!rec) return setState('notfound');
+    if(!isPostVisible(rec, preview)) return setState('forbidden');
+    setPost(rec); setState('ready');
+  })(); },[slug,preview]);
 
-  if (state === 'loading') return <div className="p-6">Loading…</div>;
-  if (state === 'notfound') return <div className="p-6">Post not found.</div>;
-  if (state === 'forbidden') return <div className="p-6">This post is not published yet.</div>;
+  useEffect(()=>{ if(!post) return;
+    const title = post['OG Title'] || post.Name;
+    const desc = post['OG Description'] || post.Excerpt || '';
+    const hero = typeof post['Hero Image']==='string' ? post['Hero Image'] :
+      (Array.isArray(post['Hero Image']) && post['Hero Image'][0]?.url) ? post['Hero Image'][0].url : '';
+    const ogImage = post['OG Image'] || cld(hero, 'w_1200,h_630,c_fill,f_auto,q_auto');
+
+    document.title = `${title} — African Speaker Bureau`;
+    upsertMeta('description', desc);
+    upsertOG('og:title', title);
+    upsertOG('og:description', desc);
+    if(ogImage) upsertOG('og:image', ogImage);
+  },[post]);
+
+  if(state==='loading') return <div className="blog-article">Loading…</div>;
+  if(state==='notfound') return <div className="blog-article">Post not found.</div>;
+  if(state==='forbidden') return <div className="blog-article">This post is not published yet.</div>;
 
   const heroImage =
     typeof post['Hero Image'] === 'string' ? post['Hero Image'] :
     (Array.isArray(post['Hero Image']) && post['Hero Image'][0]?.url) ? post['Hero Image'][0].url : null;
 
   const videoEmbed = toYouTubeEmbed(post['Hero Video URL']);
-
   const safeBody =
-    (typeof window !== 'undefined' && window.DOMPurify)
+    (typeof window!=='undefined' && window.DOMPurify)
       ? window.DOMPurify.sanitize(post.Body || '')
       : (post.Body || '');
 
   return (
-    <article className="max-w-3xl mx-auto p-6 space-y-6">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-semibold">{post.Name}</h1>
-        {post['Publish Date'] && <div className="text-sm text-gray-600">{new Date(post['Publish Date']).toDateString()}</div>}
-        {post.Excerpt && <p className="text-gray-700">{post.Excerpt}</p>}
+    <article className="blog-article">
+      <header className="blog-header">
+        <h1 className="blog-title">{post.Name}</h1>
+        {post['Publish Date'] && (
+          <div className="blog-date">
+            {new Date(post['Publish Date']).toLocaleDateString(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric'})}
+          </div>
+        )}
+        {post.Excerpt && <p className="blog-excerpt">{post.Excerpt}</p>}
       </header>
 
-      {post.Type === 'Video' && videoEmbed && (
-        <div className="aspect-video">
+      {post.Type==='Video' && videoEmbed && (
+        <div className="blog-hero aspect-video">
           <iframe
-            src={videoEmbed}
-            width="100%" height="100%" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen frameBorder={0} title="Video"
-            className="w-full h-full"
-          />
+            src={videoEmbed} title="Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen />
         </div>
       )}
 
-      {post.Type !== 'Video' && heroImage && (
-        <img src={heroImage} alt="" className="w-full rounded" loading="lazy" />
+      {post.Type!=='Video' && heroImage && (
+        <img className="blog-hero" src={cld(heroImage,'w_1600,f_auto,q_auto')} alt="" loading="lazy" />
       )}
 
-      <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: safeBody }} />
+      <div className="rich-content" dangerouslySetInnerHTML={{ __html: safeBody }} />
     </article>
   );
 }
-
