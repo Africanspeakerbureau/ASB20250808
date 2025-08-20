@@ -65,9 +65,13 @@ export default function BlogPost(){
     if(ogImage) upsertOG('og:image', ogImage);
   },[post]);
 
-  if(state==='loading') return <div className="blog-article">Loading…</div>;
-  if(state==='notfound') return <div className="blog-article">Post not found.</div>;
-  if(state==='forbidden') return <div className="blog-article">This post is not published yet.</div>;
+  if(state!=='ready'){
+    const msg =
+      state==='loading' ? 'Loading…' :
+      state==='notfound' ? 'Post not found.' :
+      'This post is not published yet.';
+    return <div className="asb-blog"><div className="blog-article">{msg}</div></div>;
+  }
 
   const heroImage =
     typeof post['Hero Image'] === 'string' ? post['Hero Image'] :
@@ -80,6 +84,7 @@ export default function BlogPost(){
       : (post.Body || '');
 
   return (
+    <div className="asb-blog">
     <article className="blog-article">
       <header className="blog-header">
         <h1 className="blog-title">{post.Name}</h1>
@@ -106,5 +111,6 @@ export default function BlogPost(){
 
       <div className="rich-content" dangerouslySetInnerHTML={{ __html: safeBody }} />
     </article>
+    </div>
   );
 }
