@@ -8,7 +8,7 @@ import FindSpeakersPage from './components/FindSpeakersPage.jsx'
 import SpeakerProfile from './components/SpeakerProfile.jsx'
 import { ToastProvider } from './components/Toast'
 import Footer from './components/Footer.jsx'
-import BlogPost from '@/site/blog/BlogPost'
+import BlogPost from './site/blog/BlogPost'
 import AdminBlogList from './admin/blog/AdminBlogList'
 import AdminBlogEditor from './admin/blog/AdminBlogEditor'
 
