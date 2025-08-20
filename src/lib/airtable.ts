@@ -23,7 +23,7 @@ async function at(method: 'GET'|'POST'|'PATCH'|'DELETE', path = '', body?: any) 
   return res.json();
 }
 
-// ---- Admin (list/edit) helpers ----
+// -------- Admin (list/edit) --------
 export async function listPosts(params: { search?: string; status?: string } = {}) {
   const filter: string[] = [];
   if (params.status) filter.push(`{Status} = '${params.status}'`);
@@ -60,7 +60,7 @@ export async function deletePost(id: string) {
   await at('DELETE', `?records[]=${encodeURIComponent(id)}`);
 }
 
-// ---- Public read-side helpers ----
+// -------- Public read-side --------
 export function isPostVisible(rec: any, preview: boolean) {
   if (preview) return true;
   if (rec?.Status !== 'Published') return false;
