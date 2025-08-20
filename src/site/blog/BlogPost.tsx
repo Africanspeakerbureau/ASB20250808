@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { getPostBySlug, isPostVisible } from '../../lib/airtable';
 
+declare global { interface Window { DOMPurify: any } }
 function useQuery() { return new URLSearchParams(useLocation().search); }
 
 function toYouTubeEmbed(url?: string) {
@@ -17,7 +18,7 @@ function toYouTubeEmbed(url?: string) {
       return `https://www.youtube.com/embed/${id}`;
     }
   } catch {}
-  return url; // already an embed or other provider
+  return url;
 }
 
 export default function BlogPost() {
