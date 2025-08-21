@@ -171,22 +171,34 @@ export async function fetchAllApprovedPublishedSpeakers({ pageSize = 100, max = 
   return all;
 }
 
-export async function listSpeakers({ pageSize = 100, max = 5000 } = {}) {
+export async function fetchSpeakersListSafe({ pageSize = 100, max = 5000 } = {}) {
   ensureEnv();
   const headers = { Authorization: `Bearer ${API_KEY}` };
   let all = [];
   let offset = '';
   let guard = 0;
+  let useFields = true;
   do {
     const params = new URLSearchParams();
     params.set('pageSize', String(pageSize));
-    SPEAKER_FIELDS.forEach((f) => params.append('fields[]', f));
+    if (useFields) SPEAKER_FIELDS.forEach((f) => params.append('fields[]', f));
     if (offset) params.set('offset', offset);
     const url = `${API}/${TBL_SPEAKERS}?${params.toString()}`;
-    const res = await fetch(url, { headers });
+    let res = await fetch(url, { headers });
     if (!res.ok) {
       const t = await res.text().catch(() => '');
-      throw new Error(`Airtable ${res.status}: ${t}`);
+      const msg = t.toLowerCase();
+      if (
+        useFields &&
+        (res.status === 422 || msg.includes('unknown field') || msg.includes('invalid'))
+      ) {
+        useFields = false;
+        continue;
+      }
+      const err = new Error(`Airtable ${res.status}: ${t}`);
+      err.status = res.status;
+      err.body = t;
+      throw err;
     }
     const json = await res.json();
     const records = json.records || [];
@@ -206,6 +218,8 @@ export async function listSpeakers({ pageSize = 100, max = 5000 } = {}) {
   } while (offset);
   return all;
 }
+
+export const listSpeakers = fetchSpeakersListSafe;
 
 async function query(table, params = {}) {
   const qs = new URLSearchParams(params).toString();

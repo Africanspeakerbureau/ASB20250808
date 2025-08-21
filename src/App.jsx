@@ -12,7 +12,7 @@ import {
   getSpeakerApplications,
   getClientInquiries,
   getQuickInquiries,
-  listSpeakers,
+  fetchSpeakersListSafe,
   getSpeakerBySlugOrId,
   isAirtableId,
 } from '@/lib/airtable'
@@ -343,10 +343,10 @@ function App() {
     let alive = true
     ;(async () => {
       try {
-        const rows = await listSpeakers()
+        const rows = await fetchSpeakersListSafe()
         if (alive) setSpeakers(rows)
       } catch (e) {
-        console.error('Fetch speakers failed', e)
+        console.error('Failed to load speakers:', e?.status || '', e?.body || e)
       }
     })()
     return () => { alive = false }

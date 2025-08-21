@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { listSpeakers } from '../lib/airtable'
+import { fetchSpeakersListSafe } from '../lib/airtable'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
@@ -76,10 +76,10 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
     ;(async () => {
       try {
         setLoading(true)
-        const rows = await listSpeakers()
+        const rows = await fetchSpeakersListSafe()
         if (alive) setAll(rows)
       } catch (e) {
-        console.error('Fetch speakers failed:', e)
+        console.error('Failed to load speakers:', e?.status || '', e?.body || e)
         if (alive) setError('Could not load speakers.')
       } finally {
         if (alive) setLoading(false)
