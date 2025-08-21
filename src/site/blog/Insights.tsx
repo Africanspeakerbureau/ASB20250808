@@ -142,7 +142,7 @@ export default function Insights() {
                   <div className="text-xs font-semibold tracking-wide" style={{ color: TOKENS.navy }}>
                     INSIGHTS
                   </div>
-                  <h1 className="mt-1 text-2xl md:text-3xl font-serif font-bold text-gray-900">
+                  <h1 className="mt-1 text-xl md:text-2xl lg:text-[32px] font-serif font-bold text-gray-900">
                     {featured.Name}
                   </h1>
                   <div className="mt-2 text-sm" style={{ color: TOKENS.muted }}>
@@ -218,7 +218,8 @@ export default function Insights() {
                 ))}
               </div>
 
-              <div className="md:ml-auto">
+              <div className="md:ml-auto flex items-center gap-2">
+                <span className="text-sm text-gray-600">Author</span>
                 <select
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
