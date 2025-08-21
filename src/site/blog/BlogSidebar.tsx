@@ -1,15 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { listPublicPosts } from '../../lib/airtable';
+import { pickBlogThumb } from '../../lib/blogMedia';
 import './blog.css';
-
-function cld(u?: string, t='w_160,f_auto,q_auto,c_fill,g_auto'){
-  return u && u.includes('/upload/') ? u.replace('/upload/','/upload/'+t+'/') : u;
-}
-function thumbOf(p:any){
-  const raw = typeof p['Hero Image']==='string' ? p['Hero Image'] :
-    (Array.isArray(p['Hero Image']) && p['Hero Image'][0]?.url) ? p['Hero Image'][0].url : '';
-  return cld(raw);
-}
 
 export default function BlogSidebar({ currentSlug }: { currentSlug?: string }) {
   const [rows,setRows]=useState<any[]>([]);
@@ -32,17 +24,20 @@ export default function BlogSidebar({ currentSlug }: { currentSlug?: string }) {
 
       <div className="sb-card">
         <h3 className="sb-title">Latest Articles</h3>
-        {latest.map(p=>(
-          <a key={p.Slug||p.id} href={`/#/blog/${p.Slug}`} className="latest-item">
-            <img className="latest-thumb" src={thumbOf(p)} alt="" loading="lazy"/>
-            <div>
-              <div style={{fontWeight:700,lineHeight:1.2}}>{p.Name}</div>
-              <div className="latest-meta">
-                {p['Publish Date'] ? new Date(p['Publish Date']).toLocaleDateString() : ''}
+        {latest.map(p=>{
+          const img = pickBlogThumb(p);
+          return (
+            <a key={p.Slug||p.id} href={`/#/blog/${p.Slug}`} className="latest-item">
+              {img ? <img src={img} alt="" className="h-10 w-10 object-cover rounded" /> : <div className="h-10 w-10 rounded bg-gray-200" />}
+              <div>
+                <div style={{fontWeight:700,lineHeight:1.2}}>{p.Name}</div>
+                <div className="latest-meta">
+                  {p['Publish Date'] ? new Date(p['Publish Date']).toLocaleDateString() : ''}
+                </div>
               </div>
-            </div>
-          </a>
-        ))}
+            </a>
+          );
+        })}
       </div>
 
       <div className="sb-card">
