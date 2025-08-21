@@ -1,4 +1,3 @@
-// src/lib/airtable.ts
 const API_KEY = import.meta.env.VITE_AIRTABLE_API_KEY as string;
 const BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID as string;
 const TABLE = import.meta.env.VITE_AIRTABLE_TABLE_BLOG || 'Blog';
@@ -23,7 +22,7 @@ async function at(method: 'GET'|'POST'|'PATCH'|'DELETE', path = '', body?: any) 
   return res.json();
 }
 
-// ---- Admin (list/edit) helpers ----
+// -------- Admin (list/edit) --------
 export async function listPosts(params: { search?: string; status?: string } = {}) {
   const filter: string[] = [];
   if (params.status) filter.push(`{Status} = '${params.status}'`);
@@ -60,7 +59,7 @@ export async function deletePost(id: string) {
   await at('DELETE', `?records[]=${encodeURIComponent(id)}`);
 }
 
-// ---- Public read-side helpers ----
+// -------- Public read-side --------
 export function isPostVisible(rec: any, preview: boolean) {
   if (preview) return true;
   if (rec?.Status !== 'Published') return false;
@@ -85,4 +84,33 @@ export async function getPostBySlug(slug: string) {
   const data = await res.json();
   const rec = data.records?.[0];
   return rec ? ({ id: rec.id, ...rec.fields } as any) : null;
+}
+
+export async function listPublicPosts(max = 24) {
+  const formula = "AND({Status}='Published', IS_BEFORE({Publish Date}, NOW()))";
+  const params = new URLSearchParams({
+    filterByFormula: formula,
+    maxRecords: String(max),
+    'sort[0][field]': 'Publish Date',
+    'sort[0][direction]': 'desc'
+  });
+  const res = await fetch(`${BASE_URL}?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${API_KEY}` }
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`Airtable listPublicPosts failed: ${res.status} ${t}`);
+  }
+  const data = await res.json();
+  const rows = (data.records || []).map((r: any) => ({ id: r.id, ...r.fields }));
+  rows.sort((a: any, b: any) => {
+    const fa = a.Featured ? 1 : 0;
+    const fb = b.Featured ? 1 : 0;
+    if (fb - fa) return fb - fa;
+    const pa = Number(a['Pin Order'] || 0);
+    const pb = Number(b['Pin Order'] || 0);
+    if (pa !== pb) return pa - pb;
+    return new Date(b['Publish Date'] || 0).getTime() - new Date(a['Publish Date'] || 0).getTime();
+  });
+  return rows;
 }

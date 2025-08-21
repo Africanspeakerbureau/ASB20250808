@@ -12,7 +12,6 @@ export default function Footer({ appActions }) {
 
   return (
     <footer
-      data-footer="ASB-GOOD"
       className="bg-slate-900 text-slate-200 relative z-10"
       onClickCapture={(e) => e.stopPropagation()}
     >

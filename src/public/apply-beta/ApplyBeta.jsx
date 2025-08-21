@@ -1,5 +1,4 @@
 import React from "react";
-import Header from "@/components/Header.jsx";
 import { toast } from "@/lib/toast";
 import {
   IdentityCardPublic,
@@ -148,7 +147,7 @@ export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header countryCode={countryCode} currency={currency} />
+      {/* Header provided by PublicLayout */}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold tracking-tight text-center">Join as Speaker</h1>

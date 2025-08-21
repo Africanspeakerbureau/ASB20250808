@@ -240,3 +240,33 @@ export async function getPostBySlug(slug) {
   const rec = data.records?.[0];
   return rec ? { id: rec.id, ...rec.fields } : null;
 }
+
+export async function listPublicPosts(max = 24) {
+  const formula = "AND({Status}='Published', IS_BEFORE({Publish Date}, NOW()))";
+  const params = new URLSearchParams({
+    filterByFormula: formula,
+    maxRecords: String(max),
+    'sort[0][field]': 'Publish Date',
+    'sort[0][direction]': 'desc'
+  });
+  const res = await fetch(`${BLOG_BASE_URL}?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${API_KEY}` }
+  });
+  if (!res.ok) {
+    const t = await res.text().catch(() => '');
+    throw new Error(`Airtable listPublicPosts failed: ${res.status} ${t}`);
+  }
+  const data = await res.json();
+  const rows = (data.records || []).map(r => ({ id: r.id, ...r.fields }));
+  // Featured & Pin Order first (client-side)
+  rows.sort((a, b) => {
+    const fa = a.Featured ? 1 : 0;
+    const fb = b.Featured ? 1 : 0;
+    if (fb - fa) return fb - fa;
+    const pa = Number(a['Pin Order'] || 0);
+    const pb = Number(b['Pin Order'] || 0);
+    if (pa !== pb) return pa - pb;
+    return new Date(b['Publish Date'] || 0).getTime() - new Date(a['Publish Date'] || 0).getTime();
+  });
+  return rows;
+}
