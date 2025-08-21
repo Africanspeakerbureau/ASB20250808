@@ -71,9 +71,13 @@ export default function BlogPost(){
   if(state==='notfound') return <div className="asb-blog"><div className="blog-shell"><div className="blog-article">Post not found.</div></div></div>;
   if(state==='forbidden') return <div className="asb-blog"><div className="blog-shell"><div className="blog-article">This post is not published yet.</div></div></div>;
 
-  const heroImage =
-    typeof post['Hero Image'] === 'string' ? post['Hero Image'] :
-    (Array.isArray(post['Hero Image']) && post['Hero Image'][0]?.url) ? post['Hero Image'][0].url : null;
+  const heroImageUrlField = post['Hero Image URL'];
+  const heroAttachment =
+    Array.isArray(post['Hero Image']) && post['Hero Image'].length
+      ? (post['Hero Image'][0]?.url || post['Hero Image'][0]?.thumbnails?.large?.url || post['Hero Image'][0]?.thumbnails?.small?.url)
+      : null;
+
+  const heroImage = heroImageUrlField || heroAttachment;
   const videoEmbed = toYouTubeEmbed(post['Hero Video URL']);
   const safeBody =
     (typeof window!=='undefined' && window.DOMPurify)

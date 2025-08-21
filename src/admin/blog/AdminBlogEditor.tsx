@@ -14,8 +14,11 @@ export default function AdminBlogEditor() {
   const [form, setForm] = useState<any>({
     Name:'', Slug:'', Status:'Draft', Type:'Article', Excerpt:'',
     'Hero Image':'', 'Hero Video URL':'', 'Publish Date':'',
-    Author:'', Tags:'', Featured:false, 'Pin Order':0
+    Author:'', Tags:'', Featured:false, 'Pin Order':0,
+    'Hero Image URL':''
   });
+  const [existingHeroAttachment, setExistingHeroAttachment] = useState<any[]>([]);
+  const [heroAttachmentToSet, setHeroAttachmentToSet] = useState<string | null>(null); // Cloudinary URL to attach on save
 
   const editorElem = useRef<HTMLDivElement>(null);
   const editorInstance = useRef<any>(null);
@@ -41,8 +44,10 @@ export default function AdminBlogEditor() {
           Author: (r as any).Author || '',
           Tags: Array.isArray((r as any).Tags) ? (r as any).Tags.join(', ') : ((r as any).Tags || ''),
           Featured: !!(r as any).Featured,
-          'Pin Order': (r as any)['Pin Order'] || 0
+          'Pin Order': (r as any)['Pin Order'] || 0,
+          'Hero Image URL': (r as any)['Hero Image URL'] || ''
         });
+        setExistingHeroAttachment(Array.isArray((r as any)['Hero Image']) ? (r as any)['Hero Image'] : []);
         setInitialBody((r as any).Body || '');
       }
 
@@ -80,6 +85,17 @@ export default function AdminBlogEditor() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, initialBody]);
 
+  async function uploadHero(file: File) {
+    try {
+      const url = await uploadToCloudinary(file);
+      set('Hero Image URL', url);         // fill text field too (nice to copy/share)
+      setHeroAttachmentToSet(url);        // stage as attachment on save
+      alert('Hero image uploaded');
+    } catch (e:any) {
+      alert('Upload failed: ' + (e?.message || e));
+    }
+  }
+
   async function save() {
     if (!form.Name?.trim()) return alert('Title is required');
     if (!form.Slug?.trim()) return alert('Slug is required');
@@ -95,21 +111,40 @@ export default function AdminBlogEditor() {
       Status: form.Status,
       Type: form.Type,
       Excerpt: form.Excerpt,
-      'Hero Image': form['Hero Image'] || undefined,
       'Hero Video URL': form['Hero Video URL'] || undefined,
       'Publish Date': form['Publish Date'] || undefined,
       Author: form.Author || undefined,
       Tags: String(form.Tags || '').split(',').map((s:string)=>s.trim()).filter(Boolean),
       Featured: !!form.Featured,
       'Pin Order': Number(form['Pin Order'] || 0),
-      Body
+      Body,
+      // NEW: save URL text field always if present
+      'Hero Image URL': form['Hero Image URL'] || undefined
     };
+
+    // NEW: attachments logic
+    if (heroAttachmentToSet === '') {
+      // user clicked "Clear attachment"
+      payload['Hero Image'] = [];                   // clears the Airtable attachment field
+    } else if (typeof heroAttachmentToSet === 'string' && heroAttachmentToSet) {
+      // user uploaded a new hero → attach it
+      payload['Hero Image'] = [{ url: heroAttachmentToSet }];
+    }
+    // else: do not include 'Hero Image' → Airtable leaves existing attachment as-is
 
     if (id && id !== 'new') {
       await updatePost(id, payload);
     } else {
       const rec = await createPost(payload);
+      if (heroAttachmentToSet !== null) {
+        setExistingHeroAttachment(heroAttachmentToSet === '' ? [] : [{ url: heroAttachmentToSet }]);
+        setHeroAttachmentToSet(null);
+      }
       return nav(`/admin/blog/${rec.id}`);
+    }
+    if (heroAttachmentToSet !== null) {
+      setExistingHeroAttachment(heroAttachmentToSet === '' ? [] : [{ url: heroAttachmentToSet }]);
+      setHeroAttachmentToSet(null);
     }
     alert('Saved');
   }
@@ -146,8 +181,55 @@ export default function AdminBlogEditor() {
           <label className="block">Hero Video URL (for Video)
             <input className="mt-1 border p-2 rounded w-full" value={form['Hero Video URL']} onChange={e=>set('Hero Video URL', e.target.value)} />
           </label>
-          <label className="block">Hero Image URL (optional)
-            <input className="mt-1 border p-2 rounded w-full" value={form['Hero Image']} onChange={e=>set('Hero Image', e.target.value)} />
+          <label className="block">Hero Image
+            <div className="mt-1 flex gap-2">
+              {/* URL input */}
+              <input
+                className="border p-2 rounded w-full"
+                value={form['Hero Image URL'] || ''}
+                onChange={e=>set('Hero Image URL', e.target.value)}
+                placeholder="https://… (Cloudinary or any image URL)"
+              />
+              {/* Upload button */}
+              <label className="px-3 py-2 border rounded cursor-pointer whitespace-nowrap">
+                Upload
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async e=>{
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    await uploadHero(f);
+                    e.currentTarget.value = '';
+                  }}
+                />
+              </label>
+            </div>
+
+            {/* Existing attachment preview + clear */}
+            {existingHeroAttachment?.length > 0 && (
+              <div className="mt-2 flex items-center gap-3">
+                <img
+                  src={existingHeroAttachment[0]?.thumbnails?.small?.url || existingHeroAttachment[0]?.url}
+                  alt=""
+                  className="w-16 h-16 object-cover rounded border"
+                />
+                <button
+                  type="button"
+                  onClick={()=>{
+                    // mark to clear on save
+                    setHeroAttachmentToSet('');    // special: empty string = clear
+                    alert('Hero attachment will be cleared on Save');
+                  }}
+                  className="px-2 py-1 border rounded"
+                >Clear attachment on Save</button>
+              </div>
+            )}
+
+            <p className="text-xs text-gray-500 mt-1">
+              Paste a URL (saved to “Hero Image URL”), or Upload (file goes to Cloudinary and is attached to “Hero Image” in Airtable).
+            </p>
           </label>
           <label className="block">Excerpt
             <textarea className="mt-1 border p-2 rounded w-full" rows={3} value={form.Excerpt} onChange={e=>set('Excerpt', e.target.value)} />
