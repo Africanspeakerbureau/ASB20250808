@@ -110,26 +110,35 @@ export default function Insights() {
           {!rows ? (
             <div className="h-60 rounded-2xl border animate-pulse" style={{ borderColor: TOKENS.border }} />
           ) : featured ? (
-            <div className="rounded-2xl border" style={{ borderColor: TOKENS.border }}>
-              <div className="grid grid-cols-1 md:grid-cols-[420px,1fr] gap-0">
-                {/* Media */}
-                <Link to={`/blog/${featured.Slug || ''}`} className="block">
-                  <div className="h-64 md:h-full w-full rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl bg-gray-200 relative overflow-hidden">
+            <div className="rounded-2xl border overflow-hidden" style={{ borderColor: TOKENS.border }}>
+              {/* Switch to flex so media is fixed-width on the left */}
+              <div className="md:flex">
+                {/* Media (fixed width on md+) */}
+                <Link to={`/blog/${featured.Slug || ''}`} className="block md:w-[380px] lg:w-[460px] shrink-0">
+                  <div className="h-64 md:h-[360px] lg:h-[420px] w-full bg-gray-200 relative">
                     {pickHero(featured) ? (
-                      <img src={pickHero(featured)!} alt="" className="h-full w-full object-cover" loading="lazy" />
+                      <img
+                        src={pickHero(featured)!}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
                     ) : null}
+
                     {(featured.Type || '').toLowerCase() === 'video' && (
                       <span className="absolute inset-0 flex items-center justify-center">
                         <span className="inline-flex h-14 w-14 items-center justify-center rounded-full" style={{ backgroundColor: TOKENS.navy }}>
-                          <PlayIcon />
+                          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                            <path d="M8 5v14l11-7z" fill="#fff"></path>
+                          </svg>
                         </span>
                       </span>
                     )}
                   </div>
                 </Link>
 
-                {/* Content */}
-                <div className="p-6 md:p-8">
+                {/* Content (fills remaining space) */}
+                <div className="p-6 md:p-8 flex-1">
                   <div className="text-xs font-semibold tracking-wide" style={{ color: TOKENS.navy }}>
                     INSIGHTS
                   </div>
@@ -137,8 +146,8 @@ export default function Insights() {
                     {featured.Name}
                   </h1>
                   <div className="mt-2 text-sm" style={{ color: TOKENS.muted }}>
-                    {(featured.Author || 'ASB Editorial')}{' '}
-                    {featured.Tags?.length ? <>• {featured.Tags[0]}</> : null}
+                    {(featured.Author || 'ASB Editorial')}
+                    {featured.Tags?.length ? <> • {featured.Tags[0]}</> : null}
                   </div>
                   {featured.Excerpt && (
                     <p className="mt-4 text-[16px] leading-7 text-gray-800">{featured.Excerpt}</p>
