@@ -2,6 +2,20 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listPublishedPostsForIndex, BlogIndexRecord } from '../../lib/airtable.ts';
 
+function ytIdFromUrl(url?: string | null) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes('youtu.be')) return u.pathname.replace('/', '').split(/[?&]/)[0] || null;
+    if (u.hostname.includes('youtube.com')) return u.searchParams.get('v');
+  } catch {}
+  return null;
+}
+function ytThumb(url?: string | null) {
+  const id = ytIdFromUrl(url || '');
+  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
+}
+
 const TOKENS = {
   surface: '#F6F8FC',
   footer:  '#0B2A4A',
@@ -13,12 +27,20 @@ const TOKENS = {
 };
 
 function pickHero(rec: BlogIndexRecord): string | null {
-  const url = (rec as any)['Hero Image URL'];
-  if (url && String(url).startsWith('http')) return url as string;
+  const urlField = (rec as any)['Hero Image URL'];
+  if (urlField && String(urlField).startsWith('http')) return urlField as string;
+
   const att = Array.isArray(rec['Hero Image']) && rec['Hero Image'].length
     ? (rec['Hero Image'][0]?.url || rec['Hero Image'][0]?.thumbnails?.large?.url || rec['Hero Image'][0]?.thumbnails?.small?.url)
     : null;
-  return att || null;
+  if (att) return att;
+
+  // Fallback for videos: YouTube thumb if no hero image
+  if ((rec.Type || '').toLowerCase() === 'video') {
+    const thumb = ytThumb((rec as any)['Hero Video URL']);
+    if (thumb) return thumb;
+  }
+  return null;
 }
 
 function PlayIcon() {
@@ -209,6 +231,15 @@ export default function Insights() {
                   <div className="rounded-2xl border overflow-hidden bg-white" style={{ borderColor: TOKENS.border }}>
                     <div className="h-40 w-full bg-gray-200 relative">
                       {img ? <img src={img} alt="" className="h-full w-full object-cover" loading="lazy" /> : null}
+                      {(a.Type || '').toLowerCase() === 'video' && (
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: TOKENS.navy }}>
+                            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                              <path d="M8 5v14l11-7z" fill="#fff"></path>
+                            </svg>
+                          </span>
+                        </span>
+                      )}
                       <div className="absolute bottom-0 left-0 right-0 h-[4px]" style={{ backgroundColor: TOKENS.blue }} />
                     </div>
                     <div className="p-4">
