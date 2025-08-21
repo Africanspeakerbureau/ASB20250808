@@ -83,7 +83,7 @@ export async function getSpeakerBySlugOrId(slugOrId) {
 
   const slug = String(slugOrId).toLowerCase();
   const bySlug = await airtableSelectAll(TABLE_SPEAKERS, {
-    filterByFormula: `LOWER({Slug}) = "${slug}"`,
+    filterByFormula: `OR(LOWER({Slug Override}) = "${slug}", LOWER({Slug}) = "${slug}")`,
     pageSize: 1,
   });
   if (bySlug[0]) return normalizeSpeaker(bySlug[0]);
@@ -129,6 +129,22 @@ export async function updateSpeaker(recordId, fields) {
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
+}
+
+export async function listAllSpeakersLite() {
+  // Fetch minimal data for duplicate checking
+  const records = await airtableSelectAll(TABLE_SPEAKERS, {
+    // no 'fields' filter to be robust
+    pageSize: 100,
+  });
+  return records.map(rec => {
+    const f = rec.fields || {};
+    const slug = (f['Slug Override'] || f['Slug'] || '')
+      .toString()
+      .trim()
+      .toLowerCase();
+    return { id: rec.id, slug };
+  });
 }
 
 // ---- Blog helpers ----

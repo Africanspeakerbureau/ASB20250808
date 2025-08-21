@@ -1,3 +1,13 @@
+// Basic slugification used across admin and site
+export const basicSlugify = (s = '') =>
+  s
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
 // Normalizes a speaker Airtable record safely.
 export function normalizeSpeaker(rec) {
   const f = (rec && rec.fields) || {};
@@ -21,14 +31,10 @@ export function normalizeSpeaker(rec) {
   const lastName  = (f['Last Name'] || '').trim();
   const fullName  = (f['Full Name'] || `${firstName} ${lastName}`).trim();
 
-  // Slug from field, else predictable fallback
-  const rawSlug = (f['Slug'] || '').toString().trim();
-  const slug = rawSlug
-    ? rawSlug
-    : fullName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+  const slugFormula = (f['Slug'] || '').toString().trim();
+  const slugOverride = (f['Slug Override'] || '').toString().trim();
+  // canonical slug used everywhere
+  const slug = (slugOverride || slugFormula || basicSlugify(fullName)).trim();
 
   const status = arr(f['Status']).map(s => s?.name || s);
   const featuredSelect = f['Featured']?.name || f['Featured'];
@@ -42,6 +48,8 @@ export function normalizeSpeaker(rec) {
   return {
     id: rec.id,
     slug,
+    slugFormula,
+    slugOverride,
     name: fullName,
     fullName,
     firstName,
