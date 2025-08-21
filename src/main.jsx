@@ -9,6 +9,7 @@ import SpeakerProfile from './components/SpeakerProfile.jsx'
 import { ToastProvider } from './components/Toast'
 import BlogPost from './site/blog/BlogPost'
 import BlogIndex from './site/blog/BlogIndex'
+import Insights from './site/blog/Insights'
 import AdminBlogList from './admin/blog/AdminBlogList'
 import AdminBlogEditor from './admin/blog/AdminBlogEditor'
 import PublicLayout from './site/layout/PublicLayout'
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')).render(
             {/* Keep existing v2 route as-is */}
             <Route path="/apply-v2" element={<App />} />
             <Route path="/blog" element={<BlogIndex />} />
+            <Route path="/insights" element={<Insights />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/*" element={<App />} />
           </Route>

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../../components/Header.jsx';
 import Footer from '../../components/Footer.jsx';
-import { listPublishedPostsForIndex, BlogIndexRecord } from '../../lib/airtable';
+import { listPublishedPostsForIndex, BlogIndexRecord } from '../../lib/airtable.ts';
 
 const TOKENS = {
   surface: '#F6F8FC',
