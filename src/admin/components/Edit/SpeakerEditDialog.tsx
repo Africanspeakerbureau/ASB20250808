@@ -9,6 +9,8 @@ import UploadWidget from "@/components/UploadWidget";
 import { useToast } from "@/components/Toast";
 import { useAirtableRecord } from "../../hooks/useAirtableRecord";
 import { airtablePatchRecord } from "../../api/airtable";
+import { basicSlugify } from "@/lib/normalizeSpeaker";
+import { listAllSpeakersLite } from "@/lib/airtable";
 import "./editDialog.css";
 
 // Computed/linked fields we never send back to Airtable
@@ -114,6 +116,9 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const hydratedRef = React.useRef(false);
   const [ready, setReady] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
+  const [allSlugs, setAllSlugs] = React.useState<string[]>([]);
+  const [checkingSlugs, setCheckingSlugs] = React.useState(true);
+  const [slugOverrideVal, setSlugOverrideVal] = React.useState('');
 
   React.useEffect(() => {
     if (!record?.id) return;
@@ -126,14 +131,48 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     buf.current.keyMessagesText = Array.isArray(f["Key Messages"])
       ? f["Key Messages"].filter(Boolean).join("\n")
       : String(f["Key Messages"] ?? "");
+    setSlugOverrideVal(String(f['Slug Override'] || ''));
     hydratedRef.current = true;
     setReady(true);
   }, [record?.id, record]);
+
+  React.useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        setCheckingSlugs(true);
+        const rows = await listAllSpeakersLite();
+        if (!alive) return;
+        setAllSlugs(
+          rows.filter(r => r.id !== recordId).map(r => (r.slug || '').toLowerCase())
+        );
+      } finally {
+        if (alive) setCheckingSlugs(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [recordId]);
+
+  const first = buf.current['First Name'] || '';
+  const last = buf.current['Last Name'] || '';
+  const autoFromName = basicSlugify(`${first} ${last}`);
+  const slugFormula = (buf.current['Slug'] || '').toString().trim();
+  const currentSlug = (slugOverrideVal || slugFormula || '').trim();
+  const candidate = slugOverrideVal.trim().toLowerCase();
+  const isBlank = candidate.length === 0;
+  const isDup = !!candidate && allSlugs.includes(candidate);
 
   async function handleSave(closeAfter = false) {
     if (!record) return;
     if (uploading) {
       push({ text: "Upload still in progress…", type: "error" });
+      return;
+    }
+    const override = (buf.current['Slug Override'] || '').trim().toLowerCase();
+    if (override && allSlugs.includes(override)) {
+      push({ text: 'Slug Override is already in use by another speaker.', type: 'error' });
       return;
     }
     try {
@@ -296,6 +335,61 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Readonly id="Total Events" />
                   <Readonly id="Potential Revenue" />
                   <Readonly id="Client Inquiries" />
+                  <Field label="Current slug" full>
+                    <input className="input" readOnly value={currentSlug || '(none)'} />
+                  </Field>
+                  <Field label="Slug Override (optional)" full>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input
+                        className="input"
+                        style={{ flex: 1 }}
+                        placeholder={autoFromName}
+                        value={slugOverrideVal}
+                        onChange={e => {
+                          const v = basicSlugify(e.target.value);
+                          setSlugOverrideVal(v);
+                          buf.current['Slug Override'] = v;
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn--dark"
+                        onClick={() => {
+                          const v = autoFromName;
+                          setSlugOverrideVal(v);
+                          buf.current['Slug Override'] = v;
+                        }}
+                      >
+                        Generate
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => {
+                          setSlugOverrideVal('');
+                          buf.current['Slug Override'] = '';
+                        }}
+                        title="Clear to use the automatic slug"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    {checkingSlugs ? (
+                      <div className="field__hint">Checking duplicates…</div>
+                    ) : isDup ? (
+                      <div className="field__hint" style={{ color: '#dc2626' }}>
+                        This slug is already used by another speaker.
+                      </div>
+                    ) : isBlank ? (
+                      <div className="field__hint">
+                        Leave blank to use the automatic slug: <code>{autoFromName || '(none)'}</code>
+                      </div>
+                    ) : (
+                      <div className="field__hint" style={{ color: '#16a34a' }}>
+                        Looks good.
+                      </div>
+                    )}
+                  </Field>
                   <TextArea id="Internal Notes" />
                 </Grid>
               )}
@@ -305,10 +399,10 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
         <div className="modal__footer">
           <button className="btn" disabled={saving || uploading} onClick={onClose}>Close</button>
-          <button className="btn" disabled={saving || uploading} onClick={() => handleSave(false)}>
+          <button className="btn" disabled={saving || uploading || isDup} onClick={() => handleSave(false)}>
             {saving ? "Saving…" : "Save"}
           </button>
-          <button className="btn btn--primary" disabled={saving || uploading} onClick={() => handleSave(true)}>
+          <button className="btn btn--primary" disabled={saving || uploading || isDup} onClick={() => handleSave(true)}>
             {saving ? "Saving…" : "Save & Close"}
           </button>
         </div>
