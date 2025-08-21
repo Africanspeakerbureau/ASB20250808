@@ -136,7 +136,7 @@ export type BlogIndexRecord = {
 export async function listPublishedPostsForIndex(): Promise<BlogIndexRecord[]> {
   // Visible = Published AND publish date <= today (or empty)
   const filterFormula =
-    "AND({Status}='Published', OR({Publish Date}='', {Publish Date}<=TODAY()))";
+    "AND({Status}='Published', OR({Publish Date}=BLANK(), {Publish Date}<=TODAY()))";
 
   const params = new URLSearchParams();
   params.set('filterByFormula', filterFormula);
@@ -151,7 +151,7 @@ export async function listPublishedPostsForIndex(): Promise<BlogIndexRecord[]> {
 
   // Select only fields we need
   [
-    'Name','Slug','Excerpt','Hero Image','Hero Image URL','Publish Date',
+    'Name','Slug','Excerpt','Hero Image','Hero Image URL','Hero Video URL','Publish Date',
     'Status','Tags','Author','Type','Featured','Pin Order'
   ].forEach(f => params.append('fields[]', f));
 
