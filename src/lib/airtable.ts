@@ -114,3 +114,51 @@ export async function listPublicPosts(max = 24) {
   });
   return rows;
 }
+
+// ---- Blog index (public) ----
+export type BlogIndexRecord = {
+  id: string;
+  Name?: string;
+  Slug?: string;
+  Excerpt?: string;
+  'Hero Image'?: any;
+  'Hero Image URL'?: string;
+  'Publish Date'?: string;
+  Status?: string;
+  Tags?: string[];
+  Author?: string;
+  Type?: string;
+  Featured?: boolean;
+  'Pin Order'?: number;
+  Body?: string;
+};
+
+export async function listPublishedPostsForIndex(): Promise<BlogIndexRecord[]> {
+  // Visible = Published AND publish date <= today (or empty)
+  const filterFormula =
+    "AND({Status}='Published', OR({Publish Date}=BLANK(), {Publish Date}<=TODAY()))";
+
+  const params = new URLSearchParams();
+  params.set('filterByFormula', filterFormula);
+
+  // Sort: Featured first, then Pin Order asc, then Publish Date desc
+  params.set('sort[0][field]', 'Featured');
+  params.set('sort[0][direction]', 'desc');
+  params.set('sort[1][field]', 'Pin Order');
+  params.set('sort[1][direction]', 'asc');
+  params.set('sort[2][field]', 'Publish Date');
+  params.set('sort[2][direction]', 'desc');
+
+  // Select only fields we need
+  [
+    'Name','Slug','Excerpt','Hero Image','Hero Image URL','Hero Video URL','Publish Date',
+    'Status','Tags','Author','Type','Featured','Pin Order'
+  ].forEach(f => params.append('fields[]', f));
+
+  const data = await fetch(
+    `https://api.airtable.com/v0/${import.meta.env.VITE_AIRTABLE_BASE_ID}/${encodeURIComponent(import.meta.env.VITE_AIRTABLE_TABLE_BLOG || 'Blog')}?${params.toString()}`,
+    { headers: { Authorization: `Bearer ${import.meta.env.VITE_AIRTABLE_API_KEY}` } }
+  ).then(r => r.json());
+
+  return (data.records || []).map((r: any) => ({ id: r.id, ...r.fields })) as BlogIndexRecord[];
+}
