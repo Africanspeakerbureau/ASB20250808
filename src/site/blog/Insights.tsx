@@ -1,20 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listPublishedPostsForIndex, BlogIndexRecord } from '../../lib/airtable.ts';
-
-function ytIdFromUrl(url?: string | null) {
-  if (!url) return null;
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes('youtu.be')) return u.pathname.replace('/', '').split(/[?&]/)[0] || null;
-    if (u.hostname.includes('youtube.com')) return u.searchParams.get('v');
-  } catch {}
-  return null;
-}
-function ytThumb(url?: string | null) {
-  const id = ytIdFromUrl(url || '');
-  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
-}
+import { pickBlogThumb } from '../../lib/blogMedia';
 
 const TOKENS = {
   surface: '#F6F8FC',
@@ -25,23 +12,6 @@ const TOKENS = {
   text:    '#0A0A0A',
   muted:   '#4B5563',
 };
-
-function pickHero(rec: BlogIndexRecord): string | null {
-  const urlField = (rec as any)['Hero Image URL'];
-  if (urlField && String(urlField).startsWith('http')) return urlField as string;
-
-  const att = Array.isArray(rec['Hero Image']) && rec['Hero Image'].length
-    ? (rec['Hero Image'][0]?.url || rec['Hero Image'][0]?.thumbnails?.large?.url || rec['Hero Image'][0]?.thumbnails?.small?.url)
-    : null;
-  if (att) return att;
-
-  // Fallback for videos: YouTube thumb if no hero image
-  if ((rec.Type || '').toLowerCase() === 'video') {
-    const thumb = ytThumb((rec as any)['Hero Video URL']);
-    if (thumb) return thumb;
-  }
-  return null;
-}
 
 function PlayIcon() {
   return (
@@ -116,9 +86,9 @@ export default function Insights() {
                 {/* Media (fixed width on md+) */}
                 <Link to={`/blog/${featured.Slug || ''}`} className="block md:w-[380px] lg:w-[460px] shrink-0">
                   <div className="h-64 md:h-[360px] lg:h-[420px] w-full bg-gray-200 relative">
-                    {pickHero(featured) ? (
+                    {pickBlogThumb(featured as any) ? (
                       <img
-                        src={pickHero(featured)!}
+                        src={pickBlogThumb(featured as any)!}
                         alt=""
                         className="h-full w-full object-cover"
                         loading="lazy"
@@ -235,7 +205,7 @@ export default function Insights() {
           {/* GRID */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {(filtered || []).map((a) => {
-              const img = pickHero(a as any);
+              const img = pickBlogThumb(a as any);
               return (
                 <Link key={a.id} to={`/blog/${a.Slug || ''}`} className="group">
                   <div className="rounded-2xl border overflow-hidden bg-white" style={{ borderColor: TOKENS.border }}>
