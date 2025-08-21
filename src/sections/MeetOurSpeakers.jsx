@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import SpeakerCard from '../components/SpeakerCard'
-import { fetchAllApprovedPublishedSpeakers as fetchAll } from '@/lib/airtable'
+import { listSpeakers } from '@/lib/airtable'
 
 function sampleRandom(arr, n) {
   const copy = arr.slice()
@@ -13,12 +13,18 @@ function sampleRandom(arr, n) {
 
 export default function MeetOurSpeakers() {
   const [items, setItems] = useState([])
+  const [error, setError] = useState('')
 
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const rows = await fetchAll({ pageSize: 100, max: 400 })
-      if (alive) setItems(sampleRandom(rows, 8))
+      try {
+        const all = await listSpeakers()
+        if (alive) setItems(sampleRandom(all, 8))
+      } catch (e) {
+        console.error('Failed to load speakers:', e?.status || '', e?.body || e)
+        if (alive) setError('Could not load speakers.')
+      }
     })()
     return () => {
       alive = false
@@ -33,9 +39,11 @@ export default function MeetOurSpeakers() {
           <p className="text-gray-500 mt-2">Voices That Inspire</p>
         </header>
 
-        {items.length === 0 ? (
+        {error && <p className="text-red-600">{error}</p>}
+        {!error && items.length === 0 && (
           <p className="text-gray-400">No speakers available at the moment.</p>
-        ) : (
+        )}
+        {!error && items.length > 0 && (
           <div className="grid gap-8 grid-cols-2 md:grid-cols-4 lg:grid-cols-4 justify-items-center lg:justify-items-stretch">
             {items.map((s) => (
               <SpeakerCard key={s.id} speaker={s} variant="compact" />

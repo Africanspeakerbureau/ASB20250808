@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SpeakerCard from '@/components/SpeakerCard';
-import { fetchFeaturedSpeakers } from '@/lib/airtable';
+import { listSpeakers } from '@/lib/airtable';
 
 export default function FeaturedSpeakers() {
   const [items, setItems] = useState([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const rows = await fetchFeaturedSpeakers(3);
-        if (alive) setItems(rows);
+        const all = await listSpeakers();
+        if (alive) setItems(all.filter(s => s.featured).slice(0, 6));
       } catch (e) {
-        console.error('FeaturedSpeakers load failed', e);
+        console.error('Failed to load speakers:', e?.status || '', e?.body || e);
+        if (alive) setError('Could not load speakers.');
       }
     })();
     return () => {
@@ -35,11 +37,17 @@ export default function FeaturedSpeakers() {
         </div>
         <div>
           <h3 className="text-3xl font-semibold mb-4 text-center md:text-left">Featured Speakers</h3>
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-items-center lg:justify-items-stretch">
-            {items.slice(0, 3).map((s) => (
-              <SpeakerCard key={s.id} speaker={s} variant="compact" />
-            ))}
-          </div>
+          {error && <p className="text-red-600">{error}</p>}
+          {!error && items.length === 0 && (
+            <p className="text-gray-400">No speakers available at the moment.</p>
+          )}
+          {!error && items.length > 0 && (
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-items-center lg:justify-items-stretch">
+              {items.map((s) => (
+                <SpeakerCard key={s.id} speaker={s} variant="compact" />
+              ))}
+            </div>
+          )}
 
           <div className="flex justify-center md:justify-start mt-8">
             <Link

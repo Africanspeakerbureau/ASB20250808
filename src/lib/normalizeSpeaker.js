@@ -1,102 +1,72 @@
-export function normalizeSpeaker(record) {
-  if (!record) return null;
-  const f = record.fields || {};
+// Normalizes a speaker Airtable record safely.
+export function normalizeSpeaker(rec) {
+  const f = (rec && rec.fields) || {};
+  const arr = v => (Array.isArray(v) ? v : v ? [v] : []);
+  const first = a => (Array.isArray(a) && a.length ? a[0] : undefined);
 
-  const pickText = (k) => (typeof f[k] === 'string' ? f[k].trim() : '');
-  const pickMulti = (k) => (Array.isArray(f[k]) ? f[k].filter(Boolean) : []);
-  const pickAttachmentUrl = (k) =>
-    Array.isArray(f[k]) && f[k][0] && f[k][0].url ? f[k][0].url : '';
+  const profAtt = first(arr(f['Profile Image']));
+  const headerAtt = first(arr(f['Header Image']));
 
-  const firstName = pickText('First Name');
-  const lastName = pickText('Last Name');
-  const titlePrefix = pickText('Title');
-  const professionalTitle = pickText('Professional Title');
-  const name = [titlePrefix, firstName, lastName]
-    .filter(Boolean)
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const photoUrl =
+    profAtt?.thumbnails?.large?.url ||
+    profAtt?.url ||
+    ''; // leave empty -> UI shows built-in “No image” tile
 
-  const languages = pickMulti('Spoken Languages');
-  const travelWillingness = pickText('Travel Willingness');
-  const feeDisplay = pickText('Display Fee');
-  const feeRangeRaw = pickText('Fee Range');
-  const feeRange = feeDisplay === 'No' ? 'On request' : feeRangeRaw || 'On request';
+  const headerUrl =
+    headerAtt?.thumbnails?.large?.url ||
+    headerAtt?.url ||
+    '';
 
-  const slugField = pickText('Slug');
-  const slugBase = slugField || name || record.id;
-  const slug = String(slugBase)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+  const firstName = (f['First Name'] || '').trim();
+  const lastName  = (f['Last Name'] || '').trim();
+  const fullName  = (f['Full Name'] || `${firstName} ${lastName}`).trim();
 
-  const speaker = {
-    id: record.id,
+  // Slug from field, else predictable fallback
+  const rawSlug = (f['Slug'] || '').toString().trim();
+  const slug = rawSlug
+    ? rawSlug
+    : fullName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+  const status = arr(f['Status']).map(s => s?.name || s);
+  const featuredSelect = f['Featured']?.name || f['Featured'];
+  const featured = (featuredSelect === 'Yes') || status.includes('Featured');
+
+  const languages = arr(f['Spoken Languages']).map(s => s?.name || s);
+  const country = (typeof f['Country'] === 'string')
+    ? f['Country']
+    : f['Country']?.name || f['Location'] || '';
+
+  return {
+    id: rec.id,
     slug,
+    name: fullName,
+    fullName,
     firstName,
     lastName,
-    titlePrefix,
-    professionalTitle,
-    name,
-    title: professionalTitle,
-    location: pickText('Location'),
-    country: pickText('Country'),
+    title: f['Professional Title'] || '',
+    professionalTitle: f['Professional Title'] || '',
+    company: f['Company'] || '',
+    country,
     languages,
     spokenLanguages: languages,
-    travelWillingness,
-    availability: travelWillingness,
-    expertiseAreas: pickMulti('Expertise Areas'),
-    expertise: pickMulti('Expertise Areas'),
-    // Display convenience: convert stored strings into arrays for UI/lists
-    speakingTopics: (() => {
-      const v = f['Speaking Topics'];
-      if (Array.isArray(v)) return v.filter(Boolean);
-      return String(v ?? '')
-        .split(/\r?\n/)
-        .map(s => s.trim())
-        .filter(Boolean);
-    })(),
-    keyMessages: (() => {
-      const v = f['Key Messages'];
-      if (Array.isArray(v)) return v.filter(Boolean);
-      const lines = String(v ?? '')
-        .split(/\r?\n/)
-        .map(s => s.trim())
-        .filter(Boolean);
-      return lines;
-    })(),
-    keyMessage: (() => {
-      const arr = Array.isArray(f['Key Messages'])
-        ? f['Key Messages']
-        : String(f['Key Messages'] ?? '')
-            .split(/\r?\n/)
-            .map(s => s.trim())
-            .filter(Boolean);
-      return arr[0] || '';
-    })(),
-    bio: pickText('Professional Bio'),
-    professionalBio: pickText('Professional Bio'),
-    achievements: pickText('Achievements'),
-    education: pickText('Education'),
-    videos: [
-      pickText('Video Link 1'),
-      pickText('Video Link 2'),
-      pickText('Video Link 3'),
-    ].filter(Boolean),
-    feeRange,
-    fee: feeRange,
-    profileImage: pickAttachmentUrl('Profile Image'),
-    photoUrl: pickAttachmentUrl('Profile Image'),
-    headerImage: pickAttachmentUrl('Header Image'),
-    // Why booking fields
-    whyListen: pickText('Why the audience should listen to these topics'),
-    whatAddress: pickText('What the speeches will address'),
-    whatLearn: pickText('What participants will learn'),
-    whatTakeHome: pickText('What the audience will take home'),
-    benefitsIndividual: pickText('Benefits for the individual'),
-    benefitsOrganisation: pickText('Benefits for the organisation'),
-    deliveryStyle: pickText("Speaker's delivery style"),
-  };
+    featured,
+    photoUrl,
+    headerUrl,
 
-  return speaker;
+    // detail fields (kept so profile page has data)
+    keyMessages: f['Key Messages'] || '',
+    keyMessage: f['Key Messages'] || '',
+    bio: f['Professional Bio'] || '',
+    achievements: f['Achievements'] || '',
+    education: f['Education'] || '',
+    feeRange: f['Fee Range'] || '',
+    availability: f['Travel Willingness'] || '',
+    travelWillingness: f['Travel Willingness'] || '',
+    topics: f['Speaking Topics'] || '',
+    speakingTopics: f['Speaking Topics'] || '',
+    location: f['Location'] || '',
+  };
 }

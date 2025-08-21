@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function SpeakerCard({ speaker, variant = 'search' }) {
   const s = speaker || {};
-  const img = s.photoUrl || s.photo || '/images/profile-default.jpg';
+  const img = s.photoUrl || s.photo || null;
   const langsArr = s.spokenLanguages || s.languages || [];
   const langs = Array.isArray(langsArr) ? langsArr.join(', ') : String(langsArr);
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ');
@@ -11,7 +11,8 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
-  const profilePath = `#/speaker/${encodeURIComponent(s.id || s.slug)}`;
+  const key = (s.slug || s.id || '').toLowerCase();
+  const profilePath = `#/speaker/${encodeURIComponent(key)}`;
   const go = (e) => {
     e.preventDefault();
     window.history.pushState({}, '', profilePath);
@@ -23,13 +24,17 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white p-6 h-full flex flex-col">
         <div className="w-full flex justify-center">
-          <a href={profilePath} onClick={go}>
-            <img
-              src={img}
-              alt={s.name}
-              loading="lazy"
-              className="w-40 h-40 object-cover rounded-xl"
-            />
+          <a href={profilePath} onClick={go} className="w-40 h-40 rounded-xl overflow-hidden bg-gray-100">
+            {img ? (
+              <img
+                src={img}
+                alt={s.name}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full grid place-items-center text-gray-400 text-sm">No image</div>
+            )}
           </a>
         </div>
 
@@ -77,12 +82,16 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
       <div className="rounded-2xl border border-slate-200 bg-white p-6 h-full">
         <a href={profilePath} onClick={go} className="group block h-full">
           <div className="w-full flex justify-center">
-            <img
-              src={img}
-              alt={s.name}
-              loading="lazy"
-              className="w-28 h-28 object-cover rounded-lg"
-            />
+            {img ? (
+              <img
+                src={img}
+                alt={s.name}
+                loading="lazy"
+                className="w-28 h-28 object-cover rounded-lg"
+              />
+            ) : (
+              <div className="w-28 h-28 rounded-lg bg-gray-100 grid place-items-center text-gray-400 text-xs">No image</div>
+            )}
           </div>
           <h3 className="text-base font-semibold text-center mt-3">{s.name}</h3>
           {locLang && <p className="text-xs text-center text-gray-600">{locLang}</p>}

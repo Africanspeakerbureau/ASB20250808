@@ -12,7 +12,9 @@ import {
   getSpeakerApplications,
   getClientInquiries,
   getQuickInquiries,
-  fetchAllPublishedSpeakers,
+  listSpeakers,
+  getSpeakerBySlugOrId,
+  isAirtableId,
 } from '@/lib/airtable'
 import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
@@ -129,6 +131,7 @@ function App() {
   const [isAuthed, setIsAuthed] = useState(() => sessionStorage.getItem('asb_admin') === '1')
   const [currentPage, setCurrentPage] = useState('home')
   const [selectedSpeakerId, setSelectedSpeakerId] = useState(null)
+  const [selectedSpeakerSlug, setSelectedSpeakerSlug] = useState(null)
   const [showBookingForm, setShowBookingForm] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [clientForm, setClientForm] = useState({})
@@ -238,40 +241,56 @@ function App() {
       if (pathname === '/find-speakers') {
         setCurrentPage('find-speakers')
         setSelectedSpeakerId(null)
+        setSelectedSpeakerSlug(null)
         setShowBookingForm(false)
       } else if (pathname.startsWith('/speaker/')) {
-        const sid = decodeURIComponent(pathname.split('/speaker/')[1] || '')
-        setSelectedSpeakerId(sid)
+        const keyRaw = pathname.split('/speaker/')[1] || ''
+        const key = decodeURIComponent(keyRaw).trim()
+        const isRecordId = isAirtableId(key)
+        if (isRecordId) {
+          setSelectedSpeakerId(key)
+          setSelectedSpeakerSlug(null)
+        } else {
+          setSelectedSpeakerId(null)
+          setSelectedSpeakerSlug(key.toLowerCase())
+        }
         setCurrentPage('speaker-profile')
         setShowBookingForm(false)
       } else if (pathname === '/services') {
         setCurrentPage('services')
         setSelectedSpeakerId(null)
+        setSelectedSpeakerSlug(null)
         setShowBookingForm(false)
       } else if (pathname === '/about') {
         setCurrentPage('about')
         setSelectedSpeakerId(null)
+        setSelectedSpeakerSlug(null)
         setShowBookingForm(false)
       } else if (pathname === '/speaker-application') {
         setCurrentPage('speaker-application')
         setSelectedSpeakerId(null)
+        setSelectedSpeakerSlug(null)
         setShowBookingForm(false)
       } else if (pathname === '/apply-card-v1') {
         setCurrentPage('apply-beta')
         setSelectedSpeakerId(null)
+        setSelectedSpeakerSlug(null)
         setShowBookingForm(false)
       } else if (pathname === '/apply-v2') {
         setCurrentPage('speaker-application-v2')
         setSelectedSpeakerId(null)
+        setSelectedSpeakerSlug(null)
         setShowBookingForm(false)
       } else if (pathname === '/book-a-speaker') {
         setCurrentPage('home')
         setSelectedSpeakerId(null)
+        setSelectedSpeakerSlug(null)
         setShowBookingForm(true)
         window.scrollTo(0, 0)
       } else {
         setCurrentPage('home')
         setSelectedSpeakerId(null)
+        setSelectedSpeakerSlug(null)
         setShowBookingForm(false)
       }
 
@@ -324,14 +343,50 @@ function App() {
     let alive = true
     ;(async () => {
       try {
-        const rows = await fetchAllPublishedSpeakers({ limit: 100 })
+        const rows = await listSpeakers()
         if (alive) setSpeakers(rows)
       } catch (e) {
-        console.error('Fetch speakers failed', e)
+        console.error('Failed to load speakers:', e?.status || '', e?.body || e)
       }
     })()
     return () => { alive = false }
   }, [])
+
+  useEffect(() => {
+    (async () => {
+      const setCanonicalHash = (slug) => {
+        if (!slug) return;
+        const target = `#/speaker/${encodeURIComponent(slug.toLowerCase())}`;
+        if (window.location.hash !== target) {
+          window.history.replaceState({}, '', target);
+        }
+      };
+
+      const key = selectedSpeakerSlug || selectedSpeakerId;
+      if (!key) return;
+
+      let rec = speakers?.find?.(
+        r => r.id === key || (r.slug || '').toLowerCase() === String(key).toLowerCase()
+      );
+
+      if (!rec) {
+        try { rec = await getSpeakerBySlugOrId(key); }
+        catch (e) { console.warn('getSpeakerBySlugOrId failed', e); }
+        if (rec) {
+          setSpeakers(prev => {
+            const list = Array.isArray(prev) ? prev.slice() : [];
+            if (!list.some(s => s.id === rec.id)) list.push(rec);
+            return list;
+          });
+        }
+      }
+
+      if (rec) {
+        setSelectedSpeakerId(rec.id);
+        setCanonicalHash(rec.slug);
+      }
+    })();
+  }, [selectedSpeakerSlug, selectedSpeakerId, speakers]);
 
   // Currency state
   const [currency, setCurrency] = useState('ZAR');

@@ -1,7 +1,5 @@
 import React, { useMemo, useEffect } from 'react'
 
-const placeholderAvatar = 'https://via.placeholder.com/160?text=ASB'
-
 function asList(str) {
   if (!str) return []
   return String(str)
@@ -69,28 +67,32 @@ export default function SpeakerProfile({ id, speakers = [] }) {
   }
 
   const fullName = [speaker.titlePrefix, speaker.firstName, speaker.lastName].filter(Boolean).join(' ')
-  const topics = asList(speaker.speakingTopics)
+  const topics = asList(speaker.topics || speaker.speakingTopics)
   const hasBulletTopics = topics.length > 1
   const videos = speaker.videos || []
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24">
-      {speaker.headerImage && (
+      {speaker.headerUrl && (
         <div className="h-40 w-full rounded-xl overflow-hidden bg-neutral-100">
-          <img src={speaker.headerImage} alt="" className="w-full h-full object-cover" />
+          <img src={speaker.headerUrl} alt="" className="w-full h-full object-cover" />
         </div>
       )}
       <div className="max-w-6xl mx-auto mt-8 md:mt-12">
         <div className="flex flex-col md:flex-row gap-4">
-          <img
-            className="w-32 h-32 rounded-2xl object-cover"
-            src={speaker.profileImage || placeholderAvatar}
-            alt={fullName}
-          />
+          {speaker.photoUrl ? (
+            <img
+              className="w-32 h-32 rounded-2xl object-cover"
+              src={speaker.photoUrl}
+              alt={fullName}
+            />
+          ) : (
+            <div className="w-32 h-32 rounded-2xl bg-gray-100 grid place-content-center text-gray-400 text-sm">No image</div>
+          )}
           <div className="flex-1">
             <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">{fullName}</h1>
-            {speaker.professionalTitle && (
-              <p className="mt-1 text-base md:text-lg text-slate-600">{speaker.professionalTitle}</p>
+            {speaker.title && (
+              <p className="mt-1 text-base md:text-lg text-slate-600">{speaker.title}</p>
             )}
 
             <div className="flex flex-wrap gap-2 mt-3">
