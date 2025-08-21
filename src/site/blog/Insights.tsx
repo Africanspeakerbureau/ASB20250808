@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Header from '../../components/Header.jsx';
-import Footer from '../../components/Footer.jsx';
 import { listPublishedPostsForIndex, BlogIndexRecord } from '../../lib/airtable.ts';
 
 const TOKENS = {
@@ -84,11 +82,8 @@ export default function Insights() {
   }, [rows, featured, topic, ctype, author, q]);
 
   return (
-    <>
-      <Header />
-
-      <main className="bg-white">
-        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <main className="bg-white">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           {/* FEATURED */}
           {!rows ? (
             <div className="h-60 rounded-2xl border animate-pulse" style={{ borderColor: TOKENS.border }} />
@@ -240,11 +235,8 @@ export default function Insights() {
               <span>…</span>
             </div>
           )}
-        </section>
-      </main>
-
-      <Footer />
-    </>
+      </section>
+    </main>
   );
 }
 
