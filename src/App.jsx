@@ -12,11 +12,10 @@ import {
   getSpeakerApplications,
   getClientInquiries,
   getQuickInquiries,
-  fetchAllPublishedSpeakers,
-  getSlugFromRecord,
-  getSpeakerBySlug,
+  listSpeakers,
+  getSpeakerBySlugOrId,
+  isAirtableId,
 } from '@/lib/airtable'
-import { normalizeSpeaker } from '@/lib/normalizeSpeaker'
 import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
 import { Cloudinary } from "@cloudinary/url-gen"
@@ -247,7 +246,7 @@ function App() {
       } else if (pathname.startsWith('/speaker/')) {
         const keyRaw = pathname.split('/speaker/')[1] || ''
         const key = decodeURIComponent(keyRaw).trim()
-        const isRecordId = /^rec[a-z0-9]{14}$/i.test(key)
+        const isRecordId = isAirtableId(key)
         if (isRecordId) {
           setSelectedSpeakerId(key)
           setSelectedSpeakerSlug(null)
@@ -344,7 +343,7 @@ function App() {
     let alive = true
     ;(async () => {
       try {
-        const rows = await fetchAllPublishedSpeakers({ limit: 100 })
+        const rows = await listSpeakers()
         if (alive) setSpeakers(rows)
       } catch (e) {
         console.error('Fetch speakers failed', e)
@@ -357,41 +356,34 @@ function App() {
     (async () => {
       const setCanonicalHash = (slug) => {
         if (!slug) return;
-        const target = `#/speaker/${encodeURIComponent(slug)}`;
+        const target = `#/speaker/${encodeURIComponent(slug.toLowerCase())}`;
         if (window.location.hash !== target) {
           window.history.replaceState({}, '', target);
         }
       };
 
-      if (selectedSpeakerSlug) {
-        let rec = speakers?.find?.(
-          r => (r.slug || '').toLowerCase() === selectedSpeakerSlug
-        );
-        if (!rec) {
-          try { rec = await getSpeakerBySlug(selectedSpeakerSlug); } catch {}
-          if (rec) {
-            setSpeakers(prev => {
-              const list = Array.isArray(prev) ? prev.slice() : [];
-              const norm = normalizeSpeaker(rec);
-              if (!list.some(s => s.id === norm.id)) list.push(norm);
-              return list;
-            });
-          }
-        }
+      const key = selectedSpeakerSlug || selectedSpeakerId;
+      if (!key) return;
+
+      let rec = speakers?.find?.(
+        r => r.id === key || (r.slug || '').toLowerCase() === String(key).toLowerCase()
+      );
+
+      if (!rec) {
+        try { rec = await getSpeakerBySlugOrId(key); }
+        catch (e) { console.warn('getSpeakerBySlugOrId failed', e); }
         if (rec) {
-          setSelectedSpeakerId(rec.id);
-          const slug = rec.slug || getSlugFromRecord(rec);
-          setCanonicalHash(slug);
+          setSpeakers(prev => {
+            const list = Array.isArray(prev) ? prev.slice() : [];
+            if (!list.some(s => s.id === rec.id)) list.push(rec);
+            return list;
+          });
         }
-        return;
       }
 
-      if (selectedSpeakerId) {
-        const rec = speakers?.find?.(r => r.id === selectedSpeakerId);
-        if (rec) {
-          const slug = rec.slug || getSlugFromRecord(rec);
-          if (slug) setCanonicalHash(slug);
-        }
+      if (rec) {
+        setSelectedSpeakerId(rec.id);
+        setCanonicalHash(rec.slug);
       }
     })();
   }, [selectedSpeakerSlug, selectedSpeakerId, speakers]);

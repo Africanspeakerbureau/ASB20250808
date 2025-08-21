@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchAllApprovedPublishedSpeakers } from '../lib/airtable'
+import { listSpeakers } from '../lib/airtable'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
   const langs = (s.spokenLanguages || []).join(', ')
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
-  const profilePath = `#/speaker/${encodeURIComponent(s.id || s.slug)}`
+  const key = (s.slug || s.id || '').toLowerCase()
+  const profilePath = `#/speaker/${encodeURIComponent(key)}`
   const go = (e) => {
     e.preventDefault()
     window.history.pushState({}, '', profilePath)
@@ -75,7 +76,7 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
     ;(async () => {
       try {
         setLoading(true)
-        const rows = await fetchAllApprovedPublishedSpeakers({ pageSize: 100 })
+        const rows = await listSpeakers()
         if (alive) setAll(rows)
       } catch (e) {
         console.error('Fetch speakers failed:', e)
@@ -164,7 +165,11 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
       {loading && <p className="text-center text-gray-600">Loading…</p>}
       {error && <p className="text-center text-red-600">{error}</p>}
 
-      {!loading && !error && (
+      {!loading && !error && all.length === 0 && (
+        <p className="mt-8 text-center text-gray-600">No speakers available at the moment.</p>
+      )}
+
+      {!loading && !error && all.length > 0 && (
         <>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {top.map(s => <SearchCard key={s.id} s={s} />)}
