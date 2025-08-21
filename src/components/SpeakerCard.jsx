@@ -11,7 +11,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
   const professionalTitle = s.professionalTitle || s.title;
-  const key = (s.slug || s.id || '').toLowerCase();
+  const key = s.slug || s.id || '';
   const profilePath = `#/speaker/${encodeURIComponent(key)}`;
   const go = (e) => {
     e.preventDefault();

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SpeakerCard from '@/components/SpeakerCard';
-import { fetchSpeakersListSafe } from '@/lib/airtable';
+import { listSpeakersPublished } from '@/lib/airtable';
 
 export default function FeaturedSpeakers() {
   const [items, setItems] = useState([]);
@@ -11,8 +11,8 @@ export default function FeaturedSpeakers() {
     let alive = true;
     (async () => {
       try {
-        const rows = await fetchSpeakersListSafe();
-        if (alive) setItems(rows.filter(r => r.featured).slice(0,3));
+        const all = await listSpeakersPublished();
+        if (alive) setItems(all.filter(s => s.featured).slice(0, 6));
       } catch (e) {
         console.error('Failed to load speakers:', e?.status || '', e?.body || e);
         if (alive) setError('Could not load speakers.');

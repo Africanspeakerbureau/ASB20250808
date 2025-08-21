@@ -1,229 +1,116 @@
-import { normalizeSpeaker } from './normalizeSpeaker';
-export { normalizeSpeaker };
+const AIRTABLE_BASE = import.meta.env.VITE_AIRTABLE_BASE_ID;
+const API_KEY = import.meta.env.VITE_AIRTABLE_API_KEY;
+const TABLE_SPEAKERS = import.meta.env.VITE_AIRTABLE_TABLE_SPEAKERS || 'Speaker Applications';
+const TABLE_BLOG = import.meta.env.VITE_AIRTABLE_TABLE_BLOG || 'Blog';
 
-const API_KEY =
-  import.meta.env.VITE_AIRTABLE_API_KEY ||
-  import.meta.env.AIRTABLE_API_KEY;
-const BASE_ID =
-  import.meta.env.VITE_AIRTABLE_BASE_ID ||
-  import.meta.env.AIRTABLE_BASE_ID;
-const API = `https://api.airtable.com/v0/${BASE_ID}`;
-const TBL_SPEAKERS = encodeURIComponent('Speaker Applications');
-const TBL_BLOG = encodeURIComponent(import.meta.env.VITE_AIRTABLE_TABLE_BLOG || 'Blog');
-const BLOG_BASE_URL = `${API}/${TBL_BLOG}`;
-
-const SPEAKER_FIELDS = [
-  'First Name',
-  'Last Name',
-  'Full Name',
-  'Title',
-  'Professional Title',
-  'Spoken Languages',
-  'Travel Willingness',
-  'Display Fee',
-  'Fee Range',
-  'Location',
-  'Country',
-  'Expertise Areas',
-  'Speaking Topics',
-  'Key Messages',
-  'Professional Bio',
-  'Achievements',
-  'Education',
-  'Video Link 1',
-  'Video Link 2',
-  'Video Link 3',
-  'Profile Image',
-  'Header Image',
-  'Why the audience should listen to these topics',
-  'What the speeches will address',
-  'What participants will learn',
-  'What the audience will take home',
-  'Benefits for the individual',
-  'Benefits for the organisation',
-  "Speaker's delivery style",
-  'Slug',
-  'Status',
-  'Featured'
-];
-
-function ensureEnv() {
-  if (!BASE_ID || !API_KEY) {
-    throw new Error(
-      'Airtable env missing: VITE_AIRTABLE_BASE_ID/AIRTABLE_BASE_ID and VITE_AIRTABLE_API_KEY/AIRTABLE_API_KEY'
-    );
+function assertEnv() {
+  if (!AIRTABLE_BASE || !API_KEY) {
+    throw new Error('Missing Airtable env (VITE_AIRTABLE_BASE_ID / VITE_AIRTABLE_API_KEY)');
   }
 }
 
-function toQuery(params) {
-  const usp = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => {
-    if (v === undefined || v === null) return;
-    if (Array.isArray(v)) {
-      if (k === 'fields') {
-        v.forEach((f) => usp.append('fields[]', f));
-      } else {
-        v.forEach((f) => usp.append(k, f));
-      }
-    } else {
-      usp.set(k, String(v));
-    }
-  });
-  return usp.toString();
+function toArray(v) {
+  if (!v) return [];
+  return Array.isArray(v) ? v : [v];
 }
 
-async function list(
-  table,
-  { filterByFormula, fields, pageSize = 50, sort, maxRecords } = {}
-) {
-  ensureEnv();
-  const headers = { Authorization: `Bearer ${API_KEY}` };
-  const params = {
-    ...(filterByFormula ? { filterByFormula } : {}),
-    ...(fields ? { fields } : {}),
-    ...(pageSize ? { pageSize } : {}),
-    ...(sort ? { sort } : {}),
-    ...(maxRecords ? { maxRecords } : {})
+export function isAirtableId(s) {
+  return typeof s === 'string' && /^rec[a-zA-Z0-9]{14}$/.test(s);
+}
+
+function slugify(name) {
+  return String(name || '')
+    .toLowerCase()
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export function normalizeSpeaker(rec) {
+  const f = rec?.fields || {};
+  const first = f['First Name'] || '';
+  const last = f['Last Name'] || '';
+  const full = f['Full Name'] || `${first} ${last}`.trim();
+  const slug = f['Slug'] || slugify(full);
+  const statusArr = toArray(f['Status']);
+  return {
+    id: rec.id,
+    slug,
+    firstName: first,
+    lastName: last,
+    fullName: full,
+    professionalTitle: f['Professional Title'] || '',
+    country: f['Country'] || '',
+    featured: (f['Featured'] === 'Yes') || (f['Featured'] === true),
+    status: statusArr,
+    profileImage: f['Profile Image'] || [],
   };
-  const url = `${API}/${table}?${toQuery(params)}`;
-  const res = await fetch(url, { headers });
-  if (!res.ok) {
-    const t = await res.text().catch(() => '');
-    throw new Error(`Airtable ${res.status}: ${t}`);
+}
+
+const API_ROOT = `https://api.airtable.com/v0/${encodeURIComponent(AIRTABLE_BASE)}`;
+const SPEAKERS_URL = `${API_ROOT}/${encodeURIComponent(TABLE_SPEAKERS)}`;
+const BLOG_BASE_URL = `${API_ROOT}/${encodeURIComponent(TABLE_BLOG)}`;
+
+async function airtableSelectAll(table, params = {}) {
+  assertEnv();
+  const urlBase = `${API_ROOT}/${encodeURIComponent(table)}`;
+  const headers = { Authorization: `Bearer ${API_KEY}` };
+  let url = new URL(urlBase);
+  Object.entries(params).forEach(([k, v]) => {
+    if (v == null) return;
+    url.searchParams.set(k, v);
+  });
+
+  const all = [];
+  while (true) {
+    const res = await fetch(url.toString(), { headers });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      console.error('Airtable list error', res.status, body);
+      throw new Error(`Airtable list failed: ${res.status}`);
+    }
+    const json = await res.json();
+    all.push(...(json.records || []));
+    if (json.offset) {
+      url = new URL(urlBase);
+      Object.entries(params).forEach(([k, v]) => {
+        if (v == null) return;
+        url.searchParams.set(k, v);
+      });
+      url.searchParams.set('offset', json.offset);
+    } else {
+      break;
+    }
   }
-  const json = await res.json();
-  return json.records || [];
-}
-
-const PUBLISHED = "FIND('Published on Site', ARRAYJOIN({Status}))";
-const APPROVED = "FIND('Approved', ARRAYJOIN({Status}))";
-
-export const isAirtableId = (s) => /^rec[a-zA-Z0-9]{14}$/.test(String(s));
-
-export async function fetchFeaturedSpeakers(limit = 3) {
-  const filterByFormula = `AND(${PUBLISHED}, {Featured}='Yes')`;
-  const records = await list(TBL_SPEAKERS, {
-    filterByFormula,
-    maxRecords: limit,
-    pageSize: limit,
-    fields: SPEAKER_FIELDS
-  });
-  return records.map(normalizeSpeaker);
-}
-
-export async function fetchPublishedSpeakers({
-  limit = 8,
-  excludeFeatured = false
-} = {}) {
-  const exclude = excludeFeatured ? ", {Featured}!='Yes'" : '';
-  const filterByFormula = `AND(${PUBLISHED}${exclude})`;
-  const records = await list(TBL_SPEAKERS, {
-    filterByFormula,
-    maxRecords: limit,
-    pageSize: limit,
-    fields: SPEAKER_FIELDS
-  });
-  return records.map(normalizeSpeaker);
-}
-
-export async function fetchAllPublishedSpeakers({ limit = 15 } = {}) {
-  const filterByFormula = `AND(${PUBLISHED})`;
-  const records = await list(TBL_SPEAKERS, {
-    filterByFormula,
-    maxRecords: limit,
-    pageSize: limit,
-    fields: SPEAKER_FIELDS
-  });
-  return records.map(normalizeSpeaker);
-}
-
-/**
- * Fetch ALL Approved + Published speakers by paging Airtable with `offset`.
- * Reuses the SAME filter formula and mapping as other helpers in this file.
- * Returns an array of normalized speaker objects.
- */
-export async function fetchAllApprovedPublishedSpeakers({ pageSize = 100, max = 5000 } = {}) {
-  const filterByFormula = `AND(${APPROVED}, ${PUBLISHED})`;
-  let all = [];
-  let offset = '';
-  let guard = 0;
-  ensureEnv();
-  const headers = { Authorization: `Bearer ${API_KEY}` };
-  do {
-    const params = new URLSearchParams();
-    params.set('pageSize', String(pageSize));
-    params.set('filterByFormula', filterByFormula);
-    SPEAKER_FIELDS.forEach(f => params.append('fields[]', f));
-    if (offset) params.set('offset', offset);
-    const url = `${API}/${TBL_SPEAKERS}?${params.toString()}`;
-    const res = await fetch(url, { headers });
-    if (!res.ok) {
-      const t = await res.text().catch(() => '');
-      throw new Error(`Airtable ${res.status}: ${t}`);
-    }
-    const json = await res.json();
-    const rows = (json.records || []).map(normalizeSpeaker);
-    all = all.concat(rows);
-    offset = json.offset || '';
-    guard += 1;
-    if (all.length >= max || guard > 200) break;
-  } while (offset);
   return all;
 }
 
-export async function fetchSpeakersListSafe({ pageSize = 100, max = 5000 } = {}) {
-  ensureEnv();
-  const headers = { Authorization: `Bearer ${API_KEY}` };
-  let all = [];
-  let offset = '';
-  let guard = 0;
-  let useFields = true;
-  do {
-    const params = new URLSearchParams();
-    params.set('pageSize', String(pageSize));
-    if (useFields) SPEAKER_FIELDS.forEach((f) => params.append('fields[]', f));
-    if (offset) params.set('offset', offset);
-    const url = `${API}/${TBL_SPEAKERS}?${params.toString()}`;
-    let res = await fetch(url, { headers });
-    if (!res.ok) {
-      const t = await res.text().catch(() => '');
-      const msg = t.toLowerCase();
-      if (
-        useFields &&
-        (res.status === 422 || msg.includes('unknown field') || msg.includes('invalid'))
-      ) {
-        useFields = false;
-        continue;
-      }
-      const err = new Error(`Airtable ${res.status}: ${t}`);
-      err.status = res.status;
-      err.body = t;
-      throw err;
-    }
-    const json = await res.json();
-    const records = json.records || [];
-    records.forEach((r) => {
-      try {
-        const norm = normalizeSpeaker(r);
-        if ((norm.status || []).includes('Published on Site')) {
-          all.push(norm);
-        }
-      } catch (e) {
-        console.warn('Bad speaker row', e);
-      }
-    });
-    offset = json.offset || '';
-    guard += 1;
-    if (all.length >= max || guard > 200) break;
-  } while (offset);
-  return all;
+export async function listSpeakersPublished() {
+  const records = await airtableSelectAll(TABLE_SPEAKERS, { pageSize: 100 });
+  return records
+    .map(normalizeSpeaker)
+    .filter((s) => s.status.includes('Published on Site'));
 }
 
-export const listSpeakers = fetchSpeakersListSafe;
+export async function getSpeakerBySlugOrId(slugOrId) {
+  assertEnv();
+  if (isAirtableId(slugOrId)) {
+    const url = `${SPEAKERS_URL}/${encodeURIComponent(slugOrId)}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` } });
+    if (!res.ok) throw new Error(`Airtable get failed: ${res.status}`);
+    const rec = await res.json();
+    return normalizeSpeaker(rec);
+  }
+  const formula = `LOWER({Slug})='${String(slugOrId).toLowerCase().replace(/'/g, "\\'")}'`;
+  const list = await airtableSelectAll(TABLE_SPEAKERS, { filterByFormula: formula, pageSize: 1 });
+  if (!list.length) throw new Error('Not found');
+  return normalizeSpeaker(list[0]);
+}
 
 async function query(table, params = {}) {
+  assertEnv();
   const qs = new URLSearchParams(params).toString();
-  const res = await fetch(`${API}/${encodeURIComponent(table)}?${qs}`, {
+  const res = await fetch(`${API_ROOT}/${encodeURIComponent(table)}?${qs}`, {
     headers: { Authorization: `Bearer ${API_KEY}` },
   });
   if (!res.ok) throw new Error(await res.text());
@@ -232,86 +119,37 @@ async function query(table, params = {}) {
 }
 
 export const getSpeakerApplications = (opts = {}) =>
-  query('Speaker Applications', { view: 'Grid view', maxRecords: 200, ...opts });
+  query(TABLE_SPEAKERS, { view: 'Grid view', maxRecords: 200, ...opts });
+
 export const getClientInquiries = (opts = {}) =>
   query('Client Inquiries', { view: 'Grid view', maxRecords: 200, ...opts });
+
 export const getQuickInquiries = (opts = {}) =>
   query('Quick Inquiries', { view: 'Grid view', maxRecords: 200, ...opts });
 
-
-export async function getSpeakerById(recordId) {
-  ensureEnv();
-  const res = await fetch(`${API}/${TBL_SPEAKERS}/${recordId}`, {
-    headers: { Authorization: `Bearer ${API_KEY}` }
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-export async function getSpeakerBySlugOrId(slugOrId) {
-  ensureEnv();
-  const key = String(slugOrId || '').trim();
-  const headers = { Authorization: `Bearer ${API_KEY}` };
-  if (isAirtableId(key)) {
-    const res = await fetch(`${API}/${TBL_SPEAKERS}/${key}`, { headers });
-    if (res.status === 404) return null;
-    if (!res.ok) {
-      const t = await res.text().catch(() => '');
-      throw new Error(`Airtable ${res.status}: ${t}`);
-    }
-    const json = await res.json();
-    return normalizeSpeaker(json);
-  }
-
-  const filter = `{Slug}='${key.toLowerCase()}'`;
-  const url = `${API}/${TBL_SPEAKERS}?filterByFormula=${encodeURIComponent(filter)}&maxRecords=1`;
-  const res = await fetch(url, { headers });
-  if (!res.ok) {
-    const t = await res.text().catch(() => '');
-    throw new Error(`Airtable ${res.status}: ${t}`);
-  }
-  const json = await res.json();
-  const rec = json.records?.[0];
-  return rec ? normalizeSpeaker(rec) : null;
-}
-
 export async function updateSpeaker(recordId, fields) {
-  ensureEnv();
-  const res = await fetch(`${API}/${TBL_SPEAKERS}/${recordId}`, {
+  assertEnv();
+  const res = await fetch(`${SPEAKERS_URL}/${recordId}`, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ fields })
+    body: JSON.stringify({ fields }),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
-export function getSlugFromRecord(rec) {
-  return (rec?.fields?.Slug || '').toString().trim();
-}
-
-export async function getSpeakerBySlug(slug) {
-  const s = String(slug || '').toLowerCase();
-  const filter = `LOWER({Slug})='${s}'`;
-  const url = `${API}/${TBL_SPEAKERS}?filterByFormula=${encodeURIComponent(filter)}&maxRecords=1&view=Grid%20view`;
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${API_KEY}` }
-  });
-  const json = await res.json();
-  return json.records?.[0] || null;
-}
-
+// ---- Blog helpers ----
 async function blogAt(method, path = '', body) {
   const res = await fetch(`${BLOG_BASE_URL}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: body ? JSON.stringify(body) : undefined
+    body: body ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) {
     const text = await res.text();
@@ -320,7 +158,6 @@ async function blogAt(method, path = '', body) {
   return res.json();
 }
 
-// ---- Blog helpers ----
 export async function listPosts(params = {}) {
   const filter = [];
   if (params.status) filter.push(`{Status} = '${params.status}'`);
@@ -372,7 +209,7 @@ export async function getPostBySlug(slug) {
   const formula = `LOWER({Slug})='${s}'`;
   const params = new URLSearchParams({ filterByFormula: formula, maxRecords: '1' });
   const res = await fetch(`${BLOG_BASE_URL}?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${API_KEY}` }
+    headers: { Authorization: `Bearer ${API_KEY}` },
   });
   if (!res.ok) {
     const text = await res.text();
@@ -389,26 +226,16 @@ export async function listPublicPosts(max = 24) {
     filterByFormula: formula,
     maxRecords: String(max),
     'sort[0][field]': 'Publish Date',
-    'sort[0][direction]': 'desc'
+    'sort[0][direction]': 'desc',
   });
   const res = await fetch(`${BLOG_BASE_URL}?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${API_KEY}` }
+    headers: { Authorization: `Bearer ${API_KEY}` },
   });
   if (!res.ok) {
     const t = await res.text().catch(() => '');
     throw new Error(`Airtable listPublicPosts failed: ${res.status} ${t}`);
   }
-  const data = await res.json();
-  const rows = (data.records || []).map(r => ({ id: r.id, ...r.fields }));
-  // Featured & Pin Order first (client-side)
-  rows.sort((a, b) => {
-    const fa = a.Featured ? 1 : 0;
-    const fb = b.Featured ? 1 : 0;
-    if (fb - fa) return fb - fa;
-    const pa = Number(a['Pin Order'] || 0);
-    const pb = Number(b['Pin Order'] || 0);
-    if (pa !== pb) return pa - pb;
-    return new Date(b['Publish Date'] || 0).getTime() - new Date(a['Publish Date'] || 0).getTime();
-  });
-  return rows;
+  const json = await res.json();
+  return (json.records || []).map((r) => ({ id: r.id, ...r.fields }));
 }
+
