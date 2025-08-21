@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { listSpeakersPublished } from '../lib/airtable'
+import { listSpeakers } from '../lib/airtable'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
   const cityCountry = [s.location, s.country].filter(Boolean).join(', ')
-  const langs = (s.spokenLanguages || []).join(', ')
+  const langs = (s.languages || s.spokenLanguages || []).join(', ')
   const locLang = [cityCountry, langs].filter(Boolean).join(' | ')
   const key = (s.slug || s.id || '').toLowerCase()
   const profilePath = `#/speaker/${encodeURIComponent(key)}`
@@ -17,10 +17,10 @@ function SearchCard({ s }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col items-center text-center">
       <a href={profilePath} onClick={go} className="w-40 h-40 rounded-xl overflow-hidden bg-gray-100 mb-6">
-        {s.photoUrl
-          ? <img src={s.photoUrl} alt={s.name} className="w-full h-full object-cover" />
-          : <div className="w-full h-full grid place-items-center text-gray-400 text-sm">No Image</div>
-        }
+      {s.photoUrl
+        ? <img src={s.photoUrl} alt={s.name} className="w-full h-full object-cover" />
+        : <div className="w-full h-full grid place-items-center text-gray-400 text-sm">No Image</div>
+      }
       </a>
 
       <h3 className="text-xl font-semibold">
@@ -29,9 +29,11 @@ function SearchCard({ s }) {
       {s.title && <p className="text-gray-600 mt-1">{s.title}</p>}
       {locLang && <p className="text-gray-500 mt-1 text-sm">{locLang}</p>}
 
-      {s.keyMessage && (
+      { (s.keyMessage || s.keyMessages) && (
         <p className="text-gray-700 mt-4 text-[15px] leading-6 max-w-md">
-          {s.keyMessage.length > 220 ? s.keyMessage.slice(0, 217) + '…' : s.keyMessage}
+          {(s.keyMessage || s.keyMessages).length > 220
+            ? (s.keyMessage || s.keyMessages).slice(0, 217) + '…'
+            : (s.keyMessage || s.keyMessages)}
         </p>
       )}
 
@@ -76,7 +78,7 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
     ;(async () => {
       try {
         setLoading(true)
-        const data = await listSpeakersPublished()
+        const data = await listSpeakers()
         if (alive) setAll(data)
       } catch (e) {
         console.error('Failed to load speakers:', e?.status || '', e?.body || e)
@@ -94,7 +96,7 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
     all.forEach(s => {
       ;(s.expertise || []).forEach(v => cats.add(v))
       if (s.country) ctys.add(s.country)
-      ;(s.spokenLanguages || []).forEach(v => lngs.add(v))
+      ;(s.languages || s.spokenLanguages || []).forEach(v => lngs.add(v))
       if (s.feeRange) fees.add(s.feeRange)
     })
     return {
@@ -111,14 +113,14 @@ export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' 
     return all.filter(s => {
       if (cat !== 'All Categories' && !(s.expertise || []).includes(cat)) return false
       if (country !== 'All Countries' && s.country !== country) return false
-      if (lang !== 'All Languages' && !(s.spokenLanguages || []).includes(lang)) return false
+      if (lang !== 'All Languages' && !(s.languages || s.spokenLanguages || []).includes(lang)) return false
       if (fee !== 'All Fee Ranges' && s.feeRange !== fee) return false
 
       if (text) {
         const hay = [
-          s.name, s.title, s.keyMessage,
+          s.name, s.title, (s.keyMessage || s.keyMessages || ''),
           (s.expertise || []).join(' '),
-          s.location, s.country, (s.spokenLanguages || []).join(' ')
+          s.location, s.country, (s.languages || s.spokenLanguages || []).join(' ')
         ].join(' ').toLowerCase()
         if (!hay.includes(text)) return false
       }

@@ -1,3 +1,5 @@
+import { normalizeSpeaker } from './normalizeSpeaker';
+
 const AIRTABLE_BASE = import.meta.env.VITE_AIRTABLE_BASE_ID;
 const API_KEY = import.meta.env.VITE_AIRTABLE_API_KEY;
 const TABLE_SPEAKERS = import.meta.env.VITE_AIRTABLE_TABLE_SPEAKERS || 'Speaker Applications';
@@ -9,43 +11,7 @@ function assertEnv() {
   }
 }
 
-function toArray(v) {
-  if (!v) return [];
-  return Array.isArray(v) ? v : [v];
-}
-
-export function isAirtableId(s) {
-  return typeof s === 'string' && /^rec[a-zA-Z0-9]{14}$/.test(s);
-}
-
-function slugify(name) {
-  return String(name || '')
-    .toLowerCase()
-    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-export function normalizeSpeaker(rec) {
-  const f = rec?.fields || {};
-  const first = f['First Name'] || '';
-  const last = f['Last Name'] || '';
-  const full = f['Full Name'] || `${first} ${last}`.trim();
-  const slug = f['Slug'] || slugify(full);
-  const statusArr = toArray(f['Status']);
-  return {
-    id: rec.id,
-    slug,
-    firstName: first,
-    lastName: last,
-    fullName: full,
-    professionalTitle: f['Professional Title'] || '',
-    country: f['Country'] || '',
-    featured: (f['Featured'] === 'Yes') || (f['Featured'] === true),
-    status: statusArr,
-    profileImage: f['Profile Image'] || [],
-  };
-}
+export const isAirtableId = s => /^rec[a-zA-Z0-9]{14}$/.test(String(s || ''));
 
 const API_ROOT = `https://api.airtable.com/v0/${encodeURIComponent(AIRTABLE_BASE)}`;
 const SPEAKERS_URL = `${API_ROOT}/${encodeURIComponent(TABLE_SPEAKERS)}`;
@@ -85,11 +51,24 @@ async function airtableSelectAll(table, params = {}) {
   return all;
 }
 
-export async function listSpeakersPublished() {
-  const records = await airtableSelectAll(TABLE_SPEAKERS, { pageSize: 100 });
-  return records
-    .map(normalizeSpeaker)
-    .filter((s) => s.status.includes('Published on Site'));
+export async function listSpeakers() {
+  const records = await airtableSelectAll(TABLE_SPEAKERS, { pageSize: 50 });
+  const rows = (records || []).filter(r => {
+    const stat = r?.fields?.['Status'];
+    if (!stat) return false;
+    if (Array.isArray(stat)) return stat.includes('Published on Site') || stat.some(s => s?.name === 'Published on Site');
+    return String(stat) === 'Published on Site';
+  });
+  return rows
+    .map(r => {
+      try {
+        return normalizeSpeaker(r);
+      } catch (e) {
+        console.error('normalizeSpeaker failed', e);
+        return null;
+      }
+    })
+    .filter(Boolean);
 }
 
 export async function getSpeakerBySlugOrId(slugOrId) {
@@ -101,10 +80,21 @@ export async function getSpeakerBySlugOrId(slugOrId) {
     const rec = await res.json();
     return normalizeSpeaker(rec);
   }
-  const formula = `LOWER({Slug})='${String(slugOrId).toLowerCase().replace(/'/g, "\\'")}'`;
-  const list = await airtableSelectAll(TABLE_SPEAKERS, { filterByFormula: formula, pageSize: 1 });
-  if (!list.length) throw new Error('Not found');
-  return normalizeSpeaker(list[0]);
+
+  const slug = String(slugOrId).toLowerCase();
+  const bySlug = await airtableSelectAll(TABLE_SPEAKERS, {
+    filterByFormula: `LOWER({Slug}) = "${slug}"`,
+    pageSize: 1,
+  });
+  if (bySlug[0]) return normalizeSpeaker(bySlug[0]);
+
+  const byName = await airtableSelectAll(TABLE_SPEAKERS, {
+    filterByFormula: `LOWER({Full Name}) = "${slug.replace(/-/g, ' ')}"`,
+    pageSize: 1,
+  });
+  if (byName[0]) return normalizeSpeaker(byName[0]);
+
+  return null;
 }
 
 async function query(table, params = {}) {

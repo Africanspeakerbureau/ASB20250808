@@ -12,7 +12,7 @@ import {
   getSpeakerApplications,
   getClientInquiries,
   getQuickInquiries,
-  listSpeakersPublished,
+  listSpeakers,
   getSpeakerBySlugOrId,
   isAirtableId,
 } from '@/lib/airtable'
@@ -343,7 +343,7 @@ function App() {
     let alive = true
     ;(async () => {
       try {
-        const rows = await listSpeakersPublished()
+        const rows = await listSpeakers()
         if (alive) setSpeakers(rows)
       } catch (e) {
         console.error('Failed to load speakers:', e?.status || '', e?.body || e)

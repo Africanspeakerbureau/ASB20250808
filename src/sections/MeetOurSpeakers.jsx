@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import SpeakerCard from '../components/SpeakerCard'
-import { listSpeakersPublished } from '@/lib/airtable'
+import { listSpeakers } from '@/lib/airtable'
 
 function sampleRandom(arr, n) {
   const copy = arr.slice()
@@ -19,7 +19,7 @@ export default function MeetOurSpeakers() {
     let alive = true
     ;(async () => {
       try {
-        const all = await listSpeakersPublished()
+        const all = await listSpeakers()
         if (alive) setItems(sampleRandom(all, 8))
       } catch (e) {
         console.error('Failed to load speakers:', e?.status || '', e?.body || e)
