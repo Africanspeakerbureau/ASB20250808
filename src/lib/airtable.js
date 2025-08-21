@@ -11,6 +11,38 @@ const TBL_SPEAKERS = encodeURIComponent('Speaker Applications');
 const TBL_BLOG = encodeURIComponent(import.meta.env.VITE_AIRTABLE_TABLE_BLOG || 'Blog');
 const BLOG_BASE_URL = `${API}/${TBL_BLOG}`;
 
+const SPEAKER_FIELDS = [
+  'First Name',
+  'Last Name',
+  'Title',
+  'Professional Title',
+  'Spoken Languages',
+  'Travel Willingness',
+  'Display Fee',
+  'Fee Range',
+  'Location',
+  'Country',
+  'Expertise Areas',
+  'Speaking Topics',
+  'Key Messages',
+  'Professional Bio',
+  'Achievements',
+  'Education',
+  'Video Link 1',
+  'Video Link 2',
+  'Video Link 3',
+  'Profile Image',
+  'Header Image',
+  'Why the audience should listen to these topics',
+  'What the speeches will address',
+  'What participants will learn',
+  'What the audience will take home',
+  'Benefits for the individual',
+  'Benefits for the organisation',
+  "Speaker's delivery style",
+  'Slug'
+];
+
 function ensureEnv() {
   if (!BASE_ID || !API_KEY) {
     throw new Error(
@@ -23,7 +55,15 @@ function toQuery(params) {
   const usp = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
     if (v === undefined || v === null) return;
-    usp.set(k, String(v));
+    if (Array.isArray(v)) {
+      if (k === 'fields') {
+        v.forEach((f) => usp.append('fields[]', f));
+      } else {
+        v.forEach((f) => usp.append(k, f));
+      }
+    } else {
+      usp.set(k, String(v));
+    }
   });
   return usp.toString();
 }
@@ -59,7 +99,8 @@ export async function fetchFeaturedSpeakers(limit = 3) {
   const records = await list(TBL_SPEAKERS, {
     filterByFormula,
     maxRecords: limit,
-    pageSize: limit
+    pageSize: limit,
+    fields: SPEAKER_FIELDS
   });
   return records.map(normalizeSpeaker);
 }
@@ -73,7 +114,8 @@ export async function fetchPublishedSpeakers({
   const records = await list(TBL_SPEAKERS, {
     filterByFormula,
     maxRecords: limit,
-    pageSize: limit
+    pageSize: limit,
+    fields: SPEAKER_FIELDS
   });
   return records.map(normalizeSpeaker);
 }
@@ -83,7 +125,8 @@ export async function fetchAllPublishedSpeakers({ limit = 15 } = {}) {
   const records = await list(TBL_SPEAKERS, {
     filterByFormula,
     maxRecords: limit,
-    pageSize: limit
+    pageSize: limit,
+    fields: SPEAKER_FIELDS
   });
   return records.map(normalizeSpeaker);
 }
@@ -104,6 +147,7 @@ export async function fetchAllApprovedPublishedSpeakers({ pageSize = 100, max = 
     const params = new URLSearchParams();
     params.set('pageSize', String(pageSize));
     params.set('filterByFormula', filterByFormula);
+    SPEAKER_FIELDS.forEach(f => params.append('fields[]', f));
     if (offset) params.set('offset', offset);
     const url = `${API}/${TBL_SPEAKERS}?${params.toString()}`;
     const res = await fetch(url, { headers });
@@ -160,6 +204,21 @@ export async function updateSpeaker(recordId, fields) {
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
+}
+
+export function getSlugFromRecord(rec) {
+  return (rec?.fields?.Slug || '').toString().trim();
+}
+
+export async function getSpeakerBySlug(slug) {
+  const s = String(slug || '').toLowerCase();
+  const filter = `LOWER({Slug})='${s}'`;
+  const url = `${API}/${TBL_SPEAKERS}?filterByFormula=${encodeURIComponent(filter)}&maxRecords=1&view=Grid%20view`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${API_KEY}` }
+  });
+  const json = await res.json();
+  return json.records?.[0] || null;
 }
 
 async function blogAt(method, path = '', body) {
