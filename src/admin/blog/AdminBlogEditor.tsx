@@ -19,6 +19,7 @@ export default function AdminBlogEditor() {
   });
   const [existingHeroAttachment, setExistingHeroAttachment] = useState<any[]>([]);
   const [heroAttachmentToSet, setHeroAttachmentToSet] = useState<string | null>(null); // Cloudinary URL to attach on save
+  const [saving, setSaving] = useState(false);
 
   const editorElem = useRef<HTMLDivElement>(null);
   const editorInstance = useRef<any>(null);
@@ -102,51 +103,62 @@ export default function AdminBlogEditor() {
     if (form.Status !== 'Draft' && !form['Publish Date']) return alert('Publish Date required for Scheduled/Published');
     if (form.Type === 'Video' && !form['Hero Video URL']) return alert('Hero Video URL required for Video');
 
-    const raw = editorInstance.current?.getData?.() || '';
-    const Body = window.DOMPurify ? window.DOMPurify.sanitize(raw) : raw;
+    try {
+      setSaving(true);
 
-    const payload: any = {
-      Name: form.Name,
-      Slug: form.Slug.toLowerCase().replace(/\s+/g,'-'),
-      Status: form.Status,
-      Type: form.Type,
-      Excerpt: form.Excerpt,
-      'Hero Video URL': form['Hero Video URL'] || undefined,
-      'Publish Date': form['Publish Date'] || undefined,
-      Author: form.Author || undefined,
-      Tags: String(form.Tags || '').split(',').map((s:string)=>s.trim()).filter(Boolean),
-      Featured: !!form.Featured,
-      'Pin Order': Number(form['Pin Order'] || 0),
-      Body,
-      // NEW: save URL text field always if present
-      'Hero Image URL': form['Hero Image URL'] || undefined
-    };
+      const raw = editorInstance.current?.getData?.() || '';
+      const Body =
+        (typeof window !== 'undefined' && window.DOMPurify)
+          ? window.DOMPurify.sanitize(raw)
+          : raw;
 
-    // NEW: attachments logic
-    if (heroAttachmentToSet === '') {
-      // user clicked "Clear attachment"
-      payload['Hero Image'] = [];                   // clears the Airtable attachment field
-    } else if (typeof heroAttachmentToSet === 'string' && heroAttachmentToSet) {
-      // user uploaded a new hero → attach it
-      payload['Hero Image'] = [{ url: heroAttachmentToSet }];
-    }
-    // else: do not include 'Hero Image' → Airtable leaves existing attachment as-is
+      const payload: any = {
+        Name: form.Name,
+        Slug: form.Slug.toLowerCase().replace(/\s+/g,'-'),
+        Status: form.Status,
+        Type: form.Type,
+        Excerpt: form.Excerpt,
+        'Hero Video URL': form['Hero Video URL'] || undefined,
+        'Publish Date': form['Publish Date'] || undefined,
+        Author: form.Author || undefined,
+        Tags: String(form.Tags || '').split(',').map((s:string)=>s.trim()).filter(Boolean),
+        Featured: !!form.Featured,
+        'Pin Order': Number(form['Pin Order'] || 0),
+        Body,
+        // always persist URL field if present
+        'Hero Image URL': form['Hero Image URL'] || undefined
+      };
 
-    if (id && id !== 'new') {
-      await updatePost(id, payload);
-    } else {
-      const rec = await createPost(payload);
+      // attachments logic (works whether Airtable field is Attachment or Text)
+      if (heroAttachmentToSet === '') {
+        payload['Hero Image'] = []; // clear attachment
+      } else if (typeof heroAttachmentToSet === 'string' && heroAttachmentToSet) {
+        payload['Hero Image'] = [{ url: heroAttachmentToSet }];
+      }
+
+      if (id && id !== 'new') {
+        await updatePost(id, payload);
+      } else {
+        const rec = await createPost(payload);
+        setExistingHeroAttachment(heroAttachmentToSet ? [{ url: heroAttachmentToSet }] : []);
+        setHeroAttachmentToSet(null);
+        alert('Saved');
+        return nav(`/admin/blog/${rec.id}`);
+      }
+
       if (heroAttachmentToSet !== null) {
         setExistingHeroAttachment(heroAttachmentToSet === '' ? [] : [{ url: heroAttachmentToSet }]);
         setHeroAttachmentToSet(null);
       }
-      return nav(`/admin/blog/${rec.id}`);
+      alert('Saved');
+    } catch (e:any) {
+      // show Airtable error text so we know exactly why it failed
+      const msg = e?.message || String(e);
+      console.error('Save failed:', e);
+      alert('Save failed:\n' + msg);
+    } finally {
+      setSaving(false);
     }
-    if (heroAttachmentToSet !== null) {
-      setExistingHeroAttachment(heroAttachmentToSet === '' ? [] : [{ url: heroAttachmentToSet }]);
-      setHeroAttachmentToSet(null);
-    }
-    alert('Saved');
   }
 
   function preview() {
@@ -249,8 +261,8 @@ export default function AdminBlogEditor() {
           </label>
 
           <div className="flex gap-2 pt-2">
-            <button onClick={save} className="px-3 py-2 border rounded">Save</button>
-            <button onClick={preview} className="px-3 py-2 border rounded">Preview</button>
+            <button onClick={save} disabled={saving} className="px-3 py-2 border rounded">{saving ? 'Saving…' : 'Save'}</button>
+            <button onClick={preview} disabled={saving} className="px-3 py-2 border rounded">Preview</button>
             <button onClick={()=>nav('/admin/blog')} className="ml-auto px-3 py-2 border rounded">Back</button>
           </div>
         </div>
