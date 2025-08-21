@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPost, getPost, updatePost } from '@/lib/airtable.ts';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 import { useNavigate, useParams } from 'react-router-dom';
+import { TAG_OPTIONS } from '../../constants/tags';
 
 declare global { interface Window { ClassicEditor: any; DOMPurify: any } }
 
@@ -14,11 +15,14 @@ export default function AdminBlogEditor() {
   const [form, setForm] = useState<any>({
     Name:'', Slug:'', Status:'Draft', Type:'Article', Excerpt:'',
     'Hero Image':'', 'Hero Video URL':'', 'Publish Date':'',
-    Author:'', Tags:'', Featured:false, 'Pin Order':0,
+    Author:'', Featured:false, 'Pin Order':0,
     'Hero Image URL':''
   });
   const [existingHeroAttachment, setExistingHeroAttachment] = useState<any[]>([]);
   const [heroAttachmentToSet, setHeroAttachmentToSet] = useState<string | null>(null); // Cloudinary URL to attach on save
+  const [saving, setSaving] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagsOpen, setTagsOpen] = useState(false);
 
   const editorElem = useRef<HTMLDivElement>(null);
   const editorInstance = useRef<any>(null);
@@ -42,12 +46,12 @@ export default function AdminBlogEditor() {
           'Hero Video URL': (r as any)['Hero Video URL'] || '',
           'Publish Date': (r as any)['Publish Date'] || '',
           Author: (r as any).Author || '',
-          Tags: Array.isArray((r as any).Tags) ? (r as any).Tags.join(', ') : ((r as any).Tags || ''),
           Featured: !!(r as any).Featured,
           'Pin Order': (r as any)['Pin Order'] || 0,
           'Hero Image URL': (r as any)['Hero Image URL'] || ''
         });
         setExistingHeroAttachment(Array.isArray((r as any)['Hero Image']) ? (r as any)['Hero Image'] : []);
+        setSelectedTags(Array.isArray((r as any).Tags) ? (r as any).Tags : []);
         setInitialBody((r as any).Body || '');
       }
 
@@ -102,51 +106,62 @@ export default function AdminBlogEditor() {
     if (form.Status !== 'Draft' && !form['Publish Date']) return alert('Publish Date required for Scheduled/Published');
     if (form.Type === 'Video' && !form['Hero Video URL']) return alert('Hero Video URL required for Video');
 
-    const raw = editorInstance.current?.getData?.() || '';
-    const Body = window.DOMPurify ? window.DOMPurify.sanitize(raw) : raw;
+    try {
+      setSaving(true);
 
-    const payload: any = {
-      Name: form.Name,
-      Slug: form.Slug.toLowerCase().replace(/\s+/g,'-'),
-      Status: form.Status,
-      Type: form.Type,
-      Excerpt: form.Excerpt,
-      'Hero Video URL': form['Hero Video URL'] || undefined,
-      'Publish Date': form['Publish Date'] || undefined,
-      Author: form.Author || undefined,
-      Tags: String(form.Tags || '').split(',').map((s:string)=>s.trim()).filter(Boolean),
-      Featured: !!form.Featured,
-      'Pin Order': Number(form['Pin Order'] || 0),
-      Body,
-      // NEW: save URL text field always if present
-      'Hero Image URL': form['Hero Image URL'] || undefined
-    };
+      const raw = editorInstance.current?.getData?.() || '';
+      const Body =
+        (typeof window !== 'undefined' && window.DOMPurify)
+          ? window.DOMPurify.sanitize(raw)
+          : raw;
 
-    // NEW: attachments logic
-    if (heroAttachmentToSet === '') {
-      // user clicked "Clear attachment"
-      payload['Hero Image'] = [];                   // clears the Airtable attachment field
-    } else if (typeof heroAttachmentToSet === 'string' && heroAttachmentToSet) {
-      // user uploaded a new hero → attach it
-      payload['Hero Image'] = [{ url: heroAttachmentToSet }];
-    }
-    // else: do not include 'Hero Image' → Airtable leaves existing attachment as-is
+      const payload: any = {
+        Name: form.Name,
+        Slug: form.Slug.toLowerCase().replace(/\s+/g,'-'),
+        Status: form.Status,
+        Type: form.Type,
+        Excerpt: form.Excerpt,
+        'Hero Video URL': form['Hero Video URL'] || undefined,
+        'Publish Date': form['Publish Date'] || undefined,
+        Author: form.Author || undefined,
+        Tags: selectedTags,   // exact Airtable multi-select array
+        Featured: !!form.Featured,
+        'Pin Order': Number(form['Pin Order'] || 0),
+        Body,
+        // always persist URL field if present
+        'Hero Image URL': form['Hero Image URL'] || undefined
+      };
 
-    if (id && id !== 'new') {
-      await updatePost(id, payload);
-    } else {
-      const rec = await createPost(payload);
+      // attachments logic (works whether Airtable field is Attachment or Text)
+      if (heroAttachmentToSet === '') {
+        payload['Hero Image'] = []; // clear attachment
+      } else if (typeof heroAttachmentToSet === 'string' && heroAttachmentToSet) {
+        payload['Hero Image'] = [{ url: heroAttachmentToSet }];
+      }
+
+      if (id && id !== 'new') {
+        await updatePost(id, payload);
+      } else {
+        const rec = await createPost(payload);
+        setExistingHeroAttachment(heroAttachmentToSet ? [{ url: heroAttachmentToSet }] : []);
+        setHeroAttachmentToSet(null);
+        alert('Saved');
+        return nav(`/admin/blog/${rec.id}`);
+      }
+
       if (heroAttachmentToSet !== null) {
         setExistingHeroAttachment(heroAttachmentToSet === '' ? [] : [{ url: heroAttachmentToSet }]);
         setHeroAttachmentToSet(null);
       }
-      return nav(`/admin/blog/${rec.id}`);
+      alert('Saved');
+    } catch (e:any) {
+      // show Airtable error text so we know exactly why it failed
+      const msg = e?.message || String(e);
+      console.error('Save failed:', e);
+      alert('Save failed:\n' + msg);
+    } finally {
+      setSaving(false);
     }
-    if (heroAttachmentToSet !== null) {
-      setExistingHeroAttachment(heroAttachmentToSet === '' ? [] : [{ url: heroAttachmentToSet }]);
-      setHeroAttachmentToSet(null);
-    }
-    alert('Saved');
   }
 
   function preview() {
@@ -237,8 +252,57 @@ export default function AdminBlogEditor() {
           <label className="block">Author
             <input className="mt-1 border p-2 rounded w-full" value={form.Author} onChange={e=>set('Author', e.target.value)} />
           </label>
-          <label className="block">Tags (comma-separated)
-            <input className="mt-1 border p-2 rounded w-full" value={form.Tags} onChange={e=>set('Tags', e.target.value)} />
+          <label className="block">Tags
+            <div className="mt-1">
+              <button
+                type="button"
+                onClick={() => setTagsOpen(v => !v)}
+                className="px-3 py-2 border rounded"
+              >
+                {tagsOpen ? 'Close' : 'Select tags'} ({selectedTags.length})
+              </button>
+
+              {tagsOpen && (
+                <div className="mt-2 max-h-56 overflow-auto rounded border p-2 space-y-1">
+                  {TAG_OPTIONS.map(opt => {
+                    const checked = selectedTags.includes(opt);
+                    return (
+                      <label key={opt} className="flex items-center gap-2 py-1">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => {
+                            setSelectedTags(prev =>
+                              e.target.checked ? [...prev, opt] : prev.filter(t => t !== opt)
+                            );
+                          }}
+                        />
+                        <span className="text-sm">{opt}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* pills */}
+              {selectedTags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selectedTags.map(t => (
+                    <span key={t} className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
+                      {t}
+                      <button
+                        type="button"
+                        className="opacity-60 hover:opacity-100"
+                        onClick={() => setSelectedTags(prev => prev.filter(x => x !== t))}
+                        aria-label={`Remove ${t}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </label>
           <label className="block flex items-center gap-2">
             <input type="checkbox" checked={!!form.Featured} onChange={e=>set('Featured', e.target.checked)} />
@@ -249,8 +313,8 @@ export default function AdminBlogEditor() {
           </label>
 
           <div className="flex gap-2 pt-2">
-            <button onClick={save} className="px-3 py-2 border rounded">Save</button>
-            <button onClick={preview} className="px-3 py-2 border rounded">Preview</button>
+            <button onClick={save} disabled={saving} className="px-3 py-2 border rounded">{saving ? 'Saving…' : 'Save'}</button>
+            <button onClick={preview} disabled={saving} className="px-3 py-2 border rounded">Preview</button>
             <button onClick={()=>nav('/admin/blog')} className="ml-auto px-3 py-2 border rounded">Back</button>
           </div>
         </div>
