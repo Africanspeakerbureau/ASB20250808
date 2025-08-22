@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { getPostBySlug, isPostVisible } from '../../lib/airtable';
 import BlogSidebar from './BlogSidebar';
 import './blog.css';
+import { useFitLines } from '../../lib/useFitLines';
 
 declare global { interface Window { DOMPurify: any } }
 function useQuery(){ return new URLSearchParams(useLocation().search); }
@@ -67,6 +68,9 @@ export default function BlogPost(){
     return Math.max(1, Math.round(words/200));
   },[post]);
 
+  const postH1Ref = useRef<HTMLHeadingElement>(null);
+  useFitLines(postH1Ref, { maxLines: 3, sizes: [40, 38, 36, 34, 32, 30, 28] });
+
   if(state==='loading') return <div className="asb-blog"><div className="blog-shell"><div className="blog-article">Loading…</div></div></div>;
   if(state==='notfound') return <div className="asb-blog"><div className="blog-shell"><div className="blog-article">Post not found.</div></div></div>;
   if(state==='forbidden') return <div className="asb-blog"><div className="blog-shell"><div className="blog-article">This post is not published yet.</div></div></div>;
@@ -93,7 +97,13 @@ export default function BlogPost(){
         {/* MAIN */}
         <article className="blog-article">
           <header className="blog-header">
-            <h1 className="blog-title">{post.Name}</h1>
+            <h1
+              ref={postH1Ref}
+              className="font-serif font-bold text-gray-900 leading-[1.15]"
+              style={{ fontSize: '40px' }} // start bigger on article page, then fit down
+            >
+              {post.Name}
+            </h1>
             <div className="blog-byline">
               By {author} • {dateStr}{readMinutes ? ` • ${readMinutes} min read` : ''}{post.Type?` • ${post.Type}`:''}
             </div>
