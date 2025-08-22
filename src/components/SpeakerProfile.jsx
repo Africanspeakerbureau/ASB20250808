@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect } from 'react'
 import VideoEmbed from './VideoEmbed'
+import QuickFacts from './QuickFacts'
 
 function asList(str) {
   if (!str) return []
@@ -57,6 +58,30 @@ export default function SpeakerProfile({ id, speakers = [] }) {
   const hasBulletTopics = topics.length > 1
   const videos = speaker.videos || []
 
+  const shareUrl = `${window.location.origin}/#/speaker/${encodeURIComponent(
+    (speaker.slug || speaker.id || '').toLowerCase()
+  )}`
+
+  const onShare = async () => {
+    try {
+      const shareData = {
+        title: `${fullName || speaker.title || 'ASB Speaker'}`,
+        text: 'Check out this speaker from African Speaker Bureau',
+        url: shareUrl,
+      }
+      if (navigator.share) {
+        await navigator.share(shareData)
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl)
+        alert('Profile link copied to clipboard.')
+      } else {
+        prompt('Copy this link:', shareUrl)
+      }
+    } catch (e) {
+      console.error('Share failed:', e)
+    }
+  }
+
   return (
     <main className="mx-auto max-w-6xl px-4 pb-24">
       {speaker.headerUrl && (
@@ -98,7 +123,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               <button
                 type="button"
                 className="inline-flex items-center rounded-xl border px-4 py-2 text-gray-800 bg-white shadow-sm"
-                onClick={()=>{navigator.clipboard?.writeText(window.location.href);}}
+                onClick={onShare}
               >
                 Share profile
               </button>
@@ -113,6 +138,15 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           </div>
         </div>
       </div>
+
+      <section id="quick-facts" className="mb-8">
+        <QuickFacts
+          country={speaker.country}
+          languages={speaker.languages}
+          availability={speaker.travelWillingness}
+          feeRange={speaker.feeRange}
+        />
+      </section>
 
       <section className="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -159,17 +193,6 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               ) : (
                 <p className="text-gray-700">{topics[0]}</p>
               )}
-            </div>
-          )}
-
-          {videos.length > 0 && (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-3">Videos & Articles</h2>
-              <div className="video-grid">
-                {videos.slice(0,3).map((url, i) => (
-                  <VideoEmbed key={i} url={url} title={`video-${i}`} />
-                ))}
-              </div>
             </div>
           )}
 
@@ -223,16 +246,6 @@ export default function SpeakerProfile({ id, speakers = [] }) {
         </div>
 
         <aside className="space-y-6">
-          <div className="rounded-2xl border bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold mb-3">Quick facts</h2>
-            <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
-              <dt className="text-gray-500">Country</dt><dd>{speaker.country || '—'}</dd>
-              <dt className="text-gray-500">Languages</dt><dd>{speaker.languages?.join(', ') || '—'}</dd>
-              <dt className="text-gray-500">Availability</dt><dd>{speaker.travelWillingness || '—'}</dd>
-              <dt className="text-gray-500">Fee range</dt><dd>{speaker.feeRange || 'On request'}</dd>
-            </dl>
-          </div>
-
           {speaker.expertiseAreas?.length > 0 && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold mb-3">Expertise Areas</h2>
@@ -247,6 +260,17 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           )}
         </aside>
       </section>
+
+      {videos.length > 0 && (
+        <section id="videos" className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4">Videos</h2>
+          <div className="video-grid">
+            {videos.map((url, i) => (
+              <VideoEmbed key={i} url={url} title={`Video ${i + 1} — ${fullName}`} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mt-8 rounded-2xl border bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold mb-4">Related speakers</h2>

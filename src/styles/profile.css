@@ -20,3 +20,7 @@
 @media (min-width: 768px) {
   .video-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+@media (min-width: 1024px) {
+  #quick-facts { margin-top: 8px; }
+}
