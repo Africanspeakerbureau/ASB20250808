@@ -51,6 +51,10 @@ async function airtableSelectAll(table, params = {}) {
   return all;
 }
 
+export async function listSpeakersAll() {
+  return await airtableSelectAll(TABLE_SPEAKERS, { pageSize: 50 });
+}
+
 export async function listSpeakers() {
   const records = await airtableSelectAll(TABLE_SPEAKERS, { pageSize: 50 });
   const rows = (records || []).filter(r => {
