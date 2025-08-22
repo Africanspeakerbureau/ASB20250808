@@ -27,6 +27,10 @@ export function normalizeSpeaker(rec) {
     headerAtt?.url ||
     '';
 
+  const video1 = f['Video Link 1'] || '';
+  const video2 = f['Video Link 2'] || '';
+  const video3 = f['Video Link 3'] || '';
+
   const firstName = (f['First Name'] || '').trim();
   const lastName  = (f['Last Name'] || '').trim();
   const fullName  = (f['Full Name'] || `${firstName} ${lastName}`).trim();
@@ -44,6 +48,7 @@ export function normalizeSpeaker(rec) {
   const country = (typeof f['Country'] === 'string')
     ? f['Country']
     : f['Country']?.name || f['Location'] || '';
+  const expertiseAreas = arr(f['Expertise Areas']).map(s => s?.name || s);
 
   return {
     id: rec.id,
@@ -60,9 +65,11 @@ export function normalizeSpeaker(rec) {
     country,
     languages,
     spokenLanguages: languages,
+    expertiseAreas,
     featured,
     photoUrl,
     headerUrl,
+    videos: [video1, video2, video3].filter(Boolean),
 
     // detail fields (kept so profile page has data)
     keyMessages: f['Key Messages'] || '',
