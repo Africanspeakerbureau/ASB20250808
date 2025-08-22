@@ -166,7 +166,7 @@ export default function AdminBlogEditor() {
 
   function preview() {
     if (!form.Slug) return alert('Add a Slug first');
-    window.open(`/#/blog/${form.Slug}?preview=1`, '_blank');
+    window.open(`/blog/${form.Slug}?preview=1`, '_blank');
   }
 
   return (
@@ -309,7 +309,17 @@ export default function AdminBlogEditor() {
             Featured
           </label>
           <label className="block">Pin Order
-            <input type="number" className="mt-1 border p-2 rounded w-full" value={form['Pin Order']} onChange={e=>set('Pin Order', Number(e.target.value))} />
+            <input
+              type="number"
+              min={0}
+              step={1}
+              className="mt-1 border p-2 rounded w-full"
+              value={form['Pin Order']}
+              onChange={e=>set('Pin Order', Math.max(0, Number(e.target.value || 0)))}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Smaller number = higher priority among Featured. Use 0 (default), 1, 2…
+            </p>
           </label>
 
           <div className="flex gap-2 pt-2">

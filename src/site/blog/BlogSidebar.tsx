@@ -27,7 +27,7 @@ export default function BlogSidebar({ currentSlug }: { currentSlug?: string }) {
         {latest.map(p=>{
           const img = pickBlogThumb(p);
           return (
-            <a key={p.Slug||p.id} href={`/#/blog/${p.Slug}`} className="latest-item">
+            <a key={p.Slug||p.id} href={`/blog/${p.Slug}`} className="latest-item">
               {img ? <img src={img} alt="" className="h-10 w-10 object-cover rounded" /> : <div className="h-10 w-10 rounded bg-gray-200" />}
               <div>
                 <div style={{fontWeight:700,lineHeight:1.2}}>{p.Name}</div>
@@ -43,7 +43,7 @@ export default function BlogSidebar({ currentSlug }: { currentSlug?: string }) {
       <div className="sb-card">
         <h3 className="sb-title">Popular Topics</h3>
         <div className="tag-list">
-          {topics.map(t=> <a key={t} className="tag" href={`/#/blog?tag=${encodeURIComponent(t)}`}>{t}</a>)}
+          {topics.map(t=> <a key={t} className="tag" href={`/blog?tag=${encodeURIComponent(t)}`}>{t}</a>)}
         </div>
       </div>
     </aside>

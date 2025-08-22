@@ -245,3 +245,30 @@ export async function listPublicPosts(max = 24) {
   return (json.records || []).map((r) => ({ id: r.id, ...r.fields }));
 }
 
+export async function listFeaturedPosts(limit = 2) {
+  const filterFormula =
+    "AND({Status}='Published', OR({Publish Date}=BLANK(), {Publish Date}<=TODAY()), {Featured}=1)";
+
+  const params = new URLSearchParams();
+  params.set('filterByFormula', filterFormula);
+  params.set('maxRecords', String(Math.max(2, limit)));
+
+  // Sort by Pin Order asc, then Publish Date desc
+  params.set('sort[0][field]', 'Pin Order');
+  params.set('sort[0][direction]', 'asc');
+  params.set('sort[1][field]', 'Publish Date');
+  params.set('sort[1][direction]', 'desc');
+
+  [
+    'Name','Slug','Excerpt','Type','Author','Tags',
+    'Hero Image','Hero Image URL','Hero Video URL',
+    'Publish Date','Featured','Pin Order'
+  ].forEach(f => params.append('fields[]', f));
+
+  const res = await fetch(`${BLOG_BASE_URL}?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${API_KEY}` },
+  });
+  const data = await res.json();
+  return (data.records || []).map(r => ({ id: r.id, ...r.fields }));
+}
+
