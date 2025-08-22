@@ -16,6 +16,7 @@ import {
   listSpeakers,
   getSpeakerBySlugOrId,
   isAirtableId,
+  listSpeakersAll
 } from '@/lib/airtable'
 import fieldOptions from './FieldOptions.js'
 import { fieldPresets } from './utils/fieldPresets.js'
@@ -32,6 +33,7 @@ import ConsentBanner from "@/components/ConsentBanner"
 import { getConsent } from "@/lib/consent"
 import { useGeolocation } from "@/hooks/useGeolocation"
 import ApplyBeta from "./public/apply-beta/ApplyBeta"
+import { getAllPublishedSpeakersCached } from '@/lib/speakers'
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -351,6 +353,10 @@ function App() {
       }
     })()
     return () => { alive = false }
+  }, [])
+
+  useEffect(() => {
+    getAllPublishedSpeakersCached(listSpeakersAll).catch(() => {});
   }, [])
 
   useEffect(() => {
