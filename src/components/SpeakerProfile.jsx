@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect } from 'react'
+import VideoEmbed from './VideoEmbed'
 
 function asList(str) {
   if (!str) return []
@@ -16,21 +17,6 @@ function Chip({ children }) {
   )
 }
 
-function videoEmbed(url = '') {
-  if (/youtu\.be\//.test(url)) {
-    const id = url.split('/').pop().split('?')[0]
-    return `https://www.youtube.com/embed/${id}`
-  }
-  if (/youtube\.com/.test(url)) {
-    const match = url.match(/[?&]v=([^&]+)/)
-    if (match && match[1]) return `https://www.youtube.com/embed/${match[1]}`
-  }
-  if (/vimeo\.com/.test(url)) {
-    const id = url.split('/').pop().split('?')[0]
-    return `https://player.vimeo.com/video/${id}`
-  }
-  return ''
-}
 
 export default function SpeakerProfile({ id, speakers = [] }) {
   useEffect(() => {
@@ -179,27 +165,10 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           {videos.length > 0 && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold mb-3">Videos & Articles</h2>
-              <div className="grid md:grid-cols-3 gap-4">
-                {videos.slice(0,3).map((url, i) => {
-                  const embed = videoEmbed(url)
-                  return embed ? (
-                    <div key={i} className="aspect-video w-full rounded-lg overflow-hidden">
-                      <iframe
-                        src={embed}
-                        title={`video-${i}`}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="w-full h-full"
-                      />
-                    </div>
-                  ) : (
-                    <a key={i} href={url} target="_blank" rel="noreferrer" className="block rounded-xl border p-3 hover:shadow">
-                      <div className="aspect-video w-full rounded-lg bg-gray-100 grid place-content-center">
-                        <span className="text-sm text-gray-500">Open link</span>
-                      </div>
-                    </a>
-                  )
-                })}
+              <div className="video-grid">
+                {videos.slice(0,3).map((url, i) => (
+                  <VideoEmbed key={i} url={url} title={`video-${i}`} />
+                ))}
               </div>
             </div>
           )}
