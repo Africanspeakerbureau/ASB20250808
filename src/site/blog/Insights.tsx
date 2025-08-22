@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listPublishedPostsForIndex, BlogIndexRecord } from '../../lib/airtable.ts';
 import { pickBlogThumb } from '../../lib/blogMedia';
+import { useFitLines } from '../../lib/useFitLines';
 
 const TOKENS = {
   surface: '#F6F8FC',
@@ -12,14 +13,6 @@ const TOKENS = {
   text:    '#0A0A0A',
   muted:   '#4B5563',
 };
-
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-      <path d="M8 5v14l11-7z" fill="#fff"></path>
-    </svg>
-  );
-}
 
 export default function Insights() {
   const [rows, setRows] = useState<BlogIndexRecord[] | null>(null);
@@ -73,6 +66,9 @@ export default function Insights() {
       });
   }, [rows, featured, topic, ctype, author, q]);
 
+  const featuredH1Ref = useRef<HTMLHeadingElement>(null);
+  useFitLines(featuredH1Ref, { maxLines: 3, sizes: [36, 34, 32, 30, 28, 26, 24] });
+
   return (
     <main className="bg-white">
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -112,7 +108,11 @@ export default function Insights() {
                   <div className="text-xs font-semibold tracking-wide" style={{ color: TOKENS.navy }}>
                     INSIGHTS
                   </div>
-                  <h1 className="mt-1 text-xl md:text-2xl lg:text-[32px] font-serif font-bold text-gray-900">
+                  <h1
+                    ref={featuredH1Ref}
+                    className="mt-1 font-serif font-bold text-gray-900 leading-[1.15]"
+                    style={{ fontSize: '36px' }} // starting size; hook will step down as needed
+                  >
                     {featured.Name}
                   </h1>
                   <div className="mt-2 text-sm" style={{ color: TOKENS.muted }}>
