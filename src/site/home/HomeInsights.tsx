@@ -49,7 +49,7 @@ export default function HomeInsights() {
 
           return (
             <Link
-              to={`/#/blog/${it.Slug || ''}`}
+              to={`/blog/${it.Slug || ''}`}
               key={it.id}
               className="rounded-3xl overflow-hidden bg-white border block hover:shadow-sm transition"
               style={{ borderColor: TOKENS.border }}

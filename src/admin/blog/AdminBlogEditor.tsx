@@ -166,7 +166,7 @@ export default function AdminBlogEditor() {
 
   function preview() {
     if (!form.Slug) return alert('Add a Slug first');
-    window.open(`/#/blog/${form.Slug}?preview=1`, '_blank');
+    window.open(`/blog/${form.Slug}?preview=1`, '_blank');
   }
 
   return (
