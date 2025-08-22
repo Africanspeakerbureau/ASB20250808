@@ -48,6 +48,7 @@ export function normalizeSpeaker(rec) {
   const country = (typeof f['Country'] === 'string')
     ? f['Country']
     : f['Country']?.name || f['Location'] || '';
+  const expertiseAreas = arr(f['Expertise Areas']).map(s => s?.name || s);
 
   return {
     id: rec.id,
@@ -64,6 +65,7 @@ export function normalizeSpeaker(rec) {
     country,
     languages,
     spokenLanguages: languages,
+    expertiseAreas,
     featured,
     photoUrl,
     headerUrl,
