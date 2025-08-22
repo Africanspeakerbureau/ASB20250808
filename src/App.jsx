@@ -4,6 +4,7 @@ import MeetOurSpeakers from './sections/MeetOurSpeakers'
 import FindSpeakersPage from './components/FindSpeakersPage'
 import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
+import HomeInsights from './site/home/HomeInsights'
 import BookingForm from './components/BookingForm'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button.jsx'
@@ -2618,50 +2619,7 @@ function App() {
       <PlanYourEvent appActions={appActions} />
 
       {/* ======== INSIGHTS FROM OUR SPEAKERS ======== */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-semibold text-center mb-2">Insights from Our Speakers</h2>
-          <p className="text-gray-600 text-center mb-8">
-            Latest videos and articles from our thought leaders
-          </p>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Card 1: Video */}
-            <div className="bg-white rounded-xl overflow-hidden shadow">
-              <div className="h-48 bg-gray-100 relative flex items-center justify-center">
-                <button className="p-4 bg-blue-600 rounded-full">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M5 3l14 9-14 9V3z" />
-                  </svg>
-                </button>
-              </div>
-              <div className="p-6">
-                <h3 className="font-medium mb-2">Leadership in the Digital Age</h3>
-                <p className="text-gray-600">
-                  Insights from our featured speakers on navigating modern leadership challenges.
-                </p>
-              </div>
-            </div>
-
-            {/* Card 2: Article */}
-            <div className="bg-white rounded-xl overflow-hidden shadow">
-              <div className="h-48 bg-gray-100 relative flex items-center justify-center">
-                <button className="p-4 bg-green-600 rounded-full">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M4 4h16v2H4V4zm0 4h16v2H4V8zm0 4h10v2H4v-2zm0 4h10v2H4v-2z" />
-                  </svg>
-                </button>
-              </div>
-              <div className="p-6">
-                <h3 className="font-medium mb-2">The Future of African Innovation</h3>
-                <p className="text-gray-600">
-                  Exploring the emerging trends and opportunities across the African continent.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HomeInsights />
 
       {/* Contact Section */}
       <section id="get-in-touch" className="py-20 bg-gray-50">
