@@ -1,0 +1,23 @@
+/* Keep existing site look; only minimal spacing utilities here. */
+
+/* Align Key Messages with the top of Quick facts on desktop. */
+@media (min-width: 1024px) {
+  .keymessages-offset {
+    margin-top: 8px; /* subtle nudge; adjust to 12px if needed */
+  }
+}
+
+/* Bullet list for Speaking Topics */
+.bullet-list {
+  margin: 0.5rem 0 0 1.25rem;
+  padding: 0;
+  list-style: disc;
+}
+.bullet-list li {
+  margin: 0.35rem 0;
+}
+
+/* What You’ll Get rows */
+.wyg-row { margin-top: 0.75rem; }
+.wyg-label { font-weight: 600; margin-bottom: 0.25rem; }
+.wyg-value { white-space: pre-wrap; }
