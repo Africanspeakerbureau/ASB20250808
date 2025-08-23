@@ -24,7 +24,7 @@ export default function TrackRecordCard({ speaker }) {
       <h3 className="text-xl md:text-2xl font-bold mb-4">Track Record</h3>
       <div className="space-y-5">
         <Block title="Notable Achievements" text={notableAchievements} />
-        <Block title="Other Achievements" text={achievements} />
+        <Block title="Further achievements" text={achievements} />
         <Block title="Education" text={education} />
       </div>
     </section>

@@ -6,7 +6,6 @@ import VideoEmbed from './VideoEmbed'
 import WhatYoullGetCard from '@/components/profile/WhatYoullGetCard';
 import TrackRecordCard from '@/components/profile/TrackRecordCard';
 import QuickFacts from './QuickFacts';
-import SpeakingTopics from './SpeakingTopics';
 import ExpertiseAreasCard from './ExpertiseAreasCard';
 
 function Chip({ children }) {
@@ -140,7 +139,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               {speaker.feeRange && <Chip>{speaker.feeRange}</Chip>}
             </div>
 
-            <div className="mt-4 mb-2 sm:mb-0 flex flex-wrap gap-3">
+            <div className="mt-4 flex flex-wrap items-center gap-3 mb-6 md:mb-8">
               <a
                 href="#/book-a-speaker"
                 className="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
@@ -172,8 +171,9 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           <ExpertiseAreasCard items={speaker.expertiseAreas} />
         </div>
         <main className="order-2 md:order-1 md:col-span-8 space-y-6">
-          <WhatYoullGetCard speaker={speaker} />
-          <SpeakingTopics topics={speaker.topics} />
+          <div className="mt-6 md:mt-8">
+            <WhatYoullGetCard speaker={speaker} />
+          </div>
 
           {speaker.bio && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
