@@ -5,7 +5,8 @@ import { getAllPublishedSpeakersCached, computeRelatedSpeakers } from '@/lib/spe
 import VideoEmbed from './VideoEmbed'
 import WhatYoullGetCard from '@/components/profile/WhatYoullGetCard';
 import TrackRecordCard from '@/components/profile/TrackRecordCard';
-import SidebarInfo from '@/components/profile/SidebarInfo';
+import QuickFacts from './QuickFacts';
+import SpeakingTopics from './SpeakingTopics';
 
 function Chip({ children }) {
   return (
@@ -165,11 +166,12 @@ export default function SpeakerProfile({ id, speakers = [] }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 md:gap-6">
-        <div className="order-1 md:order-2 md:col-span-4">
-          <SidebarInfo speaker={speaker} />
+        <div className="order-1 md:order-2 md:col-span-4 mt-4 md:mt-0">
+          <QuickFacts speaker={speaker} />
         </div>
         <main className="order-2 md:order-1 md:col-span-8 space-y-6">
           <WhatYoullGetCard speaker={speaker} />
+          <SpeakingTopics topics={speaker.topics} />
 
           {speaker.bio && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">

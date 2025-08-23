@@ -8,11 +8,24 @@ export const basicSlugify = (s = '') =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
+const toArray = (v) => (Array.isArray(v) ? v : v ? [v] : []);
+const splitBullets = (v) =>
+  typeof v === 'string'
+    ? v
+        .split(/[\n;]+/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : Array.isArray(v)
+    ? v
+    : [];
+const computeFeeRange = (displayFee, feeRange) =>
+  String(displayFee).toLowerCase() === 'yes' && feeRange ? feeRange : 'On request';
+
 // Normalizes a speaker Airtable record safely.
 export function normalizeSpeaker(rec) {
   const fields = (rec && rec.fields) || {};
   const val = (k) => (fields[k] ?? '').toString().trim();
-  const arr = (k) => (Array.isArray(fields[k]) ? fields[k] : fields[k] ? [fields[k]] : []);
+  const arr = (k) => toArray(fields[k]);
   const first = (a) => (Array.isArray(a) && a.length ? a[0] : undefined);
 
   const profAtt = first(arr('Profile Image'));
@@ -54,20 +67,12 @@ export function normalizeSpeaker(rec) {
         .filter(Boolean)
     : [];
 
-  const languagesChips = Array.isArray(fields['Spoken Languages'])
-    ? fields['Spoken Languages']
-    : fields['Spoken Languages']
-    ? String(fields['Spoken Languages'])
-        .split('|')
-        .map((s) => s.trim())
-        .filter(Boolean)
-    : [];
-
-  const languages = languagesChips;
+  const languages = toArray(fields['Spoken Languages'] || fields['Languages']);
+  const topics = splitBullets(fields['Speaking Topics']);
 
   const country = fields['Country'] || '';
   const availability = fields['Travel Willingness'] || fields['Availability'] || '';
-  const feeRange = fields['Fee Range'] || '';
+  const feeRange = computeFeeRange(fields['Display Fee'], fields['Fee Range']);
 
   // "What You'll Get" fields
   const keyMessages = fields['Key Messages'] || '';
@@ -78,8 +83,6 @@ export function normalizeSpeaker(rec) {
   const audienceTakeaways = fields['What the audience will take home'] || '';
   const benefitsIndividual = fields['Benefits for the individual'] || '';
   const benefitsOrganisation = fields['Benefits for the organisation'] || '';
-  const speakingTopics = fields['Speaking Topics'] || '';
-
   // Track record fields
   const notableAchievements = fields['Notable Achievements'] || '';
   const achievements = fields['Achievements'] || '';
@@ -100,7 +103,6 @@ export function normalizeSpeaker(rec) {
     country,
     languages,
     spokenLanguages: languages,
-    languagesChips,
     expertiseAreas,
     featured,
     photoUrl,
@@ -117,7 +119,6 @@ export function normalizeSpeaker(rec) {
     audienceTakeaways,
     benefitsIndividual,
     benefitsOrganisation,
-    speakingTopics,
     bio: val('Professional Bio'),
     achievements,
     education,
@@ -125,7 +126,7 @@ export function normalizeSpeaker(rec) {
     feeRange,
     availability,
     travelWillingness: val('Travel Willingness'),
-    topics: speakingTopics,
+    topics,
     location: val('Location'),
   };
 }

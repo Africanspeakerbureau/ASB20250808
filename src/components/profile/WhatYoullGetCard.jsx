@@ -24,7 +24,6 @@ export default function WhatYoullGetCard({ speaker }) {
     audienceTakeaways,
     benefitsIndividual,
     benefitsOrganisation,
-    speakingTopics,
   } = speaker;
 
   const hasAny =
@@ -35,8 +34,7 @@ export default function WhatYoullGetCard({ speaker }) {
     participantsWillLearn ||
     audienceTakeaways ||
     benefitsIndividual ||
-    benefitsOrganisation ||
-    speakingTopics;
+    benefitsOrganisation;
 
   if (!hasAny) return null;
 
@@ -53,7 +51,6 @@ export default function WhatYoullGetCard({ speaker }) {
         <Block title="What the audience will take home" text={audienceTakeaways} />
         <Block title="Benefits: Individual" text={benefitsIndividual} />
         <Block title="Benefits: Organisation" text={benefitsOrganisation} />
-        <Block title="Speaking Topics" text={speakingTopics} />
       </div>
     </section>
   );
