@@ -11,11 +11,12 @@ export const basicSlugify = (s = '') =>
 // Normalizes a speaker Airtable record safely.
 export function normalizeSpeaker(rec) {
   const f = (rec && rec.fields) || {};
-  const arr = v => (Array.isArray(v) ? v : v ? [v] : []);
+  const val = k => (f[k] ?? '').toString().trim();
+  const arr = k => (Array.isArray(f[k]) ? f[k] : f[k] ? [f[k]] : []);
   const first = a => (Array.isArray(a) && a.length ? a[0] : undefined);
 
-  const profAtt = first(arr(f['Profile Image']));
-  const headerAtt = first(arr(f['Header Image']));
+  const profAtt = first(arr('Profile Image'));
+  const headerAtt = first(arr('Header Image'));
 
   const photoUrl =
     profAtt?.thumbnails?.large?.url ||
@@ -40,15 +41,15 @@ export function normalizeSpeaker(rec) {
   // canonical slug used everywhere
   const slug = (slugOverride || slugFormula || basicSlugify(fullName)).trim();
 
-  const status = arr(f['Status']).map(s => s?.name || s);
+  const status = arr('Status').map(s => s?.name || s);
   const featuredSelect = f['Featured']?.name || f['Featured'];
   const featured = (featuredSelect === 'Yes') || status.includes('Featured');
 
-  const languages = arr(f['Spoken Languages']).map(s => s?.name || s);
+  const languages = arr('Spoken Languages').map(s => s?.name || s);
   const country = (typeof f['Country'] === 'string')
     ? f['Country']
     : f['Country']?.name || f['Location'] || '';
-  const expertiseAreas = arr(f['Expertise Areas']).map(s => s?.name || s);
+  const expertiseAreas = arr('Expertise Areas').map(s => s?.name || s);
 
   return {
     id: rec.id,
@@ -72,16 +73,26 @@ export function normalizeSpeaker(rec) {
     videos: [video1, video2, video3].filter(Boolean),
 
     // detail fields (kept so profile page has data)
-    keyMessages: f['Key Messages'] || '',
-    keyMessage: f['Key Messages'] || '',
-    bio: f['Professional Bio'] || '',
-    achievements: f['Achievements'] || '',
-    education: f['Education'] || '',
-    feeRange: f['Fee Range'] || '',
-    availability: f['Travel Willingness'] || '',
-    travelWillingness: f['Travel Willingness'] || '',
-    topics: f['Speaking Topics'] || '',
-    speakingTopics: f['Speaking Topics'] || '',
-    location: f['Location'] || '',
+    keyMessages: val('Key Messages'),
+    keyMessage: val('Key Messages'),
+    bio: val('Professional Bio'),
+    achievements: val('Achievements'),
+    education: val('Education'),
+    feeRange: val('Fee Range'),
+    availability: val('Travel Willingness') || val('Availability'),
+    travelWillingness: val('Travel Willingness'),
+    topics: val('Speaking Topics'),
+    speakingTopics: val('Speaking Topics'),
+    location: val('Location'),
+    // New “What You’ll Get” fields
+    deliveryStyle: val('Speakers Delivery Style'),
+    whyListen: val('Why the audience should listen to these topics'),
+    willAddress: val('What the speeches will address'),
+    willLearn: val('What participants will learn'),
+    takeHome: val('What the audience will take home'),
+    benefitsIndividual: val('Benefits for the individual'),
+    benefitsOrganisation: val('Benefits for the organisation'),
+    // Track record split
+    notableAchievements: val('Notable Achievements'),
   };
 }
