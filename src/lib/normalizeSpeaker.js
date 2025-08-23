@@ -8,7 +8,17 @@ export const basicSlugify = (s = '') =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
-const toArray = (v) => (Array.isArray(v) ? v : v ? [v] : []);
+const toArray = (v) => {
+  if (!v) return [];
+  if (Array.isArray(v)) return v.filter(Boolean);
+  if (typeof v === 'string') {
+    return v
+      .split(/[;\n,]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
 const splitBullets = (v) =>
   typeof v === 'string'
     ? v
@@ -18,6 +28,8 @@ const splitBullets = (v) =>
     : Array.isArray(v)
     ? v
     : [];
+const firstPresent = (obj, keys) =>
+  keys.map((k) => obj?.[k]).find((v) => v !== undefined && v !== null);
 const computeFeeRange = (displayFee, feeRange) =>
   String(displayFee).toLowerCase() === 'yes' && feeRange ? feeRange : 'On request';
 
@@ -58,14 +70,13 @@ export function normalizeSpeaker(rec) {
   const featuredSelect = fields['Featured']?.name || fields['Featured'];
   const featured = featuredSelect === 'Yes' || status.includes('Featured');
 
-  const expertiseAreas = Array.isArray(fields['Expertise Areas'])
-    ? fields['Expertise Areas']
-    : fields['Expertise Areas']
-    ? String(fields['Expertise Areas'])
-        .split('|')
-        .map((s) => s.trim())
-        .filter(Boolean)
-    : [];
+  const rawExpertise = firstPresent(fields, [
+    'Expertise Areas',
+    'Expertise areas',
+    'Expertise',
+    'Expertise Tags',
+  ]);
+  const expertiseAreas = toArray(rawExpertise);
 
   const languages = toArray(fields['Spoken Languages'] || fields['Languages']);
   const topics = splitBullets(fields['Speaking Topics']);

@@ -166,8 +166,18 @@ export default function SpeakerProfile({ id, speakers = [] }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 md:gap-6">
-        <div className="order-1 md:order-2 md:col-span-4 mt-4 md:mt-0">
+        <div className="order-1 md:order-2 md:col-span-4 mt-4 md:mt-0 space-y-6">
           <QuickFacts speaker={speaker} />
+          {speaker.expertiseAreas?.length > 0 && (
+            <div className="rounded-2xl border bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-semibold mb-3">Expertise areas</h2>
+              <div className="flex flex-wrap gap-2">
+                {speaker.expertiseAreas.map((x) => (
+                  <Chip key={x}>{x}</Chip>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <main className="order-2 md:order-1 md:col-span-8 space-y-6">
           <WhatYoullGetCard speaker={speaker} />
