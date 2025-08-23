@@ -1,0 +1,35 @@
+/* Speaker profile layout & spacing (scoped utility classes) */
+.profile-actions {
+  margin-top: 8px;
+  margin-bottom: 16px; /* consistent gap below the buttons */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.profile-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px; /* main | aside */
+  gap: 24px;            /* consistent column gap */
+  align-items: start;   /* top-align cards so rows line up */
+}
+
+/* Make every card spacing consistent, without touching global .card */
+.profile-main .card + .card,
+.profile-aside .card + .card {
+  margin-top: 24px;
+}
+
+/* Mobile: stack and keep Quick facts above What You’ll Get */
+@media (max-width: 900px) {
+  .profile-columns {
+    grid-template-columns: 1fr;
+  }
+  .profile-aside {
+    order: -1; /* place aside first on mobile */
+  }
+  .profile-main .card:first-child,
+  .profile-aside .card:first-child {
+    margin-top: 16px;
+  }
+}

@@ -80,6 +80,7 @@ export function normalizeSpeaker(rec) {
 
   const languages = toArray(fields['Spoken Languages'] || fields['Languages']);
   const topics = splitBullets(fields['Speaking Topics']);
+  const speakingTopics = fields['Speaking Topics'] || '';
 
   const country = fields['Country'] || '';
   const availability = fields['Travel Willingness'] || fields['Availability'] || '';
@@ -89,9 +90,9 @@ export function normalizeSpeaker(rec) {
   const keyMessages = fields['Key Messages'] || '';
   const deliveryStyle = fields['Speakers Delivery Style'] || '';
   const whyThisSpeaker = fields['Why the audience should listen to these topics'] || '';
-  const willAddress = fields['What the speeches will address'] || '';
-  const participantsWillLearn = fields['What participants will learn'] || '';
-  const audienceTakeaways = fields['What the audience will take home'] || '';
+  const addresses = fields['What the speeches will address'] || '';
+  const willLearn = fields['What participants will learn'] || '';
+  const takeHome = fields['What the audience will take home'] || '';
   const benefitsIndividual = fields['Benefits for the individual'] || '';
   const benefitsOrganisation = fields['Benefits for the organisation'] || '';
   // Track record fields
@@ -125,9 +126,9 @@ export function normalizeSpeaker(rec) {
     keyMessage: keyMessages,
     deliveryStyle,
     whyThisSpeaker,
-    willAddress,
-    participantsWillLearn,
-    audienceTakeaways,
+    addresses,
+    willLearn,
+    takeHome,
     benefitsIndividual,
     benefitsOrganisation,
     bio: val('Professional Bio'),
@@ -138,6 +139,7 @@ export function normalizeSpeaker(rec) {
     availability,
     travelWillingness: val('Travel Willingness'),
     topics,
+    speakingTopics,
     location: val('Location'),
   };
 }
