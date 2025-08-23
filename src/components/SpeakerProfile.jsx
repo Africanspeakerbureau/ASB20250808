@@ -3,15 +3,9 @@ import SpeakerCard from './SpeakerCard';
 import { listSpeakersAll } from '@/lib/airtable';
 import { getAllPublishedSpeakersCached, computeRelatedSpeakers } from '@/lib/speakers';
 import VideoEmbed from './VideoEmbed'
-import QuickFacts from './QuickFacts'
-
-function asList(str) {
-  if (!str) return []
-  return String(str)
-    .split(/\r?\n|;|•/g)
-    .map(s => s.trim())
-    .filter(Boolean)
-}
+import WhatYoullGetCard from '@/components/profile/WhatYoullGetCard';
+import TrackRecordCard from '@/components/profile/TrackRecordCard';
+import SidebarInfo from '@/components/profile/SidebarInfo';
 
 function Chip({ children }) {
   return (
@@ -87,14 +81,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
   }
 
   const fullName = [speaker.titlePrefix, speaker.firstName, speaker.lastName].filter(Boolean).join(' ')
-  const topics = asList(speaker.topics || speaker.speakingTopics)
-  const hasBulletTopics = topics.length > 1
   const videos = speaker.videos || []
-  const expertiseAreas = Array.isArray(speaker.expertiseAreas)
-    ? speaker.expertiseAreas
-    : Array.isArray(speaker.fields?.['Expertise Areas'])
-    ? speaker.fields['Expertise Areas']
-    : []
 
   const shareUrl = `${window.location.origin}/#/speaker/${encodeURIComponent(
     (speaker.slug || speaker.id || '').toLowerCase()
@@ -177,123 +164,21 @@ export default function SpeakerProfile({ id, speakers = [] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <aside className="lg:col-span-4 order-1 lg:order-2 lg:sticky lg:top-24">
-          <section id="quick-facts" className="mt-4 lg:mt-0">
-            <QuickFacts
-              country={speaker.country}
-              languages={speaker.languages}
-              availability={speaker.travelWillingness}
-              feeRange={speaker.feeRange}
-            />
-          </section>
-          {expertiseAreas.length > 0 && (
-            <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm mt-4">
-              <h3 className="text-xl font-semibold">Expertise areas</h3>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {expertiseAreas.map(tag => (
-                  <span key={tag} className="inline-block rounded-full px-3 py-1 text-sm border">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </section>
-          )}
-        </aside>
-        <main className="lg:col-span-8 order-2 lg:order-1 space-y-6">
-          {speaker.keyMessages && (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-2">Key Messages</h2>
-              <p className="text-gray-700 whitespace-pre-line">{speaker.keyMessages}</p>
-            </div>
-          )}
+      <div className="grid grid-cols-1 md:grid-cols-12 md:gap-6">
+        <div className="order-1 md:order-2 md:col-span-4">
+          <SidebarInfo speaker={speaker} />
+        </div>
+        <main className="order-2 md:order-1 md:col-span-8 space-y-6">
+          <WhatYoullGetCard speaker={speaker} />
 
-          {(speaker.bio || speaker.achievements || speaker.education) && (
+          {speaker.bio && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold mb-3">About</h2>
-              {speaker.bio && (
-                <>
-                  <h3 className="font-medium text-gray-900">Professional Bio</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.bio}</p>
-                </>
-              )}
-              {speaker.achievements && (
-                <>
-                  <h3 className="font-medium text-gray-900">Achievements</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.achievements}</p>
-                </>
-              )}
-              {speaker.education && (
-                <>
-                  <h3 className="font-medium text-gray-900">Education</h3>
-                  <p className="text-gray-700 whitespace-pre-line">{speaker.education}</p>
-                </>
-              )}
+              <p className="text-gray-700 whitespace-pre-line">{speaker.bio}</p>
             </div>
           )}
 
-          {topics.length > 0 && (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-3">Speaking Topics</h2>
-              {hasBulletTopics ? (
-                <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                  {topics.map((t, i) => (
-                    <li key={i}>{t}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-700">{topics[0]}</p>
-              )}
-            </div>
-          )}
-
-          {(speaker.whyListen || speaker.whatAddress || speaker.whatLearn || speaker.whatTakeHome || speaker.benefitsIndividual || speaker.benefitsOrganisation || speaker.deliveryStyle) && (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-4">Why booking {speaker.firstName} {speaker.lastName}</h2>
-              {speaker.whyListen && (
-                <>
-                  <h3 className="font-medium text-gray-900">Why the audience should listen</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whyListen}</p>
-                </>
-              )}
-              {speaker.whatAddress && (
-                <>
-                  <h3 className="font-medium text-gray-900">What the speeches will address</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatAddress}</p>
-                </>
-              )}
-              {speaker.whatLearn && (
-                <>
-                  <h3 className="font-medium text-gray-900">What participants will learn</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatLearn}</p>
-                </>
-              )}
-              {speaker.whatTakeHome && (
-                <>
-                  <h3 className="font-medium text-gray-900">What the audience will take home</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatTakeHome}</p>
-                </>
-              )}
-              {speaker.benefitsIndividual && (
-                <>
-                  <h3 className="font-medium text-gray-900">Benefits for the individual</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.benefitsIndividual}</p>
-                </>
-              )}
-              {speaker.benefitsOrganisation && (
-                <>
-                  <h3 className="font-medium text-gray-900">Benefits for the organisation</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.benefitsOrganisation}</p>
-                </>
-              )}
-              {speaker.deliveryStyle && (
-                <>
-                  <h3 className="font-medium text-gray-900">Speaker’s delivery style</h3>
-                  <p className="text-gray-700 whitespace-pre-line">{speaker.deliveryStyle}</p>
-                </>
-              )}
-            </div>
-          )}
+          <TrackRecordCard speaker={speaker} />
 
           {videos.length > 0 && (
             <section id="videos" className="mt-10">
