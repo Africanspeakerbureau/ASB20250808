@@ -24,3 +24,19 @@
 @media (min-width: 1024px) {
   #quick-facts { margin-top: 8px; }
 }
+
+/* Ensure bullets always render for topic lists (in case of global resets) */
+.prose ul,
+.topic-list {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+/* Guard against any reset that removed card borders */
+.card {
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.12);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+

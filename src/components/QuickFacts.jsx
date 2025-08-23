@@ -1,6 +1,8 @@
 import React from 'react'
 
-export default function QuickFacts({ country, languages, availability, feeRange }) {
+export default function QuickFacts({ speaker }) {
+  if (!speaker) return null
+  const { country, languages = [], availability, feeRange } = speaker
   return (
     <div className="rounded-2xl border bg-white p-5 shadow-sm">
       <h2 className="text-lg font-semibold mb-3">Quick facts</h2>
@@ -8,7 +10,7 @@ export default function QuickFacts({ country, languages, availability, feeRange 
         <dt className="text-gray-500">Country</dt>
         <dd>{country || '—'}</dd>
         <dt className="text-gray-500">Languages</dt>
-        <dd>{languages?.join(', ') || '—'}</dd>
+        <dd>{languages.length ? languages.join(', ') : '—'}</dd>
         <dt className="text-gray-500">Availability</dt>
         <dd>{availability || '—'}</dd>
         <dt className="text-gray-500">Fee range</dt>
