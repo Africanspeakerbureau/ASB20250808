@@ -10,10 +10,10 @@ export const basicSlugify = (s = '') =>
 
 // Normalizes a speaker Airtable record safely.
 export function normalizeSpeaker(rec) {
-  const f = (rec && rec.fields) || {};
-  const val = k => (f[k] ?? '').toString().trim();
-  const arr = k => (Array.isArray(f[k]) ? f[k] : f[k] ? [f[k]] : []);
-  const first = a => (Array.isArray(a) && a.length ? a[0] : undefined);
+  const fields = (rec && rec.fields) || {};
+  const val = (k) => (fields[k] ?? '').toString().trim();
+  const arr = (k) => (Array.isArray(fields[k]) ? fields[k] : fields[k] ? [fields[k]] : []);
+  const first = (a) => (Array.isArray(a) && a.length ? a[0] : undefined);
 
   const profAtt = first(arr('Profile Image'));
   const headerAtt = first(arr('Header Image'));
@@ -28,28 +28,62 @@ export function normalizeSpeaker(rec) {
     headerAtt?.url ||
     '';
 
-  const video1 = f['Video Link 1'] || '';
-  const video2 = f['Video Link 2'] || '';
-  const video3 = f['Video Link 3'] || '';
+  const video1 = fields['Video Link 1'] || '';
+  const video2 = fields['Video Link 2'] || '';
+  const video3 = fields['Video Link 3'] || '';
 
-  const firstName = (f['First Name'] || '').trim();
-  const lastName  = (f['Last Name'] || '').trim();
-  const fullName  = (f['Full Name'] || `${firstName} ${lastName}`).trim();
+  const firstName = (fields['First Name'] || '').trim();
+  const lastName = (fields['Last Name'] || '').trim();
+  const fullName = (fields['Full Name'] || `${firstName} ${lastName}`).trim();
 
-  const slugFormula = (f['Slug'] || '').toString().trim();
-  const slugOverride = (f['Slug Override'] || '').toString().trim();
+  const slugFormula = (fields['Slug'] || '').toString().trim();
+  const slugOverride = (fields['Slug Override'] || '').toString().trim();
   // canonical slug used everywhere
   const slug = (slugOverride || slugFormula || basicSlugify(fullName)).trim();
 
-  const status = arr('Status').map(s => s?.name || s);
-  const featuredSelect = f['Featured']?.name || f['Featured'];
-  const featured = (featuredSelect === 'Yes') || status.includes('Featured');
+  const status = arr('Status').map((s) => s?.name || s);
+  const featuredSelect = fields['Featured']?.name || fields['Featured'];
+  const featured = featuredSelect === 'Yes' || status.includes('Featured');
 
-  const languages = arr('Spoken Languages').map(s => s?.name || s);
-  const country = (typeof f['Country'] === 'string')
-    ? f['Country']
-    : f['Country']?.name || f['Location'] || '';
-  const expertiseAreas = arr('Expertise Areas').map(s => s?.name || s);
+  const expertiseAreas = Array.isArray(fields['Expertise Areas'])
+    ? fields['Expertise Areas']
+    : fields['Expertise Areas']
+    ? String(fields['Expertise Areas'])
+        .split('|')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  const languagesChips = Array.isArray(fields['Spoken Languages'])
+    ? fields['Spoken Languages']
+    : fields['Spoken Languages']
+    ? String(fields['Spoken Languages'])
+        .split('|')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  const languages = languagesChips;
+
+  const country = fields['Country'] || '';
+  const availability = fields['Travel Willingness'] || fields['Availability'] || '';
+  const feeRange = fields['Fee Range'] || '';
+
+  // "What You'll Get" fields
+  const keyMessages = fields['Key Messages'] || '';
+  const deliveryStyle = fields['Speakers Delivery Style'] || '';
+  const whyThisSpeaker = fields['Why the audience should listen to these topics'] || '';
+  const willAddress = fields['What the speeches will address'] || '';
+  const participantsWillLearn = fields['What participants will learn'] || '';
+  const audienceTakeaways = fields['What the audience will take home'] || '';
+  const benefitsIndividual = fields['Benefits for the individual'] || '';
+  const benefitsOrganisation = fields['Benefits for the organisation'] || '';
+  const speakingTopics = fields['Speaking Topics'] || '';
+
+  // Track record fields
+  const notableAchievements = fields['Notable Achievements'] || '';
+  const achievements = fields['Achievements'] || '';
+  const education = fields['Education'] || '';
 
   return {
     id: rec.id,
@@ -60,13 +94,13 @@ export function normalizeSpeaker(rec) {
     fullName,
     firstName,
     lastName,
-    title: f['Professional Title'] || '',
-    professionalTitle: f['Professional Title'] || '',
-    company: f['Company'] || '',
+    title: fields['Professional Title'] || '',
+    professionalTitle: fields['Professional Title'] || '',
+    company: fields['Company'] || '',
     country,
     languages,
     spokenLanguages: languages,
-    languagesChips: languages,
+    languagesChips,
     expertiseAreas,
     featured,
     photoUrl,
@@ -74,26 +108,24 @@ export function normalizeSpeaker(rec) {
     videos: [video1, video2, video3].filter(Boolean),
 
     // detail fields (kept so profile page has data)
-    keyMessages: val('Key Messages'),
-    keyMessage: val('Key Messages'),
+    keyMessages,
+    keyMessage: keyMessages,
+    deliveryStyle,
+    whyThisSpeaker,
+    willAddress,
+    participantsWillLearn,
+    audienceTakeaways,
+    benefitsIndividual,
+    benefitsOrganisation,
+    speakingTopics,
     bio: val('Professional Bio'),
-    achievements: val('Achievements'),
-    education: val('Education'),
-    feeRange: val('Fee Range'),
-    availability: val('Travel Willingness') || val('Availability'),
+    achievements,
+    education,
+    notableAchievements,
+    feeRange,
+    availability,
     travelWillingness: val('Travel Willingness'),
-    topics: val('Speaking Topics'),
-    speakingTopics: val('Speaking Topics'),
+    topics: speakingTopics,
     location: val('Location'),
-    // "What You'll Get" fields
-    deliveryStyle: val('Speakers Delivery Style'),
-    whyThisSpeaker: val('Why the audience should listen to these topics'),
-    willAddress: val('What the speeches will address'),
-    participantsWillLearn: val('What participants will learn'),
-    audienceTakeaways: val('What the audience will take home'),
-    benefitsIndividual: val('Benefits for the individual'),
-    benefitsOrganisation: val('Benefits for the organisation'),
-    // Track record fields
-    notableAchievements: val('Notable Achievements'),
   };
 }
