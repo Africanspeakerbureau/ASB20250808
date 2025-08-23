@@ -72,16 +72,38 @@ export function normalizeSpeaker(rec) {
     videos: [video1, video2, video3].filter(Boolean),
 
     // detail fields (kept so profile page has data)
-    keyMessages: f['Key Messages'] || '',
-    keyMessage: f['Key Messages'] || '',
+    keyMessages: (f['Key Messages'] || '').trim(),
+    keyMessage: (f['Key Messages'] || '').trim(),
     bio: f['Professional Bio'] || '',
-    achievements: f['Achievements'] || '',
-    education: f['Education'] || '',
-    feeRange: f['Fee Range'] || '',
-    availability: f['Travel Willingness'] || '',
-    travelWillingness: f['Travel Willingness'] || '',
+    achievements: (f['Achievements'] || '').trim(),
+    education: (f['Education'] || '').trim(),
+    feeRange:
+      f['Fee Range'] ||
+      (f['Display Fee'] === 'Yes' ? (f['Fee Range'] || '') : 'On request'),
+    availability: f['Travel Willingness'] || 'International',
+    travelWillingness: f['Travel Willingness'] || 'International',
     topics: f['Speaking Topics'] || '',
-    speakingTopics: f['Speaking Topics'] || '',
+    whatYoullGet: {
+      deliveryStyle: (f['Speakers Delivery Style'] || '').trim(),
+      whyThisSpeaker:
+        (f['Why the audience should listen to these topics'] || '').trim(),
+      willAddress: (f['What the speeches will address'] || '').trim(),
+      willLearn: (f['What participants will learn'] || '').trim(),
+      takeHome: (f['What the audience will take home'] || '').trim(),
+      benefitsIndividual: (f['Benefits for the individual'] || '').trim(),
+      benefitsOrganisation: (f['Benefits for the organisation'] || '').trim(),
+    },
+    speakingTopics: splitTopics(f['Speaking Topics']),
     location: f['Location'] || '',
   };
+}
+
+function splitTopics(raw) {
+  if (!raw) return [];
+  // Split on bullets, semicolons, or newlines; keep meaningful items.
+  const parts = String(raw)
+    .split(/[\n•;]+/g)
+    .map(s => s.trim())
+    .filter(Boolean);
+  return parts;
 }
