@@ -66,6 +66,7 @@ export function normalizeSpeaker(rec) {
     country,
     languages,
     spokenLanguages: languages,
+    languagesChips: languages,
     expertiseAreas,
     featured,
     photoUrl,
@@ -84,15 +85,15 @@ export function normalizeSpeaker(rec) {
     topics: val('Speaking Topics'),
     speakingTopics: val('Speaking Topics'),
     location: val('Location'),
-    // New “What You’ll Get” fields
+    // "What You'll Get" fields
     deliveryStyle: val('Speakers Delivery Style'),
-    whyListen: val('Why the audience should listen to these topics'),
+    whyThisSpeaker: val('Why the audience should listen to these topics'),
     willAddress: val('What the speeches will address'),
-    willLearn: val('What participants will learn'),
-    takeHome: val('What the audience will take home'),
+    participantsWillLearn: val('What participants will learn'),
+    audienceTakeaways: val('What the audience will take home'),
     benefitsIndividual: val('Benefits for the individual'),
     benefitsOrganisation: val('Benefits for the organisation'),
-    // Track record split
+    // Track record fields
     notableAchievements: val('Notable Achievements'),
   };
 }

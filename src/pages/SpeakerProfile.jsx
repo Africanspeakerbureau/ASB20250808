@@ -1,13 +1,11 @@
 import React from "react";
 import { useSpeaker } from "../hooks/useSpeaker";
-import QuickFacts from "../components/QuickFacts";
-import KeyMessages from "../components/KeyMessages";
 import About from "../components/About";
 import Videos from "../components/Videos";
 import RelatedSpeakers from "../components/RelatedSpeakers";
-import SpeakerWhatYouGet from "../components/sections/SpeakerWhatYouGet";
-import SpeakerTrackRecord from "../components/sections/SpeakerTrackRecord";
-import SidebarExpertiseLanguages from "../components/sections/SidebarExpertiseLanguages";
+import WhatYoullGetCard from "../components/profile/WhatYoullGetCard";
+import TrackRecordCard from "../components/profile/TrackRecordCard";
+import SidebarInfo from "../components/profile/SidebarInfo";
 
 export default function SpeakerProfile() {
   const { speaker: s, loading, error } = useSpeaker();
@@ -21,15 +19,13 @@ export default function SpeakerProfile() {
 
       {/* Re-order for mobile: sidebar (Quick facts) appears right under Back to search (order-1),
           but on desktop it sits on the right (order-2). */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <aside className="order-1 lg:order-2 lg:col-span-4 space-y-6 mt-4">
-          <QuickFacts speaker={s} />
-          <SidebarExpertiseLanguages expertiseAreas={s.expertiseAreas} languages={s.languages} />
-        </aside>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="order-1 md:order-2 md:col-span-4">
+          <SidebarInfo speaker={s} />
+        </div>
 
-        <div className="order-2 lg:order-1 lg:col-span-8 space-y-6">
-          <KeyMessages text={s.keyMessages} />
-          <SpeakerWhatYouGet s={s} />
+        <div className="order-2 md:order-1 md:col-span-8 space-y-6">
+          <WhatYoullGetCard speaker={s} />
           <About html={s.bio} />
           <Videos speaker={s} />
           <RelatedSpeakers current={s} />
@@ -37,7 +33,7 @@ export default function SpeakerProfile() {
       </div>
 
       {/* Track record (Notable / Other / Education) */}
-      <SpeakerTrackRecord s={s} />
+      <TrackRecordCard speaker={s} />
     </div>
   );
 }
