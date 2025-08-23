@@ -1,0 +1,40 @@
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+}
+@media (max-width: 1023px) {
+  .profile-grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb; /* light grey */
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.card h2 {
+  margin: 0 0 12px 0;
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.bullets {
+  padding-left: 20px;
+}
+.bullets li {
+  list-style: disc;
+  margin: 6px 0;
+}
+
+/* Nudge the first left-column card so its top aligns with Quick facts */
+.keymessages-offset {
+  margin-top: 12px;
+}
+@media (max-width: 1023px) {
+  .keymessages-offset { margin-top: 0; }
+}
