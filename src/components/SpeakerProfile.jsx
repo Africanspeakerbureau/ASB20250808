@@ -2,8 +2,9 @@ import React, { useMemo, useEffect, useState } from 'react';
 import SpeakerCard from './SpeakerCard';
 import { listSpeakersAll } from '@/lib/airtable';
 import { getAllPublishedSpeakersCached, computeRelatedSpeakers } from '@/lib/speakers';
-import VideoEmbed from './VideoEmbed'
-import QuickFacts from './QuickFacts'
+import VideoEmbed from './VideoEmbed';
+import QuickFacts from './QuickFacts';
+import WhatYoullGetCard from './profile/WhatYoullGetCard';
 
 function asList(str) {
   if (!str) return []
@@ -247,53 +248,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </div>
           )}
 
-          {(speaker.whyListen || speaker.whatAddress || speaker.whatLearn || speaker.whatTakeHome || speaker.benefitsIndividual || speaker.benefitsOrganisation || speaker.deliveryStyle) && (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-4">Why booking {speaker.firstName} {speaker.lastName}</h2>
-              {speaker.whyListen && (
-                <>
-                  <h3 className="font-medium text-gray-900">Why the audience should listen</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whyListen}</p>
-                </>
-              )}
-              {speaker.whatAddress && (
-                <>
-                  <h3 className="font-medium text-gray-900">What the speeches will address</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatAddress}</p>
-                </>
-              )}
-              {speaker.whatLearn && (
-                <>
-                  <h3 className="font-medium text-gray-900">What participants will learn</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatLearn}</p>
-                </>
-              )}
-              {speaker.whatTakeHome && (
-                <>
-                  <h3 className="font-medium text-gray-900">What the audience will take home</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatTakeHome}</p>
-                </>
-              )}
-              {speaker.benefitsIndividual && (
-                <>
-                  <h3 className="font-medium text-gray-900">Benefits for the individual</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.benefitsIndividual}</p>
-                </>
-              )}
-              {speaker.benefitsOrganisation && (
-                <>
-                  <h3 className="font-medium text-gray-900">Benefits for the organisation</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.benefitsOrganisation}</p>
-                </>
-              )}
-              {speaker.deliveryStyle && (
-                <>
-                  <h3 className="font-medium text-gray-900">Speaker’s delivery style</h3>
-                  <p className="text-gray-700 whitespace-pre-line">{speaker.deliveryStyle}</p>
-                </>
-              )}
-            </div>
-          )}
+          <WhatYoullGetCard wyg={speaker.whatYoullGet} />
 
           {videos.length > 0 && (
             <section id="videos" className="mt-10">
