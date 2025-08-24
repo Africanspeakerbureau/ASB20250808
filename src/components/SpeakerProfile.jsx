@@ -203,6 +203,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
         <main className="lg:col-span-8 order-2 lg:order-1 lg:mt-2 space-y-6">
           {(speaker.keyMessage || speaker.keyMessages?.length || speaker.deliveryStyle || speaker.whyListen || speaker.whatAddress || speaker.whatLearn || speaker.whatTakeHome || speaker.benefitsIndividual || speaker.benefitsOrganisation) && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
+              {/* Overview of benefits and learning outcomes */}
               <h2 className="text-lg font-semibold mb-4">What You’ll Get</h2>
 
               {(speaker.keyMessage || (Array.isArray(speaker.keyMessages) && speaker.keyMessages.length)) && (
