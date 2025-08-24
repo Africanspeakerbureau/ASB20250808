@@ -96,6 +96,8 @@ export default function SpeakerProfile({ id, speakers = [] }) {
     ? speaker.fields['Expertise Areas']
     : []
 
+  const F = speaker.fields || {}; // exact Airtable field values by name
+
   const shareUrl = `${window.location.origin}/#/speaker/${encodeURIComponent(
     (speaker.slug || speaker.id || '').toLowerCase()
   )}`
@@ -208,10 +210,81 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </div>
           )}
 
-          {(speaker.bio || speaker.achievements || speaker.education) && (
+          {(
+            F['Key Messages'] ||
+            F['Speakers Delivery Style'] ||
+            F['Why the audience should listen to these topics'] ||
+            F['What the speeches will address'] ||
+            F['What participants will learn'] ||
+            F['What the audience will take home'] ||
+            F['Benefits for the individual'] ||
+            F['Benefits for the organisation']
+          ) && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-3">About</h2>
-              {speaker.bio && (
+              <h2 className="text-lg font-semibold mb-4">What You’ll Get</h2>
+
+              {F['Key Messages'] && (
+                <>
+                  <h3 className="font-medium text-gray-900">Key Messages</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{F['Key Messages']}</p>
+                </>
+              )}
+
+              {F['Speakers Delivery Style'] && (
+                <>
+                  <h3 className="font-medium text-gray-900">Delivery Style</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{F['Speakers Delivery Style']}</p>
+                </>
+              )}
+
+              {F['Why the audience should listen to these topics'] && (
+                <>
+                  <h3 className="font-medium text-gray-900">Why This Speaker</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{F['Why the audience should listen to these topics']}</p>
+                </>
+              )}
+
+              {F['What the speeches will address'] && (
+                <>
+                  <h3 className="font-medium text-gray-900">What the speeches will address</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{F['What the speeches will address']}</p>
+                </>
+              )}
+
+              {F['What participants will learn'] && (
+                <>
+                  <h3 className="font-medium text-gray-900">What participants will learn</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{F['What participants will learn']}</p>
+                </>
+              )}
+
+              {F['What the audience will take home'] && (
+                <>
+                  <h3 className="font-medium text-gray-900">What the audience will take home</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{F['What the audience will take home']}</p>
+                </>
+              )}
+
+              {F['Benefits for the individual'] && (
+                <>
+                  <h3 className="font-medium text-gray-900">Benefits: Individual</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{F['Benefits for the individual']}</p>
+                </>
+              )}
+
+              {F['Benefits for the organisation'] && (
+                <>
+                  <h3 className="font-medium text-gray-900">Benefits: Organisation</h3>
+                  <p className="text-gray-700 whitespace-pre-line">{F['Benefits for the organisation']}</p>
+                </>
+              )}
+            </div>
+          )}
+
+        {(speaker.bio || speaker.achievements || speaker.education) && (
+          <div className="rounded-2xl border bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-semibold mb-3">About</h2>
+            {speaker.bio && (
                 <>
                   <h3 className="font-medium text-gray-900">Professional Bio</h3>
                   <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.bio}</p>
