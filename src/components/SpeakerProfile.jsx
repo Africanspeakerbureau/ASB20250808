@@ -207,6 +207,80 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               <p className="text-gray-700 whitespace-pre-line">{speaker.keyMessages}</p>
             </div>
           )}
+          {/* NEW: What You’ll Get (inserted directly below the Key Messages card) */}
+          {(
+            speaker.keyMessage ||
+            speaker.keyMessages ||
+            speaker.deliveryStyle ||
+            speaker.whyListen ||
+            speaker.whatAddress ||
+            speaker.whatLearn ||
+            speaker.whatTakeHome ||
+            speaker.benefitsIndividual ||
+            speaker.benefitsOrganisation
+          ) && (
+            <div className="rounded-2xl border bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">What You’ll Get</h2>
+
+              {(speaker.keyMessage || speaker.keyMessages) && (
+                <>
+                  <h3 className="font-medium text-gray-900">Key Messages</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">
+                    {speaker.keyMessage || speaker.keyMessages}
+                  </p>
+                </>
+              )}
+
+              {speaker.deliveryStyle && (
+                <>
+                  <h3 className="font-medium text-gray-900">Delivery Style</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.deliveryStyle}</p>
+                </>
+              )}
+
+              {speaker.whyListen && (
+                <>
+                  <h3 className="font-medium text-gray-900">Why This Speaker</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whyListen}</p>
+                </>
+              )}
+
+              {speaker.whatAddress && (
+                <>
+                  <h3 className="font-medium text-gray-900">What the speeches will address</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatAddress}</p>
+                </>
+              )}
+
+              {speaker.whatLearn && (
+                <>
+                  <h3 className="font-medium text-gray-900">What participants will learn</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatLearn}</p>
+                </>
+              )}
+
+              {speaker.whatTakeHome && (
+                <>
+                  <h3 className="font-medium text-gray-900">What the audience will take home</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatTakeHome}</p>
+                </>
+              )}
+
+              {speaker.benefitsIndividual && (
+                <>
+                  <h3 className="font-medium text-gray-900">Benefits: Individual</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.benefitsIndividual}</p>
+                </>
+              )}
+
+              {speaker.benefitsOrganisation && (
+                <>
+                  <h3 className="font-medium text-gray-900">Benefits: Organisation</h3>
+                  <p className="text-gray-700 whitespace-pre-line">{speaker.benefitsOrganisation}</p>
+                </>
+              )}
+            </div>
+          )}
 
           {(speaker.bio || speaker.achievements || speaker.education) && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
