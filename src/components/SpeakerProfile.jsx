@@ -200,7 +200,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </section>
           )}
         </aside>
-        <main className="lg:col-span-8 order-2 lg:order-1 space-y-6">
+        <main className="lg:col-span-8 order-2 lg:order-1 lg:mt-2 space-y-6">
           {speaker.keyMessages && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold mb-2">Key Messages</h2>
