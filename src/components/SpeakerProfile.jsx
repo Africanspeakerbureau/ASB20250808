@@ -286,7 +286,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </div>
           )}
 
-          {(speaker.bio || speaker.achievements || speaker.education) && (
+          {(speaker.bio || speaker.notableAchievements || speaker.achievements || speaker.education) && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold mb-3">About</h2>
               {speaker.bio && (
@@ -295,9 +295,15 @@ export default function SpeakerProfile({ id, speakers = [] }) {
                   <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.bio}</p>
                 </>
               )}
+              {speaker.notableAchievements && (
+                <>
+                  <h3 className="font-medium text-gray-900">Notable Achievements</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.notableAchievements}</p>
+                </>
+              )}
               {speaker.achievements && (
                 <>
-                  <h3 className="font-medium text-gray-900">Achievements</h3>
+                  <h3 className="font-medium text-gray-900">Further achievements</h3>
                   <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.achievements}</p>
                 </>
               )}

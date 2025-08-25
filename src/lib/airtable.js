@@ -51,6 +51,16 @@ async function airtableSelectAll(table, params = {}) {
   return all;
 }
 
+export function toSpeaker(record) {
+  const base = normalizeSpeaker(record);
+  const f = record?.fields || {};
+  return {
+    ...base,
+    // About → Notable Achievements
+    notableAchievements: f['Notable Achievements'] || '',
+  };
+}
+
 export async function listSpeakersAll() {
   return await airtableSelectAll(TABLE_SPEAKERS, { pageSize: 50 });
 }
@@ -66,7 +76,7 @@ export async function listSpeakers() {
   return rows
     .map(r => {
       try {
-        return normalizeSpeaker(r);
+        return toSpeaker(r);
       } catch (e) {
         console.error('normalizeSpeaker failed', e);
         return null;
@@ -82,7 +92,7 @@ export async function getSpeakerBySlugOrId(slugOrId) {
     const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` } });
     if (!res.ok) throw new Error(`Airtable get failed: ${res.status}`);
     const rec = await res.json();
-    return normalizeSpeaker(rec);
+    return toSpeaker(rec);
   }
 
   const slug = String(slugOrId).toLowerCase();
@@ -90,13 +100,13 @@ export async function getSpeakerBySlugOrId(slugOrId) {
     filterByFormula: `OR(LOWER({Slug Override}) = "${slug}", LOWER({Slug}) = "${slug}")`,
     pageSize: 1,
   });
-  if (bySlug[0]) return normalizeSpeaker(bySlug[0]);
+  if (bySlug[0]) return toSpeaker(bySlug[0]);
 
   const byName = await airtableSelectAll(TABLE_SPEAKERS, {
     filterByFormula: `LOWER({Full Name}) = "${slug.replace(/-/g, ' ')}"`,
     pageSize: 1,
   });
-  if (byName[0]) return normalizeSpeaker(byName[0]);
+  if (byName[0]) return toSpeaker(byName[0]);
 
   return null;
 }
