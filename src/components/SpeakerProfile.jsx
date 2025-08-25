@@ -209,8 +209,6 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           )}
           {/* NEW: What You’ll Get (inserted directly below the Key Messages card) */}
           {(
-            speaker.keyMessage ||
-            speaker.keyMessages ||
             speaker.deliveryStyle ||
             speaker.whyListen ||
             speaker.whatAddress ||
@@ -221,16 +219,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           ) && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold mb-4">What You’ll Get</h2>
-
-              {(speaker.keyMessage || speaker.keyMessages) && (
-                <>
-                  <h3 className="font-medium text-gray-900">Key Messages</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">
-                    {speaker.keyMessage || speaker.keyMessages}
-                  </p>
-                </>
-              )}
-
+              {/* Key Messages intentionally omitted in What You’ll Get to avoid duplication with the top card */}
               {speaker.deliveryStyle && (
                 <>
                   <h3 className="font-medium text-gray-900">Delivery Style</h3>
