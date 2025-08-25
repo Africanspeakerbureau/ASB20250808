@@ -72,11 +72,22 @@ export function normalizeSpeaker(rec) {
     videos: [video1, video2, video3].filter(Boolean),
 
     // detail fields (kept so profile page has data)
-    keyMessages: f['Key Messages'] || '',
-    keyMessage: f['Key Messages'] || '',
     bio: f['Professional Bio'] || '',
     achievements: f['Achievements'] || '',
     education: f['Education'] || '',
+
+    // --- What You’ll Get (Airtable exact names) ---
+    // Use the exact Airtable field names you provided and expose them as props consumed by SpeakerProfile.jsx
+    keyMessages:          f['Key Messages'] || '',
+    keyMessage:           f['Key Messages'] || '',      // keep both for backward compatibility
+    deliveryStyle:        f['Speakers Delivery Style'] || '',
+    whyListen:            f['Why the audience should listen to these topics'] || '',
+    whatAddress:          f['What the speeches will address'] || '',
+    whatLearn:            f['What participants will learn'] || '',
+    whatTakeHome:         f['What the audience will take home'] || '',
+    benefitsIndividual:   f['Benefits for the individual'] || '',
+    benefitsOrganisation: f['Benefits for the organisation'] || '',
+
     feeRange: f['Fee Range'] || '',
     availability: f['Travel Willingness'] || '',
     travelWillingness: f['Travel Willingness'] || '',
