@@ -271,6 +271,21 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </div>
           )}
 
+          {topics.length > 0 && (
+            <div className="rounded-2xl border bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-semibold mb-3">Speaking Topics</h2>
+              {hasBulletTopics ? (
+                <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                  {topics.map((t, i) => (
+                    <li key={i}>{t}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-700">{topics[0]}</p>
+              )}
+            </div>
+          )}
+
           {(speaker.bio || speaker.achievements || speaker.education) && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <h2 className="text-lg font-semibold mb-3">About</h2>
@@ -295,20 +310,6 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </div>
           )}
 
-          {topics.length > 0 && (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-3">Speaking Topics</h2>
-              {hasBulletTopics ? (
-                <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                  {topics.map((t, i) => (
-                    <li key={i}>{t}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-700">{topics[0]}</p>
-              )}
-            </div>
-          )}
 
           {videos.length > 0 && (
             <section id="videos" className="mt-10">
