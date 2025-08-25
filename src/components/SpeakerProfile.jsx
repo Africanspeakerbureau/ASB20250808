@@ -303,7 +303,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               )}
               {speaker.achievements && (
                 <>
-                  <h3 className="font-medium text-gray-900">Further achievements</h3>
+                  <h3 className="font-medium text-gray-900">Further Achievements</h3>
                   <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.achievements}</p>
                 </>
               )}
