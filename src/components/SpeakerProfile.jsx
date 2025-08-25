@@ -201,10 +201,67 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           )}
         </aside>
         <main className="lg:col-span-8 order-2 lg:order-1 lg:mt-2 space-y-6">
-          {speaker.keyMessages && (
+          {(speaker.keyMessage || speaker.keyMessages?.length || speaker.deliveryStyle || speaker.whyListen || speaker.whatAddress || speaker.whatLearn || speaker.whatTakeHome || speaker.benefitsIndividual || speaker.benefitsOrganisation) && (
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-2">Key Messages</h2>
-              <p className="text-gray-700 whitespace-pre-line">{speaker.keyMessages}</p>
+              <h2 className="text-lg font-semibold mb-4">What You’ll Get</h2>
+
+              {(speaker.keyMessage || (Array.isArray(speaker.keyMessages) && speaker.keyMessages.length)) && (
+                <>
+                  <h3 className="font-medium text-gray-900">Key Messages</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">
+                    {speaker.keyMessage || (Array.isArray(speaker.keyMessages) ? speaker.keyMessages.join('\n') : String(speaker.keyMessages || ''))}
+                  </p>
+                </>
+              )}
+
+              {speaker.deliveryStyle && (
+                <>
+                  <h3 className="font-medium text-gray-900">Delivery Style</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.deliveryStyle}</p>
+                </>
+              )}
+
+              {speaker.whyListen && (
+                <>
+                  <h3 className="font-medium text-gray-900">Why This Speaker</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whyListen}</p>
+                </>
+              )}
+
+              {speaker.whatAddress && (
+                <>
+                  <h3 className="font-medium text-gray-900">What the speeches will address</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatAddress}</p>
+                </>
+              )}
+
+              {speaker.whatLearn && (
+                <>
+                  <h3 className="font-medium text-gray-900">What participants will learn</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatLearn}</p>
+                </>
+              )}
+
+              {speaker.whatTakeHome && (
+                <>
+                  <h3 className="font-medium text-gray-900">What the audience will take home</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatTakeHome}</p>
+                </>
+              )}
+
+              {speaker.benefitsIndividual && (
+                <>
+                  <h3 className="font-medium text-gray-900">Benefits: Individual</h3>
+                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.benefitsIndividual}</p>
+                </>
+              )}
+
+              {speaker.benefitsOrganisation && (
+                <>
+                  <h3 className="font-medium text-gray-900">Benefits: Organisation</h3>
+                  <p className="text-gray-700 whitespace-pre-line">{speaker.benefitsOrganisation}</p>
+                </>
+              )}
             </div>
           )}
           {/* NEW: What You’ll Get (inserted directly below the Key Messages card) */}
@@ -310,53 +367,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </div>
           )}
 
-          {(speaker.whyListen || speaker.whatAddress || speaker.whatLearn || speaker.whatTakeHome || speaker.benefitsIndividual || speaker.benefitsOrganisation || speaker.deliveryStyle) && (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-4">Why booking {speaker.firstName} {speaker.lastName}</h2>
-              {speaker.whyListen && (
-                <>
-                  <h3 className="font-medium text-gray-900">Why the audience should listen</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whyListen}</p>
-                </>
-              )}
-              {speaker.whatAddress && (
-                <>
-                  <h3 className="font-medium text-gray-900">What the speeches will address</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatAddress}</p>
-                </>
-              )}
-              {speaker.whatLearn && (
-                <>
-                  <h3 className="font-medium text-gray-900">What participants will learn</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatLearn}</p>
-                </>
-              )}
-              {speaker.whatTakeHome && (
-                <>
-                  <h3 className="font-medium text-gray-900">What the audience will take home</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.whatTakeHome}</p>
-                </>
-              )}
-              {speaker.benefitsIndividual && (
-                <>
-                  <h3 className="font-medium text-gray-900">Benefits for the individual</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.benefitsIndividual}</p>
-                </>
-              )}
-              {speaker.benefitsOrganisation && (
-                <>
-                  <h3 className="font-medium text-gray-900">Benefits for the organisation</h3>
-                  <p className="text-gray-700 whitespace-pre-line mb-4">{speaker.benefitsOrganisation}</p>
-                </>
-              )}
-              {speaker.deliveryStyle && (
-                <>
-                  <h3 className="font-medium text-gray-900">Speaker’s delivery style</h3>
-                  <p className="text-gray-700 whitespace-pre-line">{speaker.deliveryStyle}</p>
-                </>
-              )}
-            </div>
-          )}
+
 
           {videos.length > 0 && (
             <section id="videos" className="mt-10">
