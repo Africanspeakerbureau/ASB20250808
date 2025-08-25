@@ -189,7 +189,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           </section>
           {expertiseAreas.length > 0 && (
             <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mt-4">
-              <h2 className="text-2xl md:text-3xl font-semibold">Expertise areas</h2>
+              <h2 className="text-2xl md:text-3xl font-semibold">Expertise Areas</h2>
               <div className="flex flex-wrap gap-2 mt-2">
                 {expertiseAreas.map(tag => (
                   <span key={tag} className="inline-block rounded-full px-3 py-1 text-sm border">
