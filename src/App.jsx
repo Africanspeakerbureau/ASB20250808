@@ -6,6 +6,8 @@ import SpeakerProfile from './components/SpeakerProfile'
 import PlanYourEvent from './sections/PlanYourEvent'
 import HomeInsights from './site/home/HomeInsights'
 import BookingForm from './components/BookingForm'
+import SectionTitle from '@/components/SectionTitle'
+import BottomCta from '@/components/BottomCta'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { getLocationAndRate } from './lib/geo.js'
@@ -2389,7 +2391,7 @@ function App() {
           {/* Service Navigation Tabs */}
           <div
             role="tablist"
-            className="flex flex-wrap gap-2 sticky top-[64px] z-20 bg-white py-2 mb-12"
+            className="flex flex-wrap items-center justify-center gap-2 py-2 sticky top-[64px] z-20 bg-white"
             style={{ borderBottom: '1px solid var(--asb-border)' }}
           >
             {serviceButtons.map((service) => {
@@ -2423,21 +2425,17 @@ function App() {
             className="scroll-mt-24 max-w-6xl mx-auto py-12"
           >
             <div className="mb-8">
-              <div className={`border-l-4 border-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-500 pl-6`}>
-                <h2 className={`text-3xl font-bold text-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-600 mb-4`}>
-                  {currentService.title}
-                </h2>
-                <p className="text-lg text-gray-700 leading-relaxed">
-                  {currentService.description}
-                </p>
-              </div>
+              <SectionTitle>{currentService.title}</SectionTitle>
+              <p className="mt-4 text-lg text-gray-700 leading-relaxed">
+                {currentService.description}
+              </p>
             </div>
 
             {/* Two-column content for keynote speakers */}
             {selectedService === 'keynote-speakers' && currentService.sections && (
               <div className="grid md:grid-cols-2 gap-5 mb-12">
                 <div>
-                  <h3 className="text-2xl font-bold text-blue-600 mb-6">{currentService.sections.left.title}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">{currentService.sections.left.title}</h3>
                   <div className="space-y-6">
                     {currentService.sections.left.items.map((item, index) => (
                       <div key={index} className="border-l-4 border-blue-200 pl-4">
@@ -2448,7 +2446,7 @@ function App() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-blue-600 mb-6">{currentService.sections.right.title}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">{currentService.sections.right.title}</h3>
                   <div className="space-y-4">
                     {currentService.sections.right.items.map((item, index) => (
                       <div key={index}>
@@ -2482,42 +2480,9 @@ function App() {
           </section>
 
           {/* Call to Action Section */}
-          <section
-            className="py-12 text-white mt-12"
-            style={{
-              background: 'linear-gradient(90deg, var(--asb-footer), var(--asb-blue-800))',
-              borderRadius: '16px'
-            }}
-          >
-            <div className="mx-auto max-w-6xl px-4">
-              <h2 className="text-2xl md:text-3xl font-bold">
-                Ready to transform your organization?
-              </h2>
-              <p className="mt-3 text-sm md:text-base opacity-90">
-                Keynotes, panels, boardroom consulting, workshops, virtual events, leadership coaching.
-              </p>
-              <div className="mt-6 flex gap-3 flex-wrap">
-                <a
-                  href="/contact#consult"
-                  className="rounded-xl bg-white px-4 py-2.5 font-semibold"
-                  style={{ color: 'var(--asb-blue-800)' }}
-                >
-                  Schedule consultation
-                </a>
-                <a
-                  href="/speakers"
-                  className="rounded-xl border px-4 py-2.5 font-semibold"
-                  style={{ borderColor: '#FFFFFF', color: '#FFFFFF' }}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setCurrentPage('find-speakers')
-                  }}
-                >
-                  Browse speakers
-                </a>
-              </div>
-            </div>
-          </section>
+          <div className="mt-12">
+            <BottomCta />
+          </div>
         </div>
         {banner}
       </div>
