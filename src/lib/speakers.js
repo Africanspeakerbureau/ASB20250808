@@ -17,15 +17,20 @@ export function normalizeSpeaker(rec) {
   const published = status.includes("Published on Site");
   const profile = arr(f["Profile Image"])[0];
   const photoUrl = profile?.thumbnails?.large?.url || profile?.url || "";
-  const fullName = (f["Full Name"] || `${f["First Name"] || ""} ${f["Last Name"] || ""}`).trim();
-  const title = (f["Professional Title"] || f["Title"] || "").toString().trim();
+  const firstName = (f["First Name"] || "").toString().trim();
+  const lastName = (f["Last Name"] || "").toString().trim();
+  const fullName = (f["Full Name"] || `${firstName} ${lastName}`).trim();
+  const honorific = (f["Title"] || "").toString().trim();
+  const professionalTitle = (f["Professional Title"] || "").toString().trim();
   return {
     id: rec.id,
     slug: (f["Slug"] || "").toString().trim().toLowerCase(),
     fullName,
     name: fullName,
-    title,
-    professionalTitle: title,
+    firstName,
+    lastName,
+    title: honorific,
+    professionalTitle,
     country: (f["Country"] || "").toString().trim(),
     languages: arr(f["Spoken Languages"]),
     spokenLanguages: arr(f["Spoken Languages"]),
