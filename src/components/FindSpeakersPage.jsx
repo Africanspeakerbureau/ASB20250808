@@ -61,7 +61,7 @@ function SearchCard({ s }) {
   )
 }
 
-export default function FindSpeakersPage({ countryCode = 'ZA', currency = 'ZAR' } = {}) {
+export default function FindSpeakersPage() {
   const [all, setAll] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

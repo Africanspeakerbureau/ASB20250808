@@ -3,10 +3,24 @@ import React from 'react';
 export default function SpeakerCard({ speaker, variant = 'search' }) {
   const s = speaker || {};
   const img = s.photoUrl || s.photo || null;
-  const langsArr = s.spokenLanguages || s.languages || [];
-  const langs = Array.isArray(langsArr) ? langsArr.join(', ') : String(langsArr);
-  const cityCountry = [s.location, s.country].filter(Boolean).join(', ');
-  const locLang = [cityCountry, langs].filter(Boolean).join(' | ');
+  // Compose City, Region, Country with graceful fallback
+  const locationLabel = [s.city || s.location, s.regionOrProvince, s.country]
+    .filter(Boolean)
+    .join(', ');
+  // Normalize languages from arrays or comma-separated strings
+  const langsRaw = Array.isArray(s.spokenLanguages) && s.spokenLanguages.length
+    ? s.spokenLanguages
+    : Array.isArray(s.languages)
+    ? s.languages
+    : typeof s.spokenLanguages === 'string'
+    ? s.spokenLanguages.split(',').map((v) => v.trim()).filter(Boolean)
+    : typeof s.languages === 'string'
+    ? s.languages.split(',').map((v) => v.trim()).filter(Boolean)
+    : [];
+  const languagesLabel = langsRaw.join(', ');
+  const locLang = [locationLabel, languagesLabel].filter(Boolean).join(' | ');
+  const hasLocation = Boolean(locationLabel);
+  const hasLanguages = Boolean(languagesLabel);
   const kmFull = s.keyMessage || s.keyMessages || '';
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
@@ -18,6 +32,47 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
     window.history.pushState({}, '', profilePath);
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
+
+  // ===== Featured (homepage grid) =====
+  if (variant === 'featured') {
+    return (
+      <a
+        href={profilePath}
+        onClick={go}
+        className="rounded-2xl border border-[#E5E7EB] overflow-hidden min-h-[320px] flex flex-col bg-white"
+      >
+        <div className="aspect-[4/3] w-full bg-gray-100">
+          {img ? (
+            <img
+              src={img}
+              alt={s.name}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full grid place-items-center text-gray-400 text-sm">No image</div>
+          )}
+        </div>
+        <div className="p-4 flex-1">
+          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-center text-[#0A0A0A]">
+            {s.name}
+          </h3>
+          {(hasLocation || hasLanguages) && (
+            <p className="mt-1 text-xs sm:text-sm text-center text-[#4B5563] leading-snug">
+              {hasLocation && <span>{locationLabel}</span>}
+              {hasLocation && hasLanguages && <span className="mx-1">|</span>}
+              {hasLanguages && <span>{languagesLabel}</span>}
+            </p>
+          )}
+          {professionalTitle && (
+            <p className="mt-3 text-base md:text-lg font-medium text-center leading-normal text-[#0A0A0A]">
+              {professionalTitle}
+            </p>
+          )}
+        </div>
+      </a>
+    );
+  }
 
   // ===== Search page card (bigger, like your mockup) =====
   if (variant === 'search') {
