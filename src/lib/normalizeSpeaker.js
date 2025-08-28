@@ -27,9 +27,13 @@ export function normalizeSpeaker(rec) {
     headerAtt?.url ||
     '';
 
-  const video1 = f['Video Link 1'] || '';
-  const video2 = f['Video Link 2'] || '';
-  const video3 = f['Video Link 3'] || '';
+  const videos = [
+    f['Video Link 1'],
+    f['Video Link 2'],
+    f['Video Link 3'],
+  ]
+    .map(v => (v || '').toString().trim())
+    .filter(Boolean);
 
   const firstName = (f['First Name'] || '').trim();
   const lastName  = (f['Last Name'] || '').trim();
@@ -70,7 +74,7 @@ export function normalizeSpeaker(rec) {
     featured,
     photoUrl,
     headerUrl,
-    videos: [video1, video2, video3].filter(Boolean),
+    videos,
 
     // detail fields (kept so profile page has data)
     bio: f['Professional Bio'] || '',
