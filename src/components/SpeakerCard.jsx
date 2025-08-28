@@ -54,16 +54,20 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           )}
         </div>
         <div className="p-4 flex-1">
-          <h3 className="text-lg font-semibold text-[#0A0A0A]">{s.name}</h3>
+          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-center text-[#0A0A0A]">
+            {s.name}
+          </h3>
           {(hasLocation || hasLanguages) && (
-            <p className="mt-1 text-sm leading-6 text-[#4B5563]">
+            <p className="mt-1 text-xs sm:text-sm text-center text-[#4B5563] leading-snug">
               {hasLocation && <span>{locationLabel}</span>}
               {hasLocation && hasLanguages && <span className="mx-1">|</span>}
               {hasLanguages && <span>{languagesLabel}</span>}
             </p>
           )}
           {professionalTitle && (
-            <p className="mt-1 text-sm text-[#4B5563]">{professionalTitle}</p>
+            <p className="mt-3 text-base md:text-lg font-medium text-center leading-normal text-[#0A0A0A]">
+              {professionalTitle}
+            </p>
           )}
         </div>
       </a>

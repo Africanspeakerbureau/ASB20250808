@@ -41,7 +41,7 @@ const CARD_COMPONENTS = {
   contact: ContactAdminCardPublic,
 };
 
-export default function ApplyBeta({ countryCode = "ZA", currency = "ZAR" }) {
+export default function ApplyBeta() {
   const DRAFT_KEY = "asbApplyDraft:v1";
   const [tab, setTab] = React.useState("identity");
   const [form, setForm] = React.useState(() => {
