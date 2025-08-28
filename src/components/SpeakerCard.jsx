@@ -19,6 +19,39 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
+  // ===== Featured (homepage grid) =====
+  if (variant === 'featured') {
+    return (
+      <a
+        href={profilePath}
+        onClick={go}
+        className="rounded-2xl border border-[#E5E7EB] overflow-hidden min-h-[320px] flex flex-col bg-white"
+      >
+        <div className="aspect-[4/3] w-full bg-gray-100">
+          {img ? (
+            <img
+              src={img}
+              alt={s.name}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full grid place-items-center text-gray-400 text-sm">No image</div>
+          )}
+        </div>
+        <div className="p-4 flex-1">
+          <h3 className="text-lg font-semibold text-[#0A0A0A]">{s.name}</h3>
+          {professionalTitle && (
+            <p className="mt-1 text-sm text-[#4B5563]">{professionalTitle}</p>
+          )}
+          {!professionalTitle && locLang && (
+            <p className="mt-1 text-sm text-[#4B5563]">{locLang}</p>
+          )}
+        </div>
+      </a>
+    );
+  }
+
   // ===== Search page card (bigger, like your mockup) =====
   if (variant === 'search') {
     return (
