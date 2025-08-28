@@ -28,12 +28,27 @@ export default function FeaturedSpeakers() {
       <div className="mx-auto max-w-[1280px] px-6 grid grid-cols-12 gap-x-8 gap-y-10">
         <div className="col-span-12 lg:col-span-5">
           <h2 className="text-3xl font-semibold mb-4 text-center md:text-left">Featured Speakers</h2>
-          <p className="text-gray-700 text-center md:text-left">
-            We are the exclusive gateway to authentic African expertise, connecting global audiences with the continent’s most compelling voices who bring unparalleled insights and transformative perspectives.
-          </p>
-          <p className="mt-3 text-gray-500 italic text-center md:text-left">
-            Please note: This website is still in development — be part of the beta launch of ASB’s new virtual home.
-          </p>
+          <div className="space-y-4 text-foreground">
+            <p className="text-base md:text-lg leading-7">
+              The African Speaker Bureau connects decision-makers with credible African voices who deliver <strong>leadership insights, market intelligence, and change-making stories</strong> to the room — context your executives can act on. We pair authentic African context with global standards — rapid shortlists, transparent pricing, clear contracting, travel coordination and post-event materials.
+            </p>
+
+            <blockquote className="border-l-2 border-muted pl-4 text-base md:text-lg leading-7">
+              “The great powers of the world may have done wonders in giving the world an industrial look, but the great gift still has to come from Africa – giving the world a more human face.”<br />— <strong>Steve Biko</strong>
+            </blockquote>
+
+            <p className="text-base md:text-lg leading-7">
+              We build on that belief. We curate speakers who pair commercial rigour with a deeply human perspective — and we manage every engagement end-to-end: rapid shortlists, transparent pricing, clear contracting, travel coordination and post-event materials.
+            </p>
+
+            <p className="text-base md:text-lg leading-7">
+              Choose ASB for <strong>authentic African context with global standards</strong> — reliable delivery, real-world outcomes, and voices your leaders will remember long after the event.
+            </p>
+
+            <p className="text-sm italic text-muted mt-2">
+              This site is in active development — thanks for being part of ASB’s beta launch.
+            </p>
+          </div>
           <div className="flex justify-center md:justify-start mt-6">
             <Link
               to="/find-speakers"
