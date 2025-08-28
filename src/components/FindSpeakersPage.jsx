@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { listSpeakers } from '../lib/airtable'
+import { getDisplayName } from '@/utils/displayName'
 
 // Compact, search-variant card (square image)
 function SearchCard({ s }) {
@@ -14,19 +15,21 @@ function SearchCard({ s }) {
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
+  const name = getDisplayName(s)
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col items-center text-center">
       <a href={profilePath} onClick={go} className="w-40 h-40 rounded-xl overflow-hidden bg-gray-100 mb-6">
       {s.photoUrl
-        ? <img src={s.photoUrl} alt={s.name} className="w-full h-full object-cover" />
+        ? <img src={s.photoUrl} alt={name} className="w-full h-full object-cover" />
         : <div className="w-full h-full grid place-items-center text-gray-400 text-sm">No Image</div>
       }
       </a>
 
       <h3 className="text-xl font-semibold">
-        <a href={profilePath} onClick={go}>{s.name}</a>
+        <a href={profilePath} onClick={go}>{name}</a>
       </h3>
-      {s.title && <p className="text-gray-600 mt-1">{s.title}</p>}
+      {s.professionalTitle && <p className="text-gray-600 mt-1">{s.professionalTitle}</p>}
       {locLang && <p className="text-gray-500 mt-1 text-sm">{locLang}</p>}
 
       { (s.keyMessage || s.keyMessages) && (
@@ -53,7 +56,7 @@ function SearchCard({ s }) {
         href={profilePath}
         onClick={go}
         className="mt-6 inline-block px-5 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700"
-        aria-label={`View ${s.name}'s profile`}
+        aria-label={`View ${name}'s profile`}
       >
         View Profile
       </a>
@@ -118,7 +121,7 @@ export default function FindSpeakersPage() {
 
       if (text) {
         const hay = [
-          s.name, s.title, (s.keyMessage || s.keyMessages || ''),
+          getDisplayName(s), s.professionalTitle, (s.keyMessage || s.keyMessages || ''),
           (s.expertise || []).join(' '),
           s.location, s.country, (s.languages || s.spokenLanguages || []).join(' ')
         ].join(' ').toLowerCase()

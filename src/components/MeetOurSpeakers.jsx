@@ -1,4 +1,5 @@
 import React from "react";
+import { getDisplayName } from '@/utils/displayName';
 
 /**
  * MeetOurSpeakers
@@ -13,11 +14,7 @@ import React from "react";
 export default function MeetOurSpeakers({ speakers = [] }) {
   const items = Array.isArray(speakers) ? speakers.slice(0, 8) : [];
 
-  const getName = (s) =>
-    s.fullName ||
-    s.name ||
-    [s.title, s.firstName, s.lastName].filter(Boolean).join(" ") ||
-    "Unnamed Speaker";
+  const getName = (s) => getDisplayName(s) || s.name || s.fullName || "Unnamed Speaker";
 
   const getPhoto = (s) =>
     s.photoUrl ||

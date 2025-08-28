@@ -4,6 +4,7 @@ import { listSpeakersAll } from '@/lib/airtable';
 import { getAllPublishedSpeakersCached, computeRelatedSpeakers } from '@/lib/speakers';
 import VideoEmbed from './VideoEmbed'
 import QuickFacts from './QuickFacts'
+import { getDisplayName } from '@/utils/displayName';
 
 function asList(str) {
   if (!str) return []
@@ -86,7 +87,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
     )
   }
 
-  const fullName = [speaker.titlePrefix, speaker.firstName, speaker.lastName].filter(Boolean).join(' ')
+  const fullName = getDisplayName(speaker)
   const topics = asList(speaker.topics || speaker.speakingTopics)
   const hasBulletTopics = topics.length > 1
   const videos = speaker.videos || []
@@ -103,7 +104,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
   const onShare = async () => {
     try {
       const shareData = {
-        title: `${fullName || speaker.title || 'ASB Speaker'}`,
+        title: `${fullName || speaker.professionalTitle || 'ASB Speaker'}`,
         text: 'Check out this speaker from African Speaker Bureau',
         url: shareUrl,
       }
@@ -140,8 +141,8 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           )}
           <div className="flex-1">
             <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">{fullName}</h1>
-            {speaker.title && (
-              <p className="mt-1 text-base md:text-lg text-slate-600">{speaker.title}</p>
+            {speaker.professionalTitle && (
+              <p className="mt-1 text-base md:text-lg text-slate-600">{speaker.professionalTitle}</p>
             )}
 
             <div className="flex flex-wrap gap-2 mt-3">
@@ -341,7 +342,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               <h2 className="text-lg font-semibold mb-4">Related speakers</h2>
               <div className="grid md:grid-cols-3 gap-4">
                 {related.map(s => (
-                  <SpeakerCard key={s.id} speaker={{ ...s, name: s.fullName, spokenLanguages: s.languages, expertiseAreas: s.expertise }} variant="compact" />
+                  <SpeakerCard key={s.id} speaker={{ ...s, name: getDisplayName(s), spokenLanguages: s.languages, expertiseAreas: s.expertise }} variant="compact" />
                 ))}
               </div>
             </section>

@@ -34,6 +34,7 @@ export function normalizeSpeaker(rec) {
   const firstName = (f['First Name'] || '').trim();
   const lastName  = (f['Last Name'] || '').trim();
   const fullName  = (f['Full Name'] || `${firstName} ${lastName}`).trim();
+  const honorific = (f['Title'] || '').trim();
 
   const slugFormula = (f['Slug'] || '').toString().trim();
   const slugOverride = (f['Slug Override'] || '').toString().trim();
@@ -59,7 +60,7 @@ export function normalizeSpeaker(rec) {
     fullName,
     firstName,
     lastName,
-    title: f['Professional Title'] || '',
+    title: honorific,
     professionalTitle: f['Professional Title'] || '',
     company: f['Company'] || '',
     country,

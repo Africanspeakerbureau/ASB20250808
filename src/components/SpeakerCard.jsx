@@ -1,8 +1,10 @@
 import React from 'react';
+import { getDisplayName } from '@/utils/displayName';
 
 export default function SpeakerCard({ speaker, variant = 'search' }) {
   const s = speaker || {};
   const img = s.photoUrl || s.photo || null;
+  const displayName = getDisplayName(s);
   // Compose City, Region, Country with graceful fallback
   const locationLabel = [s.city || s.location, s.regionOrProvince, s.country]
     .filter(Boolean)
@@ -22,7 +24,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const kmFull = s.keyMessage || s.keyMessages || '';
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
-  const professionalTitle = s.professionalTitle || s.title;
+  const professionalTitle = s.professionalTitle || s.titleText;
   const key = (s.slug || s.id || '').toLowerCase();
   const profilePath = `#/speaker/${encodeURIComponent(key)}`;
   const go = (e) => {
@@ -44,7 +46,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           {img ? (
             <img
               src={img}
-              alt={s.name}
+              alt={displayName}
               loading="lazy"
               className="h-full w-full object-cover"
             />
@@ -54,7 +56,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
         </div>
         <div className="p-4">
           <h3 className="text-[16px] font-semibold text-gray-900 group-hover:underline">
-            {s.name}
+            {displayName}
           </h3>
           {locLang && (
             <p className="mt-1 text-xs text-gray-500">{locLang}</p>
@@ -78,7 +80,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
             {img ? (
               <img
                 src={img}
-                alt={s.name}
+                alt={displayName}
                 loading="lazy"
                 className="w-full h-full object-cover"
               />
@@ -89,7 +91,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
         </div>
 
         <h3 className="text-lg font-semibold text-center mt-4">
-          <a href={profilePath} onClick={go}>{s.name}</a>
+          <a href={profilePath} onClick={go}>{displayName}</a>
         </h3>
         {locLang && <p className="text-sm text-center text-gray-600">{locLang}</p>}
         {professionalTitle && (
@@ -117,7 +119,7 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
             href={profilePath}
             onClick={go}
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-5 rounded-lg"
-            aria-label={`View ${s.name}'s profile`}
+            aria-label={`View ${displayName}'s profile`}
           >
             View Profile
           </a>
@@ -134,16 +136,16 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           <div className="w-full flex justify-center">
             {img ? (
               <img
-                src={img}
-                alt={s.name}
-                loading="lazy"
-                className="w-28 h-28 object-cover rounded-lg"
-              />
+              src={img}
+              alt={displayName}
+              loading="lazy"
+              className="w-28 h-28 object-cover rounded-lg"
+            />
             ) : (
               <div className="w-28 h-28 rounded-lg bg-gray-100 grid place-items-center text-gray-400 text-xs">No image</div>
             )}
           </div>
-          <h3 className="text-base font-semibold text-center mt-3">{s.name}</h3>
+          <h3 className="text-base font-semibold text-center mt-3">{displayName}</h3>
           {locLang && <p className="text-xs text-center text-gray-600">{locLang}</p>}
           {professionalTitle && (
             <p className="text-sm text-center text-gray-800 mt-1">{professionalTitle}</p>
