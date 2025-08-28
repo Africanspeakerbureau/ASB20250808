@@ -32,10 +32,10 @@ export default function MeetOurSpeakers() {
   }, [])
 
   return (
-    <section className="py-12 md:py-16">
-      <div className="container mx-auto px-4">
-        <header className="mb-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-semibold">Meet Our Speakers</h2>
+    <section className="section" style={{ background: 'var(--asb-surface)' }}>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <header className="text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">Meet Our Speakers</h2>
           <p className="text-gray-500 mt-2">Voices That Inspire</p>
         </header>
 
@@ -44,14 +44,14 @@ export default function MeetOurSpeakers() {
           <p className="text-gray-400">No speakers available at the moment.</p>
         )}
         {!error && items.length > 0 && (
-          <div className="grid gap-8 grid-cols-2 md:grid-cols-4 lg:grid-cols-4 justify-items-center lg:justify-items-stretch">
+          <div className="grid gap-5 grid-cols-2 md:grid-cols-4 lg:grid-cols-4 justify-items-center lg:justify-items-stretch">
             {items.map((s) => (
               <SpeakerCard key={s.id} speaker={s} variant="compact" />
             ))}
           </div>
         )}
 
-        <div className="mt-8 flex justify-center">
+        <div className="mt-6 flex justify-center">
           <a
             href="/#/find-speakers"
             className="inline-flex items-center px-5 py-3 rounded-lg border border-slate-300 hover:bg-slate-50"

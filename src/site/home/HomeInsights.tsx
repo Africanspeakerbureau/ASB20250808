@@ -3,14 +3,6 @@ import { Link } from 'react-router-dom';
 import { listFeaturedPosts } from '../../lib/airtable';
 import { pickBlogThumb } from '../../lib/blogMedia';
 
-const TOKENS = {
-  surface: '#F3F5F9',
-  navy:    '#1E3A8A',
-  border:  '#E5E7EB',
-  text:    '#0A0A0A',
-  muted:   '#4B5563',
-};
-
 export default function HomeInsights() {
   const [items, setItems] = useState<any[] | null>(null);
 
@@ -22,19 +14,20 @@ export default function HomeInsights() {
   }, []);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold tracking-tight">Insights from Our Speakers</h2>
-        <p className="mt-2 text-lg" style={{ color: TOKENS.muted }}>
-          Latest videos and articles from our thought leaders
-        </p>
-      </div>
+    <section className="section bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold mb-4">Insights from Our Speakers</h2>
+          <p className="text-lg" style={{ color: 'var(--asb-muted)' }}>
+            Latest videos and articles from our thought leaders
+          </p>
+        </div>
 
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {(items || [null, null]).slice(0, 2).map((it, idx) => {
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+          {(items || [null, null]).slice(0, 2).map((it, idx) => {
           if (!it) {
             return (
-              <div key={idx} className="rounded-3xl overflow-hidden bg-white border" style={{ borderColor: TOKENS.border }}>
+              <div key={idx} className="rounded-3xl overflow-hidden bg-white border" style={{ borderColor: 'var(--asb-border)' }}>
                 <div className="h-56 bg-gray-100" />
                 <div className="p-6">
                   <div className="h-6 w-2/3 bg-gray-100 rounded mb-2" />
@@ -52,14 +45,14 @@ export default function HomeInsights() {
               to={`/blog/${it.Slug || ''}`}
               key={it.id}
               className="rounded-3xl overflow-hidden bg-white border block hover:shadow-sm transition"
-              style={{ borderColor: TOKENS.border }}
+              style={{ borderColor: 'var(--asb-border)' }}
             >
               <div className="h-56 relative bg-gray-100">
                 {img && <img src={img} alt="" className="h-full w-full object-cover" loading="lazy" />}
                 <span className="absolute inset-0 flex items-center justify-center">
                   <span
                     className="inline-flex h-14 w-14 items-center justify-center rounded-full"
-                    style={{ backgroundColor: isVideo ? '#2563EB' : '#16A34A' }}
+                    style={{ backgroundColor: isVideo ? 'var(--asb-blue-600)' : '#16A34A' }}
                   >
                     {/* play or lines icon */}
                     {isVideo ? (
@@ -71,12 +64,13 @@ export default function HomeInsights() {
                 </span>
               </div>
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900">{it.Name}</h3>
-                {it.Excerpt && <p className="mt-2 text-[15px]" style={{ color: TOKENS.muted }}>{it.Excerpt}</p>}
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--asb-text)' }}>{it.Name}</h3>
+                {it.Excerpt && <p className="mt-2 text-[15px]" style={{ color: 'var(--asb-muted)' }}>{it.Excerpt}</p>}
               </div>
             </Link>
           );
         })}
+        </div>
       </div>
     </section>
   );

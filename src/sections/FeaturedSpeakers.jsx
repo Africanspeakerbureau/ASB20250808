@@ -24,8 +24,8 @@ export default function FeaturedSpeakers() {
   }, []);
 
   return (
-    <section id="featured-speakers" className="py-12">
-      <div className="mx-auto max-w-[1280px] px-6 grid grid-cols-12 gap-x-8 gap-y-10">
+    <section id="featured-speakers" className="section bg-white">
+      <div className="mx-auto max-w-[1280px] px-6 grid grid-cols-12 gap-x-8 gap-y-8">
         <div className="col-span-12 lg:col-span-5">
           <h2 className="text-3xl font-semibold mb-4 text-center md:text-left">Featured Speakers</h2>
           <div className="space-y-4 text-foreground">
@@ -65,7 +65,7 @@ export default function FeaturedSpeakers() {
             <p className="text-gray-400">No speakers available at the moment.</p>
           )}
           {!error && items.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {items.map((s) => (
                 <SpeakerCard key={s.id} speaker={s} variant="featured" />
               ))}
