@@ -2366,12 +2366,12 @@ function App() {
     }
 
     const serviceButtons = [
-      { id: 'keynote-speakers', label: 'Keynote Speakers', color: 'bg-blue-500' },
-      { id: 'panel-discussions', label: 'Panel Discussions', color: 'bg-green-500' },
-      { id: 'boardroom-consulting', label: 'Boardroom Consulting', color: 'bg-purple-500' },
-      { id: 'workshop-facilitators', label: 'Workshop Facilitators', color: 'bg-orange-500' },
-      { id: 'virtual-events', label: 'Virtual Events', color: 'bg-teal-500' },
-      { id: 'leadership-coaching', label: 'Leadership Coaching', color: 'bg-red-500' }
+      { id: 'keynote-speakers', label: 'Keynote Speakers' },
+      { id: 'panel-discussions', label: 'Panel Discussions' },
+      { id: 'boardroom-consulting', label: 'Boardroom Consulting' },
+      { id: 'workshop-facilitators', label: 'Workshop Facilitators' },
+      { id: 'virtual-events', label: 'Virtual Events' },
+      { id: 'leadership-coaching', label: 'Leadership Coaching' }
     ]
 
     const currentService = services[selectedService]
@@ -2386,25 +2386,42 @@ function App() {
             <p className="text-xl text-gray-600">Comprehensive speaking solutions tailored to your unique needs</p>
           </div>
 
-          {/* Service Navigation Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {serviceButtons.map((service) => (
-              <button
-                key={service.id}
-                onClick={() => setSelectedService(service.id)}
-                className={`px-6 py-3 rounded-lg text-white font-medium transition-all ${
-                  selectedService === service.id 
-                    ? `${service.color} shadow-lg scale-105` 
-                    : `${service.color} opacity-70 hover:opacity-100`
-                }`}
-              >
-                {service.label}
-              </button>
-            ))}
+          {/* Service Navigation Tabs */}
+          <div
+            role="tablist"
+            className="flex flex-wrap gap-2 sticky top-[64px] z-20 bg-white py-2 mb-12"
+            style={{ borderBottom: '1px solid var(--asb-border)' }}
+          >
+            {serviceButtons.map((service) => {
+              const active = service.id === selectedService
+              return (
+                <button
+                  key={service.id}
+                  onClick={() => setSelectedService(service.id)}
+                  role="tab"
+                  aria-selected={active}
+                  className="rounded-full px-4 py-2 text-sm"
+                  style={{
+                    color: active ? 'var(--asb-blue-800)' : 'var(--asb-muted)',
+                    background: active ? '#EAEEFE' : '#FFFFFF',
+                    border: '1px solid var(--asb-border)'
+                  }}
+                >
+                  {service.label}
+                  <span
+                    className="block h-[2px] mt-2"
+                    style={{ background: active ? 'var(--asb-blue-600)' : 'transparent' }}
+                  />
+                </button>
+              )
+            })}
           </div>
 
           {/* Service Content */}
-          <section id={serviceToHash[selectedService]} className="scroll-mt-24 max-w-6xl mx-auto">
+          <section
+            id={serviceToHash[selectedService]}
+            className="scroll-mt-24 max-w-6xl mx-auto py-12"
+          >
             <div className="mb-8">
               <div className={`border-l-4 border-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-500 pl-6`}>
                 <h2 className={`text-3xl font-bold text-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-600 mb-4`}>
@@ -2418,7 +2435,7 @@ function App() {
 
             {/* Two-column content for keynote speakers */}
             {selectedService === 'keynote-speakers' && currentService.sections && (
-              <div className="grid md:grid-cols-2 gap-12 mb-12">
+              <div className="grid md:grid-cols-2 gap-5 mb-12">
                 <div>
                   <h3 className="text-2xl font-bold text-blue-600 mb-6">{currentService.sections.left.title}</h3>
                   <div className="space-y-6">
@@ -2445,32 +2462,62 @@ function App() {
             )}
 
             {/* Investment Section */}
-            <div className={`bg-${currentService.color === 'blue' ? 'blue' : currentService.color === 'green' ? 'green' : currentService.color === 'purple' ? 'purple' : currentService.color === 'orange' ? 'orange' : currentService.color === 'teal' ? 'teal' : 'red'}-500 text-white rounded-xl p-8 mb-12`}>
-              <h3 className="text-2xl font-bold mb-4">{currentService.investment.title}</h3>
-              <p className="text-lg mb-6 opacity-90">
+            <div
+              className="rounded-2xl border p-5 md:p-6 bg-[color:var(--asb-surface)] mb-12"
+              style={{ borderColor: 'var(--asb-border)' }}
+            >
+              <h3 className="text-lg font-semibold text-gray-900">
+                {currentService.investment.title}
+              </h3>
+              <p className="mt-2 text-gray-700">
                 {currentService.investment.description}
               </p>
-              <Button className="bg-white text-gray-900 hover:bg-gray-100">
+              <a
+                href="#inquiry"
+                className="mt-4 inline-flex rounded-xl bg-[color:var(--asb-blue-600)] px-4 py-2.5 text-white font-semibold"
+              >
                 {currentService.investment.cta}
-              </Button>
+              </a>
             </div>
           </section>
 
           {/* Call to Action Section */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-12 text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Organization?</h2>
-            <p className="text-xl mb-8 opacity-90">
-              Whether you need a keynote speaker, panel discussion, boardroom consulting, workshop facilitation, virtual event, or leadership coaching, our African experts are ready to deliver exceptional value and transformational insights for your organization.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3">
-                Schedule Consultation
-              </Button>
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3" onClick={() => setCurrentPage('find-speakers')}>
-                Browse Our Speakers
-              </Button>
+          <section
+            className="py-12 text-white mt-12"
+            style={{
+              background: 'linear-gradient(90deg, var(--asb-footer), var(--asb-blue-800))',
+              borderRadius: '16px'
+            }}
+          >
+            <div className="mx-auto max-w-6xl px-4">
+              <h2 className="text-2xl md:text-3xl font-bold">
+                Ready to transform your organization?
+              </h2>
+              <p className="mt-3 text-sm md:text-base opacity-90">
+                Keynotes, panels, boardroom consulting, workshops, virtual events, leadership coaching.
+              </p>
+              <div className="mt-6 flex gap-3 flex-wrap">
+                <a
+                  href="/contact#consult"
+                  className="rounded-xl bg-white px-4 py-2.5 font-semibold"
+                  style={{ color: 'var(--asb-blue-800)' }}
+                >
+                  Schedule consultation
+                </a>
+                <a
+                  href="/speakers"
+                  className="rounded-xl border px-4 py-2.5 font-semibold"
+                  style={{ borderColor: '#FFFFFF', color: '#FFFFFF' }}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setCurrentPage('find-speakers')
+                  }}
+                >
+                  Browse speakers
+                </a>
+              </div>
             </div>
-          </div>
+          </section>
         </div>
         {banner}
       </div>
