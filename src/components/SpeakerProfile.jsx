@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import SpeakerCard from './SpeakerCard';
 import { listSpeakersAll } from '@/lib/airtable';
 import { getAllPublishedSpeakersCached, computeRelatedSpeakers } from '@/lib/speakers';
-import VideoEmbed from './VideoEmbed'
+import VideoEmbed from '@/components/speakers/VideoEmbed'
 import QuickFacts from './QuickFacts'
 import { getDisplayName } from '@/utils/displayName';
 
@@ -90,7 +90,11 @@ export default function SpeakerProfile({ id, speakers = [] }) {
   const fullName = getDisplayName(speaker)
   const topics = asList(speaker.topics || speaker.speakingTopics)
   const hasBulletTopics = topics.length > 1
-  const videos = speaker.videos || []
+  const videoLinks = [
+    speaker['Video Link 1'],
+    speaker['Video Link 2'],
+    speaker['Video Link 3'],
+  ].filter(Boolean)
   const expertiseAreas = Array.isArray(speaker.expertiseAreas)
     ? speaker.expertiseAreas
     : Array.isArray(speaker.fields?.['Expertise Areas'])
@@ -318,12 +322,12 @@ export default function SpeakerProfile({ id, speakers = [] }) {
           )}
 
 
-          {videos.length > 0 && (
-            <section id="videos" className="mt-10">
-              <h2 className="text-2xl font-semibold mb-4">Videos</h2>
-              <div className="video-grid">
-                {videos.map((url, i) => (
-                  <VideoEmbed key={i} url={url} title={`Video ${i + 1} — ${fullName}`} />
+          {videoLinks.length > 0 && (
+            <section aria-labelledby="videos" className="space-y-4">
+              <h2 id="videos" className="text-3xl font-extrabold tracking-tight">Videos</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {videoLinks.map((u, i) => (
+                  <VideoEmbed key={i} url={u} />
                 ))}
               </div>
             </section>
