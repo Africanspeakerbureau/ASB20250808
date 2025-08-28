@@ -2622,24 +2622,22 @@ function App() {
         <FeaturedSpeakers />
         <MeetOurSpeakers />
       </div>
+      <HomeInsights />
       <PlanYourEvent appActions={appActions} />
 
-      {/* ======== INSIGHTS FROM OUR SPEAKERS ======== */}
-      <HomeInsights />
-
       {/* Contact Section */}
-      <section id="get-in-touch" className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h2>
-            <p className="text-xl text-gray-600">Ready to book a speaker or join our bureau? We're here to help.</p>
+      <section id="get-in-touch" className="section bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
+            <p className="text-lg text-gray-600">Ready to book a speaker or join our bureau? We're here to help.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12">
+          <div className="grid md:grid-cols-2 gap-5">
             <div>
-              <h3 className="text-3xl font-bold">Contact</h3>
+              <h3 className="text-2xl md:text-3xl font-bold mb-4">Contact</h3>
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-4">
                 <a
                   href="mailto:info@africanspeakerbureau.com"
                   className="flex items-center gap-3 text-lg"
