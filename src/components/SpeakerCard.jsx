@@ -19,8 +19,6 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
     : [];
   const languagesLabel = langsRaw.join(', ');
   const locLang = [locationLabel, languagesLabel].filter(Boolean).join(' | ');
-  const hasLocation = Boolean(locationLabel);
-  const hasLanguages = Boolean(languagesLabel);
   const kmFull = s.keyMessage || s.keyMessages || '';
   const km = kmFull.length > 220 ? `${kmFull.slice(0, 220)}…` : kmFull;
   const tags = (s.expertise || s.expertiseAreas || []).slice(0, 3);
@@ -39,9 +37,10 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
       <a
         href={profilePath}
         onClick={go}
-        className="rounded-2xl border border-[#E5E7EB] overflow-hidden min-h-[320px] flex flex-col bg-white"
+        className="group block rounded-2xl border overflow-hidden bg-white"
+        style={{ borderColor: 'var(--asb-border)' }}
       >
-        <div className="aspect-[4/3] w-full bg-gray-100">
+        <div className="aspect-[4/3] min-h-[280px] bg-gray-100">
           {img ? (
             <img
               src={img}
@@ -53,20 +52,16 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
             <div className="w-full h-full grid place-items-center text-gray-400 text-sm">No image</div>
           )}
         </div>
-        <div className="p-4 flex-1">
-          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-center text-[#0A0A0A]">
+        <div className="p-4">
+          <h3 className="text-[16px] font-semibold text-gray-900 group-hover:underline">
             {s.name}
           </h3>
-          {(hasLocation || hasLanguages) && (
-            <p className="mt-1 text-xs sm:text-sm text-center text-[#4B5563] leading-snug">
-              {hasLocation && <span>{locationLabel}</span>}
-              {hasLocation && hasLanguages && <span className="mx-1">|</span>}
-              {hasLanguages && <span>{languagesLabel}</span>}
-            </p>
+          {locLang && (
+            <p className="mt-1 text-xs text-gray-500">{locLang}</p>
           )}
-          {professionalTitle && (
-            <p className="mt-3 text-base md:text-lg font-medium text-center leading-normal text-[#0A0A0A]">
-              {professionalTitle}
+          {tags.length > 0 && (
+            <p className="mt-2 text-[14px] font-normal text-gray-700 leading-5">
+              {tags.join(' | ')}
             </p>
           )}
         </div>
