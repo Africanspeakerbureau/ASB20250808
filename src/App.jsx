@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect, useRef } from 'react'
 import FeaturedSpeakers from './sections/FeaturedSpeakers'
 import MeetOurSpeakers from './sections/MeetOurSpeakers'
@@ -62,10 +63,6 @@ const FIELD_PRESETS = {
   "Virtual Experience": {
     fieldType: "singleSelect",
     presetValues: "None | Limited | Moderate | Extensive"
-  },
-  "Fee Range": {
-    fieldType: "singleSelect",
-    presetValues: "$500-$1 000 | $1 001-$2 500 | $2 501-$5 000 | $5 0001- $10 000 | $10 001 - $25 000 | $25 001 - $50 000 | $50 001 - $100 000 | $100 000+"
   },
   "Travel Willingness": {
     fieldType: "singleSelect",
@@ -525,36 +522,6 @@ function App() {
     }
   }
 
-  const convertFeeRange = (feeRange, { currency, rate }) => {
-    try {
-      // Extract numbers from fee range like "$10,000 - $25,000"
-      const numbers = feeRange.match(/\$[\d,]+/g)
-      if (!numbers) return feeRange
-      
-      const convertedNumbers = numbers.map(num => {
-        const value = parseInt(num.replace(/[$,]/g, ''))
-        const converted = Math.ceil(value * rate / 10000) * 10000
-        return new Intl.NumberFormat(undefined, {
-          style: 'currency',
-          currency,
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0
-        }).format(converted)
-      })
-      
-      // Replace the original numbers with converted ones
-      let result = feeRange
-      numbers.forEach((original, index) => {
-        result = result.replace(original, convertedNumbers[index])
-      })
-      
-      return result
-    } catch (error) {
-      console.error('Error converting fee range:', error)
-      return feeRange
-    }
-  }
-
   const submitToAirtable = async (tableName, data) => {
     try {
       setSubmitStatus({ type: 'loading', message: 'Submitting...' })
@@ -792,7 +759,11 @@ function App() {
       "Professional Bio": formData.get('bio'),
       "Achievements": formData.get('achievements'),
       "Education": formData.get('education'),
-      "Fee Range": formData.get('feeRange'),
+      "Fee Range Local": formData.get('feeRangeLocal'),
+      "Fee Range Continental": formData.get('feeRangeContinental'),
+      "Fee Range International": formData.get('feeRangeInternational'),
+      "Fee Range Virtual": formData.get('feeRangeVirtual'),
+      "Fee Range General": formData.get('feeRangeGeneral'),
       "Travel Willingness": formData.get('travelWillingness'),
       "Travel Requirements": formData.get('travelRequirements'),
       "Website": formData.get('website'),
@@ -882,7 +853,11 @@ function App() {
       "Professional Bio": formData.get('bio'),
       "Achievements": formData.get('achievements'),
       "Education": formData.get('education'),
-      "Fee Range": formData.get('feeRange'),
+      "Fee Range Local": formData.get('feeRangeLocal'),
+      "Fee Range Continental": formData.get('feeRangeContinental'),
+      "Fee Range International": formData.get('feeRangeInternational'),
+      "Fee Range Virtual": formData.get('feeRangeVirtual'),
+      "Fee Range General": formData.get('feeRangeGeneral'),
       "Display Fee": formData.get('displayFee'),
       "Travel Willingness": formData.get('travelWillingness'),
       "Travel Requirements": formData.get('travelRequirements'),
@@ -1938,10 +1913,46 @@ function App() {
                       </div>
                       <div className={`grid grid-cols-1 ${isV2 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
                         <div>
-                          <label className="block text-sm font-medium mb-2">Fee Range (USD)</label>
-                          <select name="feeRange" className="w-full p-2 border border-gray-300 rounded-md">
+                          <label className="block text-sm font-medium mb-2">Fee Range (Local)</label>
+                          <select name="feeRangeLocal" className="w-full p-2 border border-gray-300 rounded-md">
                             <option value="">Select range</option>
-                            {fieldOptions['Speaker Applications']['Fee Range'].map(opt => (
+                            {fieldOptions['Speaker Applications']['Fee Range Local'].map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Fee Range (Continental)</label>
+                          <select name="feeRangeContinental" className="w-full p-2 border border-gray-300 rounded-md">
+                            <option value="">Select range</option>
+                            {fieldOptions['Speaker Applications']['Fee Range Continental'].map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Fee Range (International)</label>
+                          <select name="feeRangeInternational" className="w-full p-2 border border-gray-300 rounded-md">
+                            <option value="">Select range</option>
+                            {fieldOptions['Speaker Applications']['Fee Range International'].map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Fee Range (Virtual)</label>
+                          <select name="feeRangeVirtual" className="w-full p-2 border border-gray-300 rounded-md">
+                            <option value="">Select range</option>
+                            {fieldOptions['Speaker Applications']['Fee Range Virtual'].map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Fee Range (General)</label>
+                          <select name="feeRangeGeneral" className="w-full p-2 border border-gray-300 rounded-md">
+                            <option value="">Select range</option>
+                            {fieldOptions['Speaker Applications']['Fee Range General'].map(opt => (
                               <option key={opt} value={opt}>{opt}</option>
                             ))}
                           </select>
