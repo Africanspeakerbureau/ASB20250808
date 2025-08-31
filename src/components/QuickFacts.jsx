@@ -11,7 +11,7 @@ export default function QuickFacts({ country, languages, availability, feeRange 
         <dd>{languages?.join(', ') || '—'}</dd>
         <dt className="text-gray-500">Availability</dt>
         <dd>{availability || '—'}</dd>
-        <dt className="text-gray-500">Fee range</dt>
+        <dt className="text-gray-500">Fee Range</dt>
         <dd>{feeRange || 'On request'}</dd>
       </dl>
     </div>
