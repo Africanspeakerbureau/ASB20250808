@@ -13,15 +13,21 @@ export function Field({
   error,
   id,
 }) {
+  const hintId = hint && id ? `${id}-hint` : undefined;
+  const child = hintId ? React.cloneElement(children, { 'aria-describedby': hintId }) : children;
   return (
     <label className={`field ${className}`} data-field={id}>
       <div className="field__label">
         {label}
         {required && <span className="text-red-500">*</span>}
       </div>
-      {children}
+      {child}
       {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
-      {hint && <div className="field__hint">{hint}</div>}
+      {hint && (
+        <div className="field__hint" id={hintId}>
+          {hint}
+        </div>
+      )}
     </label>
   );
 }
@@ -35,9 +41,10 @@ export function Text({
   type = "text",
   inputMode,
   error,
+  hint,
 }) {
   return (
-    <Field label={label ?? id} required={required} error={error} id={id}>
+    <Field label={label ?? id} required={required} error={error} id={id} hint={hint}>
       <input
         className="input"
         value={form[id] ?? ""}
@@ -52,9 +59,9 @@ export function Text({
   );
 }
 
-export function TextArea({ form, setField, id, label, rows = 4 }) {
+export function TextArea({ form, setField, id, label, rows = 4, hint }) {
   return (
-    <Field label={label ?? id}>
+    <Field label={label ?? id} hint={hint} id={id}>
       <textarea
         className="textarea"
         value={form[id] ?? ""}
@@ -66,9 +73,9 @@ export function TextArea({ form, setField, id, label, rows = 4 }) {
   );
 }
 
-export function Select({ form, setField, id, options, label }) {
+export function Select({ form, setField, id, options, label, hint }) {
   return (
-    <Field label={label ?? id}>
+    <Field label={label ?? id} hint={hint} id={id}>
       <select
         className="select"
         value={form[id] ?? ""}
@@ -83,7 +90,7 @@ export function Select({ form, setField, id, options, label }) {
   );
 }
 
-export function Chips({ form, setField, id, options, allowMulti = true, label }) {
+export function Chips({ form, setField, id, options, allowMulti = true, label, hint }) {
   const value = Array.isArray(form[id])
     ? form[id]
     : form[id]
@@ -98,7 +105,7 @@ export function Chips({ form, setField, id, options, allowMulti = true, label })
     }
   };
   return (
-    <Field label={label ?? id}>
+    <Field label={label ?? id} hint={hint} id={id}>
       <div className="chips">
         {options.map(v => (
           <button

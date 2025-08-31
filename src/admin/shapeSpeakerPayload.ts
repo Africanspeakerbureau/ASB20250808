@@ -29,17 +29,20 @@ export function buildFields(state: any) {
     [F.Achievements]: state.achievements || "",
     [F.Education]: state.education || "",
 
-    // Experience
-    [F.SpeakingExperience]: state.speakingExperience || undefined,
-    [F.NumberEvents]: state.numberEvents || undefined,
-    [F.LargestAudience]: state.largestAudience || undefined,
-    [F.VirtualExperience]: state.virtualExperience || undefined,
+  // Experience
+  [F.SpeakingExperience]: state.speakingExperience || undefined,
+  [F.NumberEvents]: state.numberEvents || undefined,
+  [F.LargestAudience]: state.largestAudience || undefined,
+  [F.VirtualExperience]: state.virtualExperience || undefined,
+  [F.TargetAudience]: state.targetAudience?.length ? state.targetAudience : undefined,
+  [F.DeliveryContext]: state.deliveryContext?.length ? state.deliveryContext : undefined,
 
-    // Content
-    [F.ExpertiseAreas]: state.expertiseAreas?.length ? state.expertiseAreas : undefined,
-    [F.SpeakingTopics]: state.speakingTopics || "",
-    [F.KeyMessages]: state.keyMessages || "",
-    [F.ProfessionalBio]: state.professionalBio || "",
+  // Content
+  [F.ExpertiseAreas]: state.expertiseAreas?.length ? state.expertiseAreas : undefined,
+  [F.SpeakingTopics]: state.speakingTopics || "",
+  [F.KeyMessages]: state.keyMessages || "",
+  [F.ProfessionalBio]: state.professionalBio || "",
+  [F.SpeechesDetailed]: state.speechesDetailed || "",
 
     // Why booking
     [F.DeliveryStyle]: state.deliveryStyle || "",
@@ -53,14 +56,19 @@ export function buildFields(state: any) {
     // Media
     [F.Video1]: state.video1 || "",
     [F.Video2]: state.video2 || "",
-    [F.Video3]: state.video3 || "",
-    [F.SpokenLanguages]: state.spokenLanguages?.length ? state.spokenLanguages : undefined,
+  [F.Video3]: state.video3 || "",
+  [F.SpokenLanguages]: state.spokenLanguages?.length ? state.spokenLanguages : undefined,
 
-    // Logistics
-    [F.FeeRange]: state.feeRange || undefined,
-    [F.DisplayFee]: state.displayFee || undefined,
-    [F.TravelWillingness]: state.travelWillingness || undefined,
-    [F.TravelRequirements]: state.travelRequirements || "",
+  // Logistics
+  [F.FeeRange]: state.feeRange || undefined,
+  [F.FeeRangeLocal]: state.feeRangeLocal || undefined,
+  [F.FeeRangeContinental]: state.feeRangeContinental || undefined,
+  [F.FeeRangeInternational]: state.feeRangeInternational || undefined,
+  [F.FeeRangeVirtual]: state.feeRangeVirtual || undefined,
+  [F.FeeRangeGeneral]: state.feeRangeGeneral || undefined,
+  [F.DisplayFee]: state.displayFee || undefined,
+  [F.TravelWillingness]: state.travelWillingness || undefined,
+  [F.TravelRequirements]: state.travelRequirements || "",
 
     // Links & Admin
     [F.Website]: state.website || "",

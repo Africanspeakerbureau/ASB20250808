@@ -32,6 +32,15 @@ export default function ExpertiseCardPublic({ form, setField }) {
         />
       </Field>
 
+      <TextArea
+        form={form}
+        setField={setField}
+        id="speechesDetailed"
+        label="Speeches Detailed"
+        rows={8}
+        hint="Optionally paste detailed descriptions or outlines for your talks (multiple talks welcome)."
+      />
+
       {/* Professional Bio: full width */}
       <Field
         label="Professional Bio"

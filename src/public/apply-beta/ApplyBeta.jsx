@@ -44,12 +44,19 @@ const CARD_COMPONENTS = {
 export default function ApplyBeta() {
   const DRAFT_KEY = "asbApplyDraft:v1";
   const [tab, setTab] = React.useState("identity");
+  const defaults = {
+    feeRangeLocal: "On request (TBD)",
+    feeRangeContinental: "On request (TBD)",
+    feeRangeInternational: "On request (TBD)",
+    feeRangeVirtual: "On request (TBD)",
+    feeRangeGeneral: "On Request",
+  };
   const [form, setForm] = React.useState(() => {
     try {
       const saved = localStorage.getItem(DRAFT_KEY);
-      return saved ? JSON.parse(saved) : {};
+      return saved ? { ...defaults, ...JSON.parse(saved) } : { ...defaults };
     } catch {
-      return {};
+      return { ...defaults };
     }
   });
   const [submitting, setSubmitting] = React.useState(false);

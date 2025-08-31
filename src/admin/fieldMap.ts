@@ -22,12 +22,15 @@ export const F = {
   NumberEvents: "Number of Events", // singleSelect
   LargestAudience: "Largest Audience", // singleSelect
   VirtualExperience: "Virtual Experience", // singleSelect
+  TargetAudience: "Target Audience", // multipleSelects
+  DeliveryContext: "Delivery Context", // multipleSelects
 
   // Expertise & Content
   ExpertiseAreas: "Expertise Areas", // multipleSelects
   SpeakingTopics: "Speaking Topics",
   KeyMessages: "Key Messages",
   ProfessionalBio: "Professional Bio",
+  SpeechesDetailed: "Speeches Detailed",
 
   // Why booking
   DeliveryStyle: "Speakers Delivery Style",
@@ -46,6 +49,11 @@ export const F = {
 
   // Logistics & Fees
   FeeRange: "Fee Range", // singleSelect
+  FeeRangeLocal: "Fee Range Local", // singleSelect
+  FeeRangeContinental: "Fee Range Continental", // singleSelect
+  FeeRangeInternational: "Fee Range International", // singleSelect
+  FeeRangeVirtual: "Fee Range Virtual", // singleSelect
+  FeeRangeGeneral: "Fee Range General", // singleSelect
   DisplayFee: "Display Fee", // singleSelect (Yes/No)
   TravelWillingness: "Travel Willingness", // singleSelect
   TravelRequirements: "Travel Requirements",
