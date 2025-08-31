@@ -149,7 +149,9 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               {speaker.languages?.length > 0 && <Chip>{speaker.languages.join(', ')}</Chip>}
               {speaker.country && <Chip>{speaker.country}</Chip>}
               {speaker.travelWillingness && <Chip>{speaker.travelWillingness}</Chip>}
-              {speaker.feeRange && <Chip>{speaker.feeRange}</Chip>}
+              {(speaker.feeRangeGeneral || speaker.feeRange) && (
+                <Chip>{speaker.feeRangeGeneral || speaker.feeRange}</Chip>
+              )}
             </div>
 
             <div className="mt-4 mb-2 sm:mb-0 flex flex-wrap gap-3">
@@ -185,7 +187,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               country={speaker.country}
               languages={speaker.languages}
               availability={speaker.travelWillingness}
-              feeRange={speaker.feeRange}
+              feeRange={speaker.feeRangeGeneral || speaker.feeRange}
             />
           </section>
           {expertiseAreas.length > 0 && (
@@ -200,6 +202,60 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               </div>
             </section>
           )}
+          {/* Audience & Context */}
+          {(() => {
+            const audience = speaker.targetAudience || [];
+            const context = speaker.deliveryContext || [];
+            if (!audience.length && !context.length) return null;
+            return (
+              <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mt-4">
+                <h2 className="text-2xl md:text-3xl font-semibold">Audience & Context</h2>
+                {audience.length > 0 && (
+                  <div className="mt-2">
+                    <h3 className="font-medium text-gray-900">Ideal Audience</h3>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {audience.map(a => (
+                        <Chip key={a}>{a}</Chip>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {context.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="font-medium text-gray-900">Context</h3>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {context.map(c => (
+                        <Chip key={c}>{c}</Chip>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </section>
+            );
+          })()}
+          {/* Fee Ranges */}
+          {(() => {
+            const rows = [
+              { label: 'Local', value: speaker.feeRangeLocal },
+              { label: 'Continental', value: speaker.feeRangeContinental },
+              { label: 'International', value: speaker.feeRangeInternational },
+              { label: 'Virtual', value: speaker.feeRangeVirtual },
+            ].filter(r => r.value && r.value.trim());
+            if (rows.length === 0) return null;
+            return (
+              <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mt-4">
+                <h2 className="text-2xl md:text-3xl font-semibold">Fee Ranges</h2>
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm mt-2">
+                  {rows.map(r => (
+                    <React.Fragment key={r.label}>
+                      <dt className="text-gray-500">{r.label}</dt>
+                      <dd>{r.value}</dd>
+                    </React.Fragment>
+                  ))}
+                </dl>
+              </section>
+            );
+          })()}
         </aside>
         <main className="lg:col-span-8 order-2 lg:order-1 lg:mt-2 space-y-6">
           {speaker.keyMessages && (
@@ -316,7 +372,12 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               )}
             </div>
           )}
-
+          {speaker.speechesDetailed && (
+            <div className="rounded-2xl border bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-semibold mb-3">Want more detail on this speaker’s talks? Here you go.</h2>
+              <p className="text-gray-700 whitespace-pre-line">{speaker.speechesDetailed}</p>
+            </div>
+          )}
 
           {videos.length > 0 && (
             <section id="videos" className="mt-10">

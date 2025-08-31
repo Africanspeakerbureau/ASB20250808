@@ -90,10 +90,18 @@ export function normalizeSpeaker(rec) {
     benefitsOrganisation: f['Benefits for the organisation'] || '',
 
     feeRange: f['Fee Range General'] || '',
+    feeRangeGeneral: f['Fee Range General'] || '',
     availability: f['Travel Willingness'] || '',
     travelWillingness: f['Travel Willingness'] || '',
     topics: f['Speaking Topics'] || '',
     speakingTopics: f['Speaking Topics'] || '',
     location: f['Location'] || '',
+    targetAudience: arr(f['Target Audience']).map(s => s?.name || s),
+    deliveryContext: arr(f['Delivery Context']).map(s => s?.name || s),
+    feeRangeLocal: f['Fee Range Local'] || '',
+    feeRangeContinental: f['Fee Range Continental'] || '',
+    feeRangeInternational: f['Fee Range International'] || '',
+    feeRangeVirtual: f['Fee Range Virtual'] || '',
+    speechesDetailed: f['Speeches Detailed'] || '',
   };
 }
