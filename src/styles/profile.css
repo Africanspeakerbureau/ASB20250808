@@ -43,15 +43,3 @@
   padding: 0;
   border-radius: 0;
 }
-
-.info-card__title {
-  font-size: 1.25rem;
-  line-height: 1.6;
-  font-weight: 700;
-}
-.info-card__subtitle {
-  margin-top: 4px;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  color: var(--asb-text-muted, #6b7280);
-}
