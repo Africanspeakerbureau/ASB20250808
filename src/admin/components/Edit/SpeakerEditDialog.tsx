@@ -98,12 +98,17 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
   const [allSlugs, setAllSlugs] = React.useState<string[]>([]);
   const [checkingSlugs, setCheckingSlugs] = React.useState(true);
   const [slugOverrideVal, setSlugOverrideVal] = React.useState('');
+  const [legacyFeeRange, setLegacyFeeRange] = React.useState('');
 
   React.useEffect(() => {
     if (!record?.id) return;
     if (hydratedRef.current) return;
     buf.current = { ...(record.fields || {}) };
     const f = buf.current;
+    if (f['Fee Range']) {
+      setLegacyFeeRange(String(f['Fee Range']));
+      delete buf.current['Fee Range'];
+    }
     buf.current.speakingTopicsText = Array.isArray(f["Speaking Topics"])
       ? f["Speaking Topics"].filter(Boolean).join("\n")
       : String(f["Speaking Topics"] ?? "");
@@ -285,6 +290,11 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
               {tab === "Logistics & Fees" && (
                 <Grid>
+                  {legacyFeeRange && (
+                    <div style={{ gridColumn: "1 / -1", color: "#b45309" }}>
+                      Legacy 'Fee Range' detected. Please populate the new fee fields.
+                    </div>
+                  )}
                   <Select id="Fee Range Local" options={FEE_RANGE_EXTENDED} />
                   <Select id="Fee Range Continental" options={FEE_RANGE_EXTENDED} />
                   <Select id="Fee Range International" options={FEE_RANGE_EXTENDED} />
