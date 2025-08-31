@@ -4,6 +4,8 @@ import { listSpeakersAll } from '@/lib/airtable';
 import { getAllPublishedSpeakersCached, computeRelatedSpeakers } from '@/lib/speakers';
 import VideoEmbed from './VideoEmbed'
 import QuickFacts from './QuickFacts'
+import InfoCard from './InfoCard'
+import RichText from './RichText'
 import { getDisplayName } from '@/utils/displayName';
 
 function asList(str) {
@@ -149,9 +151,7 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               {speaker.languages?.length > 0 && <Chip>{speaker.languages.join(', ')}</Chip>}
               {speaker.country && <Chip>{speaker.country}</Chip>}
               {speaker.travelWillingness && <Chip>{speaker.travelWillingness}</Chip>}
-              {(speaker.feeRangeGeneral || speaker.feeRange) && (
-                <Chip>{speaker.feeRangeGeneral || speaker.feeRange}</Chip>
-              )}
+              {speaker.feeRangeGeneral && <Chip>{speaker.feeRangeGeneral}</Chip>}
             </div>
 
             <div className="mt-4 mb-2 sm:mb-0 flex flex-wrap gap-3">
@@ -187,25 +187,27 @@ export default function SpeakerProfile({ id, speakers = [] }) {
               country={speaker.country}
               languages={speaker.languages}
               availability={speaker.travelWillingness}
-              feeRange={speaker.feeRangeGeneral || speaker.feeRange}
+              feeRange={speaker.feeRangeGeneral}
             />
           </section>
           {expertiseAreas.length > 0 && (
             <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mt-4">
               <h2 className="text-2xl md:text-3xl font-semibold">Expertise Areas</h2>
-              <div className="flex flex-wrap gap-2 mt-2">
+              <ul className="asb-plainlist mt-2">
                 {expertiseAreas.map(tag => (
-                  <span key={tag} className="inline-block rounded-full px-3 py-1 text-sm border">
-                    {tag}
-                  </span>
+                  <li key={tag} className="asb-plainlist__item">{tag}</li>
                 ))}
-              </div>
+              </ul>
             </section>
           )}
           {/* Audience & Context */}
           {(() => {
-            const audience = speaker.targetAudience || [];
-            const context = speaker.deliveryContext || [];
+            const audience = Array.isArray(speaker.targetAudience)
+              ? speaker.targetAudience
+              : [];
+            const context = Array.isArray(speaker.deliveryContext)
+              ? speaker.deliveryContext
+              : [];
             if (!audience.length && !context.length) return null;
             return (
               <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mt-4">
@@ -213,21 +215,21 @@ export default function SpeakerProfile({ id, speakers = [] }) {
                 {audience.length > 0 && (
                   <div className="mt-2">
                     <h3 className="font-medium text-gray-900">Ideal Audience</h3>
-                    <div className="flex flex-wrap gap-2 mt-1">
+                    <ul className="asb-plainlist mt-1">
                       {audience.map(a => (
-                        <Chip key={a}>{a}</Chip>
+                        <li key={a} className="asb-plainlist__item">{a}</li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 )}
                 {context.length > 0 && (
                   <div className="mt-4">
                     <h3 className="font-medium text-gray-900">Context</h3>
-                    <div className="flex flex-wrap gap-2 mt-1">
+                    <ul className="asb-plainlist mt-1">
                       {context.map(c => (
-                        <Chip key={c}>{c}</Chip>
+                        <li key={c} className="asb-plainlist__item">{c}</li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 )}
               </section>
@@ -373,10 +375,12 @@ export default function SpeakerProfile({ id, speakers = [] }) {
             </div>
           )}
           {speaker.speechesDetailed && (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold mb-3">Want more detail on this speaker’s talks? Here you go.</h2>
-              <p className="text-gray-700 whitespace-pre-line">{speaker.speechesDetailed}</p>
-            </div>
+            <InfoCard
+              title="Speech Details"
+              subtitle="Want more detail on this speaker’s talks? Here you go."
+            >
+              <RichText html={speaker.speechesDetailed} />
+            </InfoCard>
           )}
 
           {videos.length > 0 && (

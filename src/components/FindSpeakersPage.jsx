@@ -50,7 +50,7 @@ function SearchCard({ s }) {
         </div>
       )}
 
-      {s.feeRange && <p className="mt-5 font-medium">{s.feeRange}</p>}
+      {s.feeRangeGeneral && <p className="mt-5 font-medium">{s.feeRangeGeneral}</p>}
 
       <a
         href={profilePath}
@@ -100,7 +100,7 @@ export default function FindSpeakersPage() {
       ;(s.expertise || []).forEach(v => cats.add(v))
       if (s.country) ctys.add(s.country)
       ;(s.languages || s.spokenLanguages || []).forEach(v => lngs.add(v))
-      if (s.feeRange) fees.add(s.feeRange)
+      if (s.feeRangeGeneral) fees.add(s.feeRangeGeneral)
     })
     return {
       categories: ['All Categories', ...Array.from(cats).sort()],
@@ -117,7 +117,7 @@ export default function FindSpeakersPage() {
       if (cat !== 'All Categories' && !(s.expertise || []).includes(cat)) return false
       if (country !== 'All Countries' && s.country !== country) return false
       if (lang !== 'All Languages' && !(s.languages || s.spokenLanguages || []).includes(lang)) return false
-      if (fee !== 'All Fee Ranges' && s.feeRange !== fee) return false
+      if (fee !== 'All Fee Ranges' && s.feeRangeGeneral !== fee) return false
 
       if (text) {
         const hay = [

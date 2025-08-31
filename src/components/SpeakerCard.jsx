@@ -110,8 +110,8 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           </div>
         )}
 
-        {s.feeRange && (
-          <div className="text-base font-semibold text-center mt-4">{s.feeRange}</div>
+        {s.feeRangeGeneral && (
+          <div className="text-base font-semibold text-center mt-4">{s.feeRangeGeneral}</div>
         )}
 
         <div className="flex justify-center mt-4">
