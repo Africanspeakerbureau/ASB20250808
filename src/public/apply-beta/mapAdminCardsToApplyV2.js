@@ -1,4 +1,8 @@
+import { toAirtableAttachments } from "@/utils/airtableAttachments";
+
 export function toApplyV2Payload(form) {
+  const profileImages = toAirtableAttachments(form["Profile Image"]);
+  const headerImages = toAirtableAttachments(form["Header Image"]);
   return {
     "First Name": form.firstName,
     "Last Name": form.lastName,
@@ -9,7 +13,7 @@ export function toApplyV2Payload(form) {
     "Country": form.country,
     "Email": form.email,
     "Phone": form.phone,
-    "Profile Image": form["Profile Image"],
+    "Profile Image": profileImages,
     "Industry": form.industry,
     "Expertise Level": form.expertiseLevel,
     "Years Experience": form.yearsExperience,
@@ -37,7 +41,7 @@ export function toApplyV2Payload(form) {
     "What the audience will take home": form.whatTakeHome,
     "Benefits for the individual": form.benefitsIndividual,
     "Benefits for the organisation": form.benefitsOrganisation,
-    "Header Image": form["Header Image"],
+    "Header Image": headerImages,
     "Video Link 1": form.videoLink1,
     "Video Link 2": form.videoLink2,
     "Video Link 3": form.videoLink3,

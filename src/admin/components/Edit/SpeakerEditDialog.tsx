@@ -11,6 +11,7 @@ import { useAirtableRecord } from "../../hooks/useAirtableRecord";
 import { airtablePatchRecord } from "../../api/airtable";
 import { basicSlugify } from "@/lib/normalizeSpeaker";
 import { listAllSpeakersLite } from "@/lib/airtable";
+import { toAirtableAttachments } from "@/utils/airtableAttachments";
 import "./editDialog.css";
 
 // Computed/linked fields we never send back to Airtable
@@ -35,29 +36,6 @@ function isEqualShallow(a: any, b: any) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
-function toAirtableAttachments(input: any) {
-  // Accepts: string URL | object | array; returns valid [{url, filename}] or []
-  if (!input) return [];
-  const pick = (v: any) => {
-    if (!v) return null;
-    // string URL
-    if (typeof v === "string") {
-      if (v.startsWith("blob:")) return null;
-      return { url: v };
-    }
-    // object with url
-    const url = v.secure_url || v.url;
-    if (!url || String(url).startsWith("blob:")) return null;
-    const filename =
-      v.filename ||
-      v.original_filename ||
-      (typeof v.name === "string" ? v.name : undefined);
-    return filename ? { url: String(url), filename: String(filename) } : { url: String(url) };
-  };
-  if (Array.isArray(input)) return input.map(pick).filter(Boolean);
-  const one = pick(input);
-  return one ? [one] : [];
-}
 
 function buildSpeakerPayload(
   form: Record<string, any>,
