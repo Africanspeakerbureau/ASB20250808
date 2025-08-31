@@ -42,9 +42,60 @@ export const SPOKEN_LANGUAGES = [
 import fieldOptions from "@/FieldOptions";
 export const COUNTRIES: string[] = fieldOptions['Speaker Applications']['Country'];
 
-export const FEE_RANGE = [
-  "$500-$1 000","$1 001-$2 500","$2 501-$5 000","$5 0001- $10 000",
-  "$10 001 - $25 000","$25 001 - $50 000","$50 001 - $100 000","$100 000+"
+export const FEE_RANGE_EXTENDED = [
+  "$500-$1 000",
+  "$1 001-$2 500",
+  "$2 501-$5 000",
+  "$5 0001- $10 000",
+  "$10 001 - $25 000",
+  "$25 001 - $50 000",
+  "$50 001 - $100 000",
+  "$100 000+",
+  "On request (TBD)",
+  "On request",
+];
+
+export const FEE_RANGE_GENERAL = ["$","$$","$$$","$$$$","$$$$$","On Request"];
+
+export const TARGET_AUDIENCE = [
+  "Board of Directors / Board Committees",
+  "C-Suite / Executive Leadership Team",
+  "Senior Leaders (VP/Director)",
+  "Middle Management (People Managers)",
+  "Frontline Supervisors",
+  "Frontline Staff / Operators",
+  "High-Potentials / Emerging Leaders (HiPo)",
+  "Women in Leadership (ERGs / Networks)",
+  "Youth / Graduates / Early Career",
+  "Sales Organisation (AEs, SEs, CS, Partners)",
+  "Product / Engineering / Tech & Data",
+  "HR / People & Culture",
+  "Finance / Strategy",
+  "Marketing / Brand / Comms / CX",
+  "Operations / Supply Chain / PMO",
+  "Entrepreneurs / SMEs & Startups",
+  "Government Executives / Public Sector Leaders",
+  "Municipal / Local Government Leaders",
+  "Development / NGO / Multilateral Teams",
+  "Universities / Business Schools / Educators",
+  "Healthcare Professionals",
+  "Energy / Mining Teams",
+];
+
+export const DELIVERY_CONTEXT = [
+  "Boardroom Advisory / Consulting",
+  "Executive Leadership Programme / Academy Cohort",
+  "Executive Offsite / Senior Getaway",
+  "Succession / HiPo / OD Track",
+  "Middle-Management Training (in-house)",
+  "Frontline / Lower-Management Training",
+  "Annual Leadership Conference / Town Hall",
+  "Sales Kickoff / Sales Enablement (SKO)",
+  "Executive Briefing Centre / External Organiser",
+  "Keynote / Plenary — Workshop / Masterclass — Advisory (maps to your one-pager)",
+  "Panel / Fireside / Moderation",
+  "Coaching (1:1 / Team)",
+  "Virtual Webinar / Studio",
 ];
 
 export const TRAVEL_WILLINGNESS = ["Virtual Only","Local Only","Domestic","International"];

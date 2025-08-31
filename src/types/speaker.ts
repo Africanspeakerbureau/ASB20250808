@@ -12,5 +12,13 @@ export type Speaker = {
   // ...other existing fields
   professionalTitle?: string;
   name?: string;
+  speechesDetailed?: string;
+  targetAudience?: string[];
+  deliveryContext?: string[];
+  feeRangeLocal?: string;
+  feeRangeContinental?: string;
+  feeRangeInternational?: string;
+  feeRangeVirtual?: string;
+  feeRangeGeneral?: string;
   [key: string]: any;
 };

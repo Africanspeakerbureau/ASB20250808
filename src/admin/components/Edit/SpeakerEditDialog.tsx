@@ -2,7 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {
   INDUSTRIES, YEARS_EXPERIENCE, SPEAKING_EXPERIENCE, NUMBER_OF_EVENTS, LARGEST_AUDIENCE,
-  VIRTUAL_EXPERIENCE, EXPERTISE_AREAS, SPOKEN_LANGUAGES, COUNTRIES, FEE_RANGE,
+  VIRTUAL_EXPERIENCE, EXPERTISE_AREAS, SPOKEN_LANGUAGES, COUNTRIES,
+  FEE_RANGE_EXTENDED, FEE_RANGE_GENERAL, TARGET_AUDIENCE, DELIVERY_CONTEXT,
   TRAVEL_WILLINGNESS, FEATURED, STATUS, EXPERTISE_LEVEL, DISPLAY_FEE
 } from "../../edit/options";
 import UploadWidget from "@/components/UploadWidget";
@@ -11,6 +12,7 @@ import { useAirtableRecord } from "../../hooks/useAirtableRecord";
 import { airtablePatchRecord } from "../../api/airtable";
 import { basicSlugify } from "@/lib/normalizeSpeaker";
 import { listAllSpeakersLite } from "@/lib/airtable";
+import { toAirtableAttachments } from "@/utils/airtableAttachments";
 import "./editDialog.css";
 
 // Computed/linked fields we never send back to Airtable
@@ -35,29 +37,6 @@ function isEqualShallow(a: any, b: any) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
-function toAirtableAttachments(input: any) {
-  // Accepts: string URL | object | array; returns valid [{url, filename}] or []
-  if (!input) return [];
-  const pick = (v: any) => {
-    if (!v) return null;
-    // string URL
-    if (typeof v === "string") {
-      if (v.startsWith("blob:")) return null;
-      return { url: v };
-    }
-    // object with url
-    const url = v.secure_url || v.url;
-    if (!url || String(url).startsWith("blob:")) return null;
-    const filename =
-      v.filename ||
-      v.original_filename ||
-      (typeof v.name === "string" ? v.name : undefined);
-    return filename ? { url: String(url), filename: String(filename) } : { url: String(url) };
-  };
-  if (Array.isArray(input)) return input.map(pick).filter(Boolean);
-  const one = pick(input);
-  return one ? [one] : [];
-}
 
 function buildSpeakerPayload(
   form: Record<string, any>,
@@ -258,6 +237,8 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                   <Select id="Number of Events" options={NUMBER_OF_EVENTS} />
                   <Select id="Largest Audience" options={LARGEST_AUDIENCE} />
                   <Select id="Virtual Experience" options={VIRTUAL_EXPERIENCE} />
+                  <Chips id="Target Audience" options={TARGET_AUDIENCE} />
+                  <Chips id="Delivery Context" options={DELIVERY_CONTEXT} />
                 </Grid>
               )}
 
@@ -274,7 +255,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
                       style={{ resize: "vertical" }}
                     />
                   </Field>
-
+                  <TextArea id="Speeches Detailed" label="Speeches Detailed" rows={8} full />
                   <TextArea id="keyMessagesText" label="Key Messages" rows={8} full />
                   <TextArea id="Professional Bio" label="Professional Bio" rows={12} full />
                 </Grid>
@@ -304,7 +285,11 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
               {tab === "Logistics & Fees" && (
                 <Grid>
-                  <Select id="Fee Range" options={FEE_RANGE} label="Fee Range (USD)" />
+                  <Select id="Fee Range Local" options={FEE_RANGE_EXTENDED} />
+                  <Select id="Fee Range Continental" options={FEE_RANGE_EXTENDED} />
+                  <Select id="Fee Range International" options={FEE_RANGE_EXTENDED} />
+                  <Select id="Fee Range Virtual" options={FEE_RANGE_EXTENDED} />
+                  <Select id="Fee Range General" options={FEE_RANGE_GENERAL} />
                   <Select id="Display Fee" options={DISPLAY_FEE} label="Display Fee on site?" />
                   <Select id="Travel Willingness" options={TRAVEL_WILLINGNESS} />
                   <TextArea id="Travel Requirements" />

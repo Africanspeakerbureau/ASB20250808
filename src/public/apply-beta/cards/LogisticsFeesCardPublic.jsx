@@ -1,11 +1,55 @@
 import React from "react";
 import { Grid, Select, TextArea } from "./components.jsx";
-import { FEE_RANGE, DISPLAY_FEE, TRAVEL_WILLINGNESS } from "@/admin/edit/options";
+import {
+  DISPLAY_FEE,
+  TRAVEL_WILLINGNESS,
+  FEE_RANGE_EXTENDED,
+  FEE_RANGE_GENERAL,
+} from "@/admin/edit/options";
 
 export default function LogisticsFeesCardPublic({ form, setField }) {
   return (
     <Grid>
-      <Select form={form} setField={setField} id="feeRange" options={FEE_RANGE} label="Fee Range (USD)" />
+      <Select
+        form={form}
+        setField={setField}
+        id="feeRangeLocal"
+        options={FEE_RANGE_EXTENDED}
+        label="Fee Range Local"
+        hint="Indicative speaker fee. Final pricing depends on scope, travel and schedule."
+      />
+      <Select
+        form={form}
+        setField={setField}
+        id="feeRangeContinental"
+        options={FEE_RANGE_EXTENDED}
+        label="Fee Range Continental"
+        hint="Indicative speaker fee. Final pricing depends on scope, travel and schedule."
+      />
+      <Select
+        form={form}
+        setField={setField}
+        id="feeRangeInternational"
+        options={FEE_RANGE_EXTENDED}
+        label="Fee Range International"
+        hint="Indicative speaker fee. Final pricing depends on scope, travel and schedule."
+      />
+      <Select
+        form={form}
+        setField={setField}
+        id="feeRangeVirtual"
+        options={FEE_RANGE_EXTENDED}
+        label="Fee Range Virtual"
+        hint="Indicative speaker fee. Final pricing depends on scope, travel and schedule."
+      />
+      <Select
+        form={form}
+        setField={setField}
+        id="feeRangeGeneral"
+        options={FEE_RANGE_GENERAL}
+        label="Fee Range General"
+        hint="Indicative speaker fee. Final pricing depends on scope, travel and schedule."
+      />
       <Select form={form} setField={setField} id="displayFee" options={DISPLAY_FEE} label="Display Fee on site?" />
       <Select form={form} setField={setField} id="travelWillingness" options={TRAVEL_WILLINGNESS} label="Travel Willingness" />
       <TextArea form={form} setField={setField} id="travelRequirements" label="Travel Requirements" />
