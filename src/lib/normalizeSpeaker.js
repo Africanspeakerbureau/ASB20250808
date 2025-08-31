@@ -90,6 +90,7 @@ export function normalizeSpeaker(rec) {
     benefitsOrganisation: f['Benefits for the organisation'] || '',
 
     feeRangeGeneral: f['Fee Range General'] || '',
+    displayFee: f['Display Fee'] || '',
     availability: f['Travel Willingness'] || '',
     travelWillingness: f['Travel Willingness'] || '',
     topics: f['Speaking Topics'] || '',

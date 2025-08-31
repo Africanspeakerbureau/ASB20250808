@@ -16,6 +16,8 @@ function SearchCard({ s }) {
   }
 
   const name = getDisplayName(s)
+  const fee = s.feeRangeGeneral ?? s.feeRange ?? null
+  const showFee = s.displayFee !== 'No' && !!fee
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col items-center text-center">
@@ -50,7 +52,7 @@ function SearchCard({ s }) {
         </div>
       )}
 
-      {s.feeRangeGeneral && <p className="mt-5 font-medium">{s.feeRangeGeneral}</p>}
+      {showFee && <p className="mt-5 font-medium">Fee Range: {fee}</p>}
 
       <a
         href={profilePath}

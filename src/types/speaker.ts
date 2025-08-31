@@ -20,5 +20,6 @@ export type Speaker = {
   feeRangeInternational?: string;
   feeRangeVirtual?: string;
   feeRangeGeneral?: string;
+  displayFee?: string;
   [key: string]: any;
 };

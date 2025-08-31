@@ -27,6 +27,8 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
   const professionalTitle = s.professionalTitle || s.titleText;
   const key = (s.slug || s.id || '').toLowerCase();
   const profilePath = `#/speaker/${encodeURIComponent(key)}`;
+  const fee = s.feeRangeGeneral ?? s.feeRange ?? null;
+  const showFee = s.displayFee !== 'No' && !!fee;
   const go = (e) => {
     e.preventDefault();
     window.history.pushState({}, '', profilePath);
@@ -64,6 +66,11 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           {tags.length > 0 && (
             <p className="mt-2 text-[14px] font-normal text-gray-700 leading-5">
               {tags.join(' | ')}
+            </p>
+          )}
+          {showFee && (
+            <p className="mt-2 text-sm font-semibold text-gray-900">
+              Fee Range: {fee}
             </p>
           )}
         </div>
@@ -110,8 +117,10 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           </div>
         )}
 
-        {s.feeRangeGeneral && (
-          <div className="text-base font-semibold text-center mt-4">{s.feeRangeGeneral}</div>
+        {showFee && (
+          <div className="text-base font-semibold text-center mt-4">
+            Fee Range: {fee}
+          </div>
         )}
 
         <div className="flex justify-center mt-4">
@@ -149,6 +158,9 @@ export default function SpeakerCard({ speaker, variant = 'search' }) {
           {locLang && <p className="text-xs text-center text-gray-600">{locLang}</p>}
           {professionalTitle && (
             <p className="text-sm text-center text-gray-800 mt-1">{professionalTitle}</p>
+          )}
+          {showFee && (
+            <p className="text-sm text-center text-gray-900 mt-2">Fee Range: {fee}</p>
           )}
         </a>
       </div>
