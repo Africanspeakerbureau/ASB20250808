@@ -10,7 +10,7 @@ import {
   LogisticsFeesCardPublic,
   ContactAdminCardPublic,
 } from "./cardsIndex";
-import { toApplyV2Payload } from "./mapAdminCardsToApplyV2";
+import { buildAirtableFieldsFromForm } from "./mapAdminCardsToApplyV2";
 import { submitApplication } from "@/lib/apply";
 import "@/admin/components/Edit/editDialog.css";
 
@@ -118,7 +118,7 @@ export default function ApplyBeta() {
       const prepared = { ...form };
       delete prepared.speakingTopicsText;
       delete prepared.keyMessagesText;
-      const payload = toApplyV2Payload(prepared);
+      const payload = buildAirtableFieldsFromForm(prepared);
       payload["Speaking Topics"] = normalizeMultiline(
         form.speakingTopicsText ?? form["Speaking Topics"]
       );

@@ -87,13 +87,6 @@ export const fieldPresets = {
         "Virtual Webinar / Studio"
       ]
     },
-    "Fee Range": {
-      type: "singleSelect",
-      options: [
-        "$500-$1 000", "$1 001-$2 500", "$2 501-$5 000", "$5 0001- $10 000",
-        "$10 001 - $25 000", "$25 001 - $50 000", "$50 001 - $100 000", "$100 000+"
-      ]
-    },
     "Fee Range Local": {
       type: "singleSelect",
       options: [

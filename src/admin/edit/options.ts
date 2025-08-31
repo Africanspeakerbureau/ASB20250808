@@ -42,11 +42,6 @@ export const SPOKEN_LANGUAGES = [
 import fieldOptions from "@/FieldOptions";
 export const COUNTRIES: string[] = fieldOptions['Speaker Applications']['Country'];
 
-export const FEE_RANGE = [
-  "$500-$1 000","$1 001-$2 500","$2 501-$5 000","$5 0001- $10 000",
-  "$10 001 - $25 000","$25 001 - $50 000","$50 001 - $100 000","$100 000+"
-];
-
 export const FEE_RANGE_EXTENDED = [
   "$500-$1 000",
   "$1 001-$2 500",

@@ -52,7 +52,6 @@ export function buildFields(state: any) {
   [F.SpokenLanguages]: state.spokenLanguages?.length ? state.spokenLanguages : undefined,
 
   // Logistics
-  [F.FeeRange]: state.feeRange || undefined,
   [F.FeeRangeLocal]: state.feeRangeLocal || undefined,
   [F.FeeRangeContinental]: state.feeRangeContinental || undefined,
   [F.FeeRangeInternational]: state.feeRangeInternational || undefined,

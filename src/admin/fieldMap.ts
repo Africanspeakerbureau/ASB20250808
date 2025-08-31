@@ -48,7 +48,6 @@ export const F = {
   SpokenLanguages: "Spoken Languages", // multipleSelects
 
   // Logistics & Fees
-  FeeRange: "Fee Range", // singleSelect
   FeeRangeLocal: "Fee Range Local", // singleSelect
   FeeRangeContinental: "Fee Range Continental", // singleSelect
   FeeRangeInternational: "Fee Range International", // singleSelect
