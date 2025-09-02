@@ -26,9 +26,9 @@ export default function FeaturedSpeakers() {
   return (
     <section id="featured-speakers" className="section bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-12">
-          <div className="lg:col-span-5 lg:pr-6 max-w-[560px] flex flex-col">
-            {/* Intro first on mobile */}
+        <div className="grid grid-cols-12 gap-10 xl:gap-12">
+          <div className="col-span-12 lg:col-span-5 flex flex-col lg:pr-6 max-w-[560px]">
+            {/* Intro first on mobile, second on desktop */}
             <div className="order-1 md:order-2 space-y-4 text-foreground">
               <p className="text-base md:text-lg leading-7">
                 The African Speaker Bureau connects decision-makers with credible African voices who deliver <strong>leadership insights, market intelligence, and change-making stories</strong> to the room — context your executives can act on. We pair authentic African context with global standards — rapid shortlists, transparent pricing, clear contracting, travel coordination and post-event materials.
@@ -53,33 +53,32 @@ export default function FeaturedSpeakers() {
             {/* Heading moves below intro on mobile */}
             <h2 className="order-2 md:order-1 mt-6 md:mt-0 text-3xl font-semibold mb-4 text-center md:text-left">Featured Speakers</h2>
             {/* Desktop button stays here; hidden on mobile */}
-            <div className="order-3 hidden md:flex justify-center md:justify-start mt-6">
+            <div className="order-3 hidden md:block">
               <Link
                 to="/find-speakers"
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
+                className="mt-6 inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
               >
                 View all speakers
               </Link>
             </div>
           </div>
-
-          <div className="lg:col-span-7 xl:col-span-6">
+          <div className="col-span-12 lg:col-span-7">
             {error && <p className="text-red-600">{error}</p>}
             {!error && items.length === 0 && (
               <p className="text-gray-400">No speakers available at the moment.</p>
             )}
             {!error && items.length > 0 && (
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {items.map((s) => (
                   <SpeakerCard key={s.id} speaker={s} variant="featured" />
                 ))}
               </div>
             )}
             {/* Mobile button below cards */}
-            <div className="mt-6 md:hidden flex justify-center">
+            <div className="md:hidden">
               <Link
                 to="/find-speakers"
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg w-full text-center"
+                className="mt-6 inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg text-center"
               >
                 View all speakers
               </Link>
