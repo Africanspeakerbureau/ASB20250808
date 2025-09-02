@@ -1,38 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SpeakerCard from '@/components/SpeakerCard';
 import { listSpeakers } from '@/lib/airtable';
 
 const FEATURED_COUNT = 4;
 
-function selectDailyRotation(items, count) {
+function pickRandom(items, count) {
   if (!Array.isArray(items) || items.length === 0) return [];
-  const c = Math.min(count, items.length);
-  // Stable per day (YYYY-MM-DD) to avoid flicker/hydration mismatch
-  const today = new Date().toISOString().slice(0, 10);
-  const seed = [...today].reduce((a, ch) => a + ch.charCodeAt(0), 0);
-  const start = seed % items.length;
-  const out = [];
-  for (let i = 0; i < c; i++) out.push(items[(start + i) % items.length]);
-  return out;
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.slice(0, Math.min(count, arr.length));
 }
 
 export default function FeaturedSpeakers() {
   const [items, setItems] = useState([]);
   const [error, setError] = useState('');
+  const featuredRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         const all = await listSpeakers();
-        if (alive)
-          setItems(
-            selectDailyRotation(
-              all.filter((s) => s.featured),
-              FEATURED_COUNT
-            )
-          );
+        if (!alive) return;
+        const filtered = all.filter((s) => s.featured);
+        if (!featuredRef.current) {
+          featuredRef.current = pickRandom(filtered, FEATURED_COUNT);
+        }
+        setItems(featuredRef.current);
       } catch (e) {
         console.error('Failed to load speakers:', e?.status || '', e?.body || e);
         if (alive) setError('Could not load speakers.');
