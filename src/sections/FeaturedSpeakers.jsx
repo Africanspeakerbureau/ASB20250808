@@ -1,18 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SpeakerCard from '@/components/SpeakerCard';
 import { listSpeakers } from '@/lib/airtable';
 
+const FEATURED_COUNT = 4;
+
+function pickRandom(items, count) {
+  if (!Array.isArray(items) || items.length === 0) return [];
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.slice(0, Math.min(count, arr.length));
+}
+
 export default function FeaturedSpeakers() {
   const [items, setItems] = useState([]);
   const [error, setError] = useState('');
+  const featuredRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         const all = await listSpeakers();
-        if (alive) setItems(all.filter((s) => s.featured).slice(0, 4));
+        if (!alive) return;
+        const filtered = all.filter((s) => s.featured);
+        if (!featuredRef.current) {
+          featuredRef.current = pickRandom(filtered, FEATURED_COUNT);
+        }
+        setItems(featuredRef.current);
       } catch (e) {
         console.error('Failed to load speakers:', e?.status || '', e?.body || e);
         if (alive) setError('Could not load speakers.');
