@@ -3,7 +3,6 @@ import { Menu } from "lucide-react"; // hamburger icon
 import { Link } from "react-router-dom";
 import { MAIN_LINKS } from "@/lib/navLinks";
 import MobileMenu from "@/components/MobileMenu.jsx";
-import { LEGACY_ADMIN_URL } from "../config";
 
 export default function Header({ countryCode, currency }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -26,21 +25,23 @@ export default function Header({ countryCode, currency }) {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-6 text-slate-800">
-            {MAIN_LINKS.map(({ to, label, variant }) => (
-              <a
-                key={to}
-                href={`#${to}`}
-                className={
-                  variant === 'default'
-                    ? 'px-3 py-1 rounded bg-black text-white hover:bg-black/80'
-                    : undefined
-                }
-              >
-                {label}
-              </a>
-            ))}
+              {MAIN_LINKS.map(({ to, label, variant }) => {
+                const href = to === '/admin' ? '/admin' : to.startsWith('/#') ? to : `#${to}`;
+              return (
+                <a
+                  key={to}
+                  href={href}
+                  className={
+                    variant === 'default'
+                      ? 'px-3 py-1 rounded bg-black text-white hover:bg-black/80'
+                      : undefined
+                  }
+                >
+                  {label}
+                </a>
+              );
+            })}
             <Link to="/speaker/signin">Speaker Login</Link>
-            <a href={LEGACY_ADMIN_URL} target="_blank" rel="noopener noreferrer">Admin</a>
           </nav>
 
           {/* Geo/currency chip (wired in Patch 2) + mobile button */}

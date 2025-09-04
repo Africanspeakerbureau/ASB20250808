@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
-import { LEGACY_ADMIN_URL } from '../config';
 
 export default function MobileMenu({ open, onClose }) {
   useEffect(() => {
@@ -42,15 +41,15 @@ export default function MobileMenu({ open, onClose }) {
         <ul className="space-y-4 text-base">
           {MAIN_LINKS.map(({ to, label, variant }) => (
             <li key={to}>
-              <a
-                href={`#${to}`}
-                onClick={onClose}
-                className={
-                  variant === 'default'
-                    ? 'inline-block px-3 py-2 rounded bg-black text-white'
-                    : undefined
-                }
-              >
+                <a
+                  href={to === '/admin' ? '/admin' : to.startsWith('/#') ? to : `#${to}`}
+                  onClick={onClose}
+                  className={
+                    variant === 'default'
+                      ? 'inline-block px-3 py-2 rounded bg-black text-white'
+                      : undefined
+                  }
+                >
                 {label}
               </a>
             </li>
@@ -59,11 +58,6 @@ export default function MobileMenu({ open, onClose }) {
             <Link to="/speaker/signin" onClick={onClose}>
               Speaker Login
             </Link>
-          </li>
-          <li>
-            <a href={LEGACY_ADMIN_URL} target="_blank" rel="noopener noreferrer">
-              Admin
-            </a>
           </li>
         </ul>
 

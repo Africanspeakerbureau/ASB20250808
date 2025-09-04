@@ -17,18 +17,20 @@ import PublicLayout from './site/layout/PublicLayout'
 import SignIn from './pages/SignIn'
 import AuthCallback from './pages/AuthCallback'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard'
-import SiteAdmin from './pages/admin/SiteAdmin'
 import ProtectedRoute from './components/ProtectedRoute'
+import HashFixer from './components/HashFixer'
+import AdminPage from './pages/admin/AdminPage'
 import { AuthProvider } from './providers/AuthProvider'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ToastProvider>
-      <AuthProvider>
-        <Router>
-          <AuthHashGuard />
-          <ScrollToTop />
-          <Routes>
+        <AuthProvider>
+          <Router>
+            <HashFixer />
+            <AuthHashGuard />
+            <ScrollToTop />
+            <Routes>
             <Route element={<PublicLayout />}>
               <Route path="/speakers/:slug" element={<SpeakerProfile />} />
               <Route path="/find-speakers" element={<FindSpeakersPage />} />
@@ -60,10 +62,8 @@ createRoot(document.getElementById('root')).render(
             <Route path="/signin" element={<Navigate to="/speaker/signin" replace />} />
             <Route path="/auth/callback" element={<Navigate to="/speaker/auth/callback" replace />} />
 
-            {/* Site Admin landing */}
-            <Route path="/admin" element={<SiteAdmin />} />
-
-            <Route path="/admin/blog" element={<AdminBlogList />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin/blog" element={<AdminBlogList />} />
             <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
             <Route path="/admin/blog/:id" element={<AdminBlogEditor />} />
           </Routes>
