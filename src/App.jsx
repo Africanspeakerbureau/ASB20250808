@@ -38,6 +38,7 @@ import { getConsent } from "@/lib/consent"
 import { useGeolocation } from "@/hooks/useGeolocation"
 import ApplyBeta from "./public/apply-beta/ApplyBeta"
 import { getAllPublishedSpeakersCached } from '@/lib/speakers'
+import SpeakerPortal from "./features/speaker/SpeakerPortal.jsx";
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -2749,6 +2750,7 @@ function App() {
         }} />
       )}
       {banner}
+      <SpeakerPortal /> {/* renders ONLY for #/speaker/... ; never touches #/admin */}
     </div>
   )
 }
