@@ -32,19 +32,19 @@ export default function MeetOurSpeakers({ speakers = [] }) {
     return (
       <section className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-semibold text-center md:text-left">Meet Our Speakers</h2>
-          <p className="text-gray-500 mt-1 text-center md:text-left">Voices That Inspire</p>
-          <p className="text-gray-400 mt-10">No speakers available at the moment.</p>
-        </div>
-      </section>
-    );
-  }
+            <h2 className="text-2xl font-semibold text-center md:text-left">Meet Our Speakers</h2>
+            <p className="text-gray-500 mt-1 text-lg md:text-xl text-center md:text-left mb-8">Voices That Inspire</p>
+            <p className="text-gray-400 mt-10">No speakers available at the moment.</p>
+          </div>
+        </section>
+      );
+    }
 
   return (
     <section className="py-16 bg-white">
       <div className="max-w-6xl mx-auto px-4">
         <h2 className="text-2xl font-semibold text-center md:text-left">Meet Our Speakers</h2>
-        <p className="text-gray-500 mt-1 text-center md:text-left">Voices That Inspire</p>
+        <p className="text-gray-500 mt-1 text-lg md:text-xl text-center md:text-left mb-8">Voices That Inspire</p>
 
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-8">
           {items.map((s) => {
