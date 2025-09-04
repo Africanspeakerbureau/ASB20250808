@@ -56,8 +56,8 @@ export default function MobileMenu({ open, onClose }) {
             </li>
           ))}
           <li>
-            <Link to="/speaker/signin" onClick={onClose}>
-              Speaker Login
+            <Link to="/speaker-admin" onClick={onClose}>
+              Speaker Admin
             </Link>
           </li>
           <li>

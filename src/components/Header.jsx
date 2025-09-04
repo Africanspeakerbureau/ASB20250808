@@ -39,7 +39,7 @@ export default function Header({ countryCode, currency }) {
                 {label}
               </a>
             ))}
-            <Link to="/speaker/signin">Speaker Login</Link>
+            <Link to="/speaker-admin">Speaker Admin</Link>
             <a href={LEGACY_ADMIN_URL} target="_blank" rel="noopener noreferrer">Admin</a>
           </nav>
 

@@ -45,6 +45,7 @@ createRoot(document.getElementById('root')).render(
               <Route path="/*" element={<App />} />
             </Route>
             {/* Speaker Portal (new paths) */}
+            <Route path="/speaker-admin" element={<SignIn />} />
             <Route path="/speaker/signin" element={<SignIn />} />
             <Route path="/speaker/auth/callback" element={<AuthCallback />} />
             <Route
@@ -57,7 +58,7 @@ createRoot(document.getElementById('root')).render(
             />
 
             {/* Back-compat redirects from old paths */}
-            <Route path="/signin" element={<Navigate to="/speaker/signin" replace />} />
+            <Route path="/signin" element={<Navigate to="/speaker-admin" replace />} />
             <Route path="/auth/callback" element={<Navigate to="/speaker/auth/callback" replace />} />
 
             {/* Site Admin landing */}
