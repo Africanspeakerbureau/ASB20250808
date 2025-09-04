@@ -34,10 +34,10 @@ export default function MeetOurSpeakers() {
   return (
     <section className="section" style={{ background: 'var(--asb-surface)' }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <header className="text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Meet Our Speakers</h2>
-          <p className="text-gray-500 mt-2">Voices That Inspire</p>
-        </header>
+          <header className="text-center">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">Meet Our Speakers</h2>
+            <p className="text-gray-500 mt-2 text-lg md:text-xl mb-8">Voices That Inspire</p>
+          </header>
 
         {error && <p className="text-red-600">{error}</p>}
         {!error && items.length === 0 && (
