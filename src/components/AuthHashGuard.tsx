@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 /**
  * If Supabase drops us on "/" with hash tokens (e.g. #access_token=...),
- * immediately push to /auth/callback while preserving the hash.
+ * immediately push to /speaker/auth/callback while preserving the hash.
  */
 export default function AuthHashGuard() {
   const { hash } = useLocation();

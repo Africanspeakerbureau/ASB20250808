@@ -16,7 +16,8 @@ import AdminBlogEditor from './admin/blog/AdminBlogEditor'
 import PublicLayout from './site/layout/PublicLayout'
 import SignIn from './pages/SignIn'
 import AuthCallback from './pages/AuthCallback'
-import Dashboard from './pages/admin/Dashboard'
+import SpeakerDashboard from './pages/speaker/SpeakerDashboard'
+import SiteAdmin from './pages/admin/SiteAdmin'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './providers/AuthProvider'
 
@@ -50,7 +51,7 @@ createRoot(document.getElementById('root')).render(
               path="/speaker/admin"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <SpeakerDashboard />
                 </ProtectedRoute>
               }
             />
@@ -58,6 +59,10 @@ createRoot(document.getElementById('root')).render(
             {/* Back-compat redirects from old paths */}
             <Route path="/signin" element={<Navigate to="/speaker/signin" replace />} />
             <Route path="/auth/callback" element={<Navigate to="/speaker/auth/callback" replace />} />
+
+            {/* Site Admin landing */}
+            <Route path="/admin" element={<SiteAdmin />} />
+
             <Route path="/admin/blog" element={<AdminBlogList />} />
             <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
             <Route path="/admin/blog/:id" element={<AdminBlogEditor />} />
