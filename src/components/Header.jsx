@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Menu } from "lucide-react"; // hamburger icon
+import { Link } from "react-router-dom";
 import { MAIN_LINKS } from "@/lib/navLinks";
 import MobileMenu from "@/components/MobileMenu.jsx";
 
@@ -37,6 +38,8 @@ export default function Header({ countryCode, currency }) {
                 {label}
               </a>
             ))}
+            <Link to="/speaker/signin">Speaker Login</Link>
+            <a href="/admin">Admin</a>
           </nav>
 
           {/* Geo/currency chip (wired in Patch 2) + mobile button */}

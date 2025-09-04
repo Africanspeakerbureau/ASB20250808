@@ -43,16 +43,21 @@ createRoot(document.getElementById('root')).render(
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/*" element={<App />} />
             </Route>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
+            {/* Speaker Portal (new paths) */}
+            <Route path="/speaker/signin" element={<SignIn />} />
+            <Route path="/speaker/auth/callback" element={<AuthCallback />} />
             <Route
-              path="/admin"
+              path="/speaker/admin"
               element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
               }
             />
+
+            {/* Back-compat redirects from old paths */}
+            <Route path="/signin" element={<Navigate to="/speaker/signin" replace />} />
+            <Route path="/auth/callback" element={<Navigate to="/speaker/auth/callback" replace />} />
             <Route path="/admin/blog" element={<AdminBlogList />} />
             <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
             <Route path="/admin/blog/:id" element={<AdminBlogEditor />} />

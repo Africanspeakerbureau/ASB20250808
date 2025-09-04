@@ -13,7 +13,7 @@ export default function AuthHashGuard() {
     if (!hash) return;
     // If the hash contains auth info or an auth error, let the callback handle it.
     if (hash.includes("access_token") || hash.includes("refresh_token") || hash.includes("error")) {
-      nav(`/auth/callback${hash}`, { replace: true });
+      nav(`/speaker/auth/callback${hash}`, { replace: true });
     }
   }, [hash, nav]);
 

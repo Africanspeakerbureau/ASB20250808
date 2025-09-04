@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
 
 export default function MobileMenu({ open, onClose }) {
@@ -53,6 +54,14 @@ export default function MobileMenu({ open, onClose }) {
               </a>
             </li>
           ))}
+          <li>
+            <Link to="/speaker/signin" onClick={onClose}>
+              Speaker Login
+            </Link>
+          </li>
+          <li>
+            <a href="/admin">Admin</a>
+          </li>
         </ul>
 
         <div className="mt-8 border-t border-white/10 pt-4">
