@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MAIN_LINKS, SERVICE_LINKS } from '@/lib/navLinks';
+import { LEGACY_ADMIN_URL } from '../config';
 
 export default function MobileMenu({ open, onClose }) {
   useEffect(() => {
@@ -60,7 +61,9 @@ export default function MobileMenu({ open, onClose }) {
             </Link>
           </li>
           <li>
-            <a href="/admin">Admin</a>
+            <a href={LEGACY_ADMIN_URL} target="_blank" rel="noopener noreferrer">
+              Admin
+            </a>
           </li>
         </ul>
 

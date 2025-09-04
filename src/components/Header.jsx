@@ -3,6 +3,7 @@ import { Menu } from "lucide-react"; // hamburger icon
 import { Link } from "react-router-dom";
 import { MAIN_LINKS } from "@/lib/navLinks";
 import MobileMenu from "@/components/MobileMenu.jsx";
+import { LEGACY_ADMIN_URL } from "../config";
 
 export default function Header({ countryCode, currency }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,7 +40,7 @@ export default function Header({ countryCode, currency }) {
               </a>
             ))}
             <Link to="/speaker/signin">Speaker Login</Link>
-            <a href="/admin">Admin</a>
+            <a href={LEGACY_ADMIN_URL} target="_blank" rel="noopener noreferrer">Admin</a>
           </nav>
 
           {/* Geo/currency chip (wired in Patch 2) + mobile button */}
