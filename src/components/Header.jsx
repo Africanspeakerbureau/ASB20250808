@@ -25,8 +25,8 @@ export default function Header({ countryCode, currency }) {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-6 text-slate-800">
-            {MAIN_LINKS.map(({ to, label, variant }) => {
-              const href = to.startsWith('/#') ? to : `#${to}`;
+              {MAIN_LINKS.map(({ to, label, variant }) => {
+                const href = to === '/admin' ? '/admin' : to.startsWith('/#') ? to : `#${to}`;
               return (
                 <a
                   key={to}
