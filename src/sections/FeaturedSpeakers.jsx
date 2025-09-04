@@ -47,37 +47,39 @@ export default function FeaturedSpeakers() {
         <div className="grid grid-cols-12 gap-10 xl:gap-12">
           <div className="col-span-12 lg:col-span-5 flex flex-col lg:pr-6 max-w-[560px]">
             {/* Intro first on mobile, second on desktop */}
-            <div className="order-1 md:order-2 space-y-4 text-foreground">
-              <p className="text-base md:text-lg leading-7">
-                The African Speaker Bureau connects decision-makers with credible African voices who deliver <strong>leadership insights, market intelligence, and change-making stories</strong> to the room — context your executives can act on. We pair authentic African context with global standards — rapid shortlists, transparent pricing, clear contracting, travel coordination and post-event materials.
+            <div className="order-1 md:order-2 text-foreground">
+              <p className="text-base md:text-lg leading-relaxed">
+                The African Speaker Bureau connects decision-makers with credible African voices who deliver leadership insights, market intelligence, and change-making stories to the room — context your executives can act on.
               </p>
 
-              <blockquote className="border-l-2 border-muted pl-4 text-base md:text-lg leading-7">
+              <p className="mt-4 text-base md:text-lg leading-relaxed">
+                We pair authentic African context with global standards — rapid shortlists, transparent pricing, clear contracting, travel coordination and post-event materials.
+              </p>
+
+              <blockquote className="mt-6 border-l-4 border-muted pl-4 italic text-base md:text-lg leading-relaxed">
                 “The great powers of the world may have done wonders in giving the world an industrial look, but the great gift still has to come from Africa – giving the world a more human face.”<br />— <strong>Steve Biko</strong>
               </blockquote>
 
-              <p className="text-base md:text-lg leading-7">
-                We build on that belief. We curate speakers who pair commercial rigour with a deeply human perspective — and we manage every engagement end-to-end: rapid shortlists, transparent pricing, clear contracting, travel coordination and post-event materials.
+              <p className="mt-6 text-base md:text-lg leading-relaxed">
+                We build on that belief. We curate speakers who pair commercial rigour with a deeply human perspective — and we manage every engagement end-to-end.
               </p>
 
-              <p className="text-base md:text-lg leading-7">
-                Choose ASB for <strong>authentic African context with global standards</strong> — reliable delivery, real-world outcomes, and voices your leaders will remember long after the event.
-              </p>
-
-              <p className="text-sm italic text-muted mt-2">
-                This site is in active development — thanks for being part of ASB’s beta launch.
+              <p className="mt-4 text-base md:text-lg leading-relaxed">
+                Choose ASB for authentic African context with global standards — reliable delivery, real-world outcomes, and voices your leaders will remember long after the event.
               </p>
             </div>
             {/* Heading moves below intro on mobile */}
             <h2 className="order-2 md:order-1 mt-6 md:mt-0 text-3xl font-semibold mb-4 text-center md:text-left">Featured Speakers</h2>
             {/* Desktop button stays here; hidden on mobile */}
             <div className="order-3 hidden md:block">
-              <Link
-                to="/find-speakers"
-                className="mt-6 inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
-              >
-                View all speakers
-              </Link>
+              <div className="mt-6 flex justify-center">
+                <Link
+                  to="/find-speakers"
+                  className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg"
+                >
+                  View all speakers
+                </Link>
+              </div>
             </div>
           </div>
           <div className="col-span-12 lg:col-span-7">
