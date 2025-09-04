@@ -38,6 +38,7 @@ import { getConsent } from "@/lib/consent"
 import { useGeolocation } from "@/hooks/useGeolocation"
 import ApplyBeta from "./public/apply-beta/ApplyBeta"
 import { getAllPublishedSpeakersCached } from '@/lib/speakers'
+import SpeakerPortal from "./features/speaker/SpeakerPortal.jsx"
 
 // Field presets mapping for dropdowns
 const FIELD_PRESETS = {
@@ -2560,7 +2561,8 @@ function App() {
     )
   }
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <div className="min-h-screen bg-white">
       {/* Header */}
       {/* Header provided by PublicLayout */}
 
@@ -2749,7 +2751,9 @@ function App() {
         }} />
       )}
       {banner}
-    </div>
+      </div>
+      <SpeakerPortal />
+    </>
   )
 }
 
