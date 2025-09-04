@@ -17,6 +17,7 @@ import PublicLayout from './site/layout/PublicLayout'
 import SignIn from './pages/SignIn'
 import AuthCallback from './pages/AuthCallback'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard'
+import AdminRedirect from './pages/admin/AdminRedirect'
 import SiteAdmin from './pages/admin/SiteAdmin'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './providers/AuthProvider'
@@ -60,8 +61,10 @@ createRoot(document.getElementById('root')).render(
             <Route path="/signin" element={<Navigate to="/speaker/signin" replace />} />
             <Route path="/auth/callback" element={<Navigate to="/speaker/auth/callback" replace />} />
 
-            {/* Site Admin landing */}
-            <Route path="/admin" element={<SiteAdmin />} />
+            {/* /admin goes to the real (password) admin */}
+            <Route path="/admin" element={<AdminRedirect />} />
+            {/* optional helper page we made earlier */}
+            <Route path="/internal-admin" element={<SiteAdmin />} />
 
             <Route path="/admin/blog" element={<AdminBlogList />} />
             <Route path="/admin/blog/new" element={<AdminBlogEditor />} />

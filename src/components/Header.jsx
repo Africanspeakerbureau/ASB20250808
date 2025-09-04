@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Menu } from "lucide-react"; // hamburger icon
-import { Link } from "react-router-dom";
 import { MAIN_LINKS } from "@/lib/navLinks";
 import MobileMenu from "@/components/MobileMenu.jsx";
-import { LEGACY_ADMIN_URL } from "../config";
 
 export default function Header({ countryCode, currency }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -13,7 +11,7 @@ export default function Header({ countryCode, currency }) {
       <header className="sticky top-0 z-50 bg-white border-b shadow-sm pointer-events-auto">
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
           {/* Logo -> Home */}
-          <a href="#/" className="h-12 flex items-center">
+          <a href="/" className="h-12 flex items-center">
             <div className="bg-blue-900 rounded px-3 py-2 flex items-center justify-center min-w-[50px]">
               <span className="text-white font-bold text-lg">ASB</span>
             </div>
@@ -29,7 +27,7 @@ export default function Header({ countryCode, currency }) {
             {MAIN_LINKS.map(({ to, label, variant }) => (
               <a
                 key={to}
-                href={`#${to}`}
+                href={to}
                 className={
                   variant === 'default'
                     ? 'px-3 py-1 rounded bg-black text-white hover:bg-black/80'
@@ -39,8 +37,8 @@ export default function Header({ countryCode, currency }) {
                 {label}
               </a>
             ))}
-            <Link to="/speaker/signin">Speaker Login</Link>
-            <a href={LEGACY_ADMIN_URL} target="_blank" rel="noopener noreferrer">Admin</a>
+            <a href="/speaker/signin">Speaker Login</a>
+            <a href="/admin">Admin</a>
           </nav>
 
           {/* Geo/currency chip (wired in Patch 2) + mobile button */}
