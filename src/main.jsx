@@ -17,14 +17,16 @@ import PublicLayout from './site/layout/PublicLayout'
 import SignIn from './pages/SignIn'
 import AuthCallback from './pages/AuthCallback'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard'
-import SiteAdmin from './pages/admin/SiteAdmin'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminHashRedirect from './pages/AdminHashRedirect'
+import AdminHashGate from './components/AdminHashGate'
 import { AuthProvider } from './providers/AuthProvider'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ToastProvider>
       <AuthProvider>
+        <AdminHashGate />
         <Router>
           <AuthHashGuard />
           <ScrollToTop />
@@ -60,8 +62,8 @@ createRoot(document.getElementById('root')).render(
             <Route path="/signin" element={<Navigate to="/speaker/signin" replace />} />
             <Route path="/auth/callback" element={<Navigate to="/speaker/auth/callback" replace />} />
 
-            {/* Site Admin landing */}
-            <Route path="/admin" element={<SiteAdmin />} />
+            {/* Admin hash redirect */}
+            <Route path="/admin" element={<AdminHashRedirect />} />
 
             <Route path="/admin/blog" element={<AdminBlogList />} />
             <Route path="/admin/blog/new" element={<AdminBlogEditor />} />

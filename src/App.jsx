@@ -27,7 +27,6 @@ import { Cloudinary } from "@cloudinary/url-gen"
 import { AdvancedImage, placeholder } from "@cloudinary/react"
 import { CLOUDINARY } from "@/config/cloudinary";
 import AdminLoginModal from "./components/AdminLoginModal"
-import AdminInlineLogin from "./components/AdminInlineLogin.jsx"
 import SpeakerEditDialog from "./admin/components/Edit/SpeakerEditDialog"
 import QuickInquiryEditDialog from "./admin/components/Edit/QuickInquiryEditDialog"
 import ClientInquiryEditDialog from "./admin/components/Edit/ClientInquiryEditDialog"
@@ -2737,17 +2736,6 @@ function App() {
         onClose={closeAdminModal}
         onSubmit={handleAdminSubmit}
       />
-      {/* Fallback: if the modal fails for any reason, show an inline login page */}
-      {route === '/admin' && !isAuthed && (
-        <AdminInlineLogin onSuccess={() => {
-          // After success, show the dashboard view the old way
-          // (App.jsx returns the Admin Dashboard when isAuthed is true)
-          window.history.replaceState({}, '', '#/admin')
-          // Let App state catch up:
-          window.dispatchEvent(new HashChangeEvent('hashchange'))
-          // App.jsx will set isAuthed from sessionStorage and render the dashboard
-        }} />
-      )}
       {banner}
     </div>
   )
