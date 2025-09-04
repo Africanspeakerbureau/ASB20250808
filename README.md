@@ -28,6 +28,8 @@ This is the complete, production-ready African Speaker Bureau website with all f
    - Go to [vercel.com](https://vercel.com)
    - Sign up with GitHub
    - Import your repository
+   - In **Project Settings**, set Node.js version to **20.x**
+   - Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` environment variables
    - Click "Deploy"
    - Live in 2-3 minutes!
 
