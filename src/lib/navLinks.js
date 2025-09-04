@@ -5,7 +5,6 @@ export const MAIN_LINKS = [
   { to: '/about', label: 'About', variant: 'ghost' },
   { to: '/#get-in-touch', label: 'Contact', variant: 'ghost' },
   { to: '/book-a-speaker', label: 'Book a Speaker', variant: 'default' },
-  { to: '/signin', label: 'Speaker Login', variant: 'ghost' }
 ];
 
 export const SERVICE_LINKS = [

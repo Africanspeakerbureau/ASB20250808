@@ -36,7 +36,7 @@ export default function AuthCallback() {
           const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
           if (error) throw error;
           setMsg("Success! Redirecting…");
-          setTimeout(() => nav("/admin", { replace: true }), 600);
+          setTimeout(() => nav("/speaker/admin", { replace: true }), 600);
           return;
         }
 
@@ -47,7 +47,7 @@ export default function AuthCallback() {
           const { error } = await supabase.auth.setSession({ access_token, refresh_token });
           if (error) throw error;
           setMsg("Success! Redirecting…");
-          setTimeout(() => nav("/admin", { replace: true }), 600);
+          setTimeout(() => nav("/speaker/admin", { replace: true }), 600);
           return;
         }
 
@@ -55,7 +55,7 @@ export default function AuthCallback() {
         const { data } = await supabase.auth.getSession();
         if (data.session) {
           setMsg("You are already signed in. Redirecting…");
-          setTimeout(() => nav("/admin", { replace: true }), 300);
+          setTimeout(() => nav("/speaker/admin", { replace: true }), 300);
           return;
         }
 
@@ -76,7 +76,7 @@ export default function AuthCallback() {
       {isError && (
         <button
           className="rounded bg-black text-white px-3 py-2"
-          onClick={() => (window.location.href = "/signin")}
+          onClick={() => (window.location.href = "/speaker/signin")}
         >
           Back to sign-in
         </button>
