@@ -36,20 +36,22 @@ export default function MeetOurSpeakers() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Meet Our Speakers</h2>
-          <p className="text-gray-500 mt-2">Voices That Inspire</p>
+          <p className="mt-2 text-lg" style={{ color: 'var(--asb-muted)' }}>Voices That Inspire</p>
         </header>
 
-        {error && <p className="text-red-600">{error}</p>}
-        {!error && items.length === 0 && (
-          <p className="text-gray-400">No speakers available at the moment.</p>
-        )}
-        {!error && items.length > 0 && (
-          <div className="grid gap-5 grid-cols-2 md:grid-cols-4 lg:grid-cols-4 justify-items-center lg:justify-items-stretch">
-            {items.map((s) => (
-              <SpeakerCard key={s.id} speaker={s} variant="compact" />
-            ))}
-          </div>
-        )}
+        <div className="mt-6">
+          {error && <p className="text-red-600">{error}</p>}
+          {!error && items.length === 0 && (
+            <p className="text-gray-400">No speakers available at the moment.</p>
+          )}
+          {!error && items.length > 0 && (
+            <div className="grid gap-5 grid-cols-2 md:grid-cols-4 lg:grid-cols-4 justify-items-center lg:justify-items-stretch">
+              {items.map((s) => (
+                <SpeakerCard key={s.id} speaker={s} variant="compact" />
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="mt-6 flex justify-center">
           <a

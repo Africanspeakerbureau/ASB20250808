@@ -45,14 +45,14 @@ export default function FeaturedSpeakers() {
     <section id="featured-speakers" className="section bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-12 gap-10 xl:gap-12">
-          <div className="col-span-12 lg:col-span-5 flex flex-col lg:pr-6 max-w-[560px]">
+          <div className="col-span-12 lg:col-span-5 flex flex-col lg:pr-6 w-full max-w-prose">
             {/* Intro first on mobile, second on desktop */}
             <div className="order-1 md:order-2 text-foreground">
-              <p className="text-base md:text-lg leading-relaxed">
+              <p className="text-base md:text-lg leading-relaxed text-justify">
                 The African Speaker Bureau connects decision-makers with credible African voices who deliver leadership insights, market intelligence, and change-making stories to the room — context your executives can act on.
               </p>
 
-              <p className="mt-4 text-base md:text-lg leading-relaxed">
+              <p className="mt-4 text-base md:text-lg leading-relaxed text-justify">
                 We pair authentic African context with global standards — rapid shortlists, transparent pricing, clear contracting, travel coordination and post-event materials.
               </p>
 
@@ -60,11 +60,11 @@ export default function FeaturedSpeakers() {
                 “The great powers of the world may have done wonders in giving the world an industrial look, but the great gift still has to come from Africa – giving the world a more human face.”<br />— <strong>Steve Biko</strong>
               </blockquote>
 
-              <p className="mt-6 text-base md:text-lg leading-relaxed">
+              <p className="mt-6 text-base md:text-lg leading-relaxed text-justify">
                 We build on that belief. We curate speakers who pair commercial rigour with a deeply human perspective — and we manage every engagement end-to-end.
               </p>
 
-              <p className="mt-4 text-base md:text-lg leading-relaxed">
+              <p className="mt-4 text-base md:text-lg leading-relaxed text-justify">
                 Choose ASB for authentic African context with global standards — reliable delivery, real-world outcomes, and voices your leaders will remember long after the event.
               </p>
             </div>
