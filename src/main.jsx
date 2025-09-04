@@ -13,6 +13,9 @@ import Insights from './site/blog/Insights'
 import AdminBlogList from './admin/blog/AdminBlogList'
 import AdminBlogEditor from './admin/blog/AdminBlogEditor'
 import PublicLayout from './site/layout/PublicLayout'
+import SpeakerLogin from './pages/speaker/SpeakerLogin'
+import SpeakerAuthCallback from './pages/speaker/SpeakerAuthCallback'
+import SpeakerDashboard from './pages/speaker/SpeakerDashboard'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -38,6 +41,9 @@ createRoot(document.getElementById('root')).render(
           <Route path="/admin/blog" element={<AdminBlogList />} />
           <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
           <Route path="/admin/blog/:id" element={<AdminBlogEditor />} />
+          <Route path="/speaker-admin" element={<SpeakerLogin />} />
+          <Route path="/speaker/callback" element={<SpeakerAuthCallback />} />
+          <Route path="/speaker/dashboard" element={<SpeakerDashboard />} />
         </Routes>
       </Router>
     </ToastProvider>
