@@ -118,6 +118,7 @@ import heroTechSummit from './assets/hero_tech_summit.jpg'
 import heroExecutiveAI from './assets/hero_executive_ai_training.jpg'
 import heroCorporateLeadership from './assets/hero_corporate_leadership_conference.jpg'
 import heroVirtualSeminars from './assets/hero_virtual_seminars_webinars.jpg'
+import SpeakerPortal from "./features/speaker/SpeakerPortal.jsx"
 
 function App() {
   // Cloudinary configuration
@@ -2749,6 +2750,7 @@ function App() {
         }} />
       )}
       {banner}
+      <SpeakerPortal /> {/* renders ONLY for #/speaker/... ; never touches #/admin */}
     </div>
   )
 }
