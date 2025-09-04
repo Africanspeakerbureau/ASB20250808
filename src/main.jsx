@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
+import AuthHashGuard from './components/AuthHashGuard'
 import App from './App.jsx'
 import FindSpeakersPage from './components/FindSpeakersPage.jsx'
 import SpeakerProfile from './components/SpeakerProfile.jsx'
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')).render(
     <ToastProvider>
       <AuthProvider>
         <Router>
+          <AuthHashGuard />
           <ScrollToTop />
           <Routes>
             <Route element={<PublicLayout />}>
