@@ -15,8 +15,9 @@ export const supabase = createClient(url, anon, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true, // picks up tokens on callback
-    flowType: 'pkce',
+    detectSessionInUrl: true,
+    // IMPORTANT: magic links should use implicit/hash tokens, not PKCE code
+    flowType: 'implicit',
   },
 })
 
