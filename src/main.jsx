@@ -14,7 +14,7 @@ import AdminBlogList from './admin/blog/AdminBlogList'
 import AdminBlogEditor from './admin/blog/AdminBlogEditor'
 import PublicLayout from './site/layout/PublicLayout'
 import SpeakerLogin from './pages/speaker/SpeakerLogin.jsx'
-import SpeakerAuthCallback from './pages/speaker/SpeakerAuthCallback.jsx'
+import SpeakerCallback from './pages/speaker/SpeakerCallback.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 import RequireSpeakerAuth from './routes/RequireSpeakerAuth.jsx'
 import MagicLinkShim from './app/MagicLinkShim.jsx'
@@ -42,7 +42,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/*" element={<App />} />
         </Route>
         <Route path="/speaker-login" element={<SpeakerLogin />} />
-        <Route path="/speaker-callback" element={<SpeakerAuthCallback />} />
+        <Route path="/speaker-callback" element={<SpeakerCallback />} />
         <Route
           path="/speaker-dashboard"
           element={

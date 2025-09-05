@@ -3,34 +3,40 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 
 export default function SpeakerDashboard() {
-  const nav = useNavigate()
-  const [user, setUser] = useState(null)
+  const navigate = useNavigate()
+  const [email, setEmail] = useState('')
 
   useEffect(() => {
-    let alive = true
+    let mounted = true
     ;(async () => {
-      const { data } = await supabase.auth.getUser()
-      if (!alive) return
-      if (!data?.user) {
-        nav('/speaker-login', { replace: true })
-      } else {
-        setUser(data.user)
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!mounted) return
+      if (!user) {
+        navigate('/speaker-login', { replace: true })
+        return
       }
+      setEmail(user.email || '')
     })()
-    return () => { alive = false }
-  }, [nav])
+    return () => {
+      mounted = false
+    }
+  }, [navigate])
 
   async function signOut() {
     await supabase.auth.signOut()
-    nav('/speaker-login', { replace: true })
+    navigate('/speaker-login', { replace: true })
   }
 
-  if (!user) return null
+  if (!email) return null
 
   return (
-    <div style={{maxWidth: 880, margin:'40px auto'}}>
+    <div style={{ maxWidth: 880, margin: '40px auto' }}>
       <h1>Speaker Portal</h1>
-      <p>You are signed in as <strong>{user.email}</strong></p>
+      <p>
+        You are signed in as <strong>{email}</strong>
+      </p>
       <button onClick={signOut}>Sign out</button>
       {/* Future: speaker profile editor, uploads, etc. */}
     </div>
