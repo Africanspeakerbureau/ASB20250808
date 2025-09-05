@@ -9,8 +9,9 @@ import HomeInsights from './site/home/HomeInsights'
 import BookingForm from './components/BookingForm'
 import SectionTitle from '@/components/SectionTitle'
 import BottomCta from '@/components/BottomCta'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button.jsx'
+import { supabase } from '@/lib/supabaseClient'
 import { getLocationAndRate } from './lib/geo.js'
 import {
   getSpeakerApplications,
@@ -127,6 +128,7 @@ function App() {
   })
   
   const widgetRef = useRef()
+  const navigate = useNavigate()
   
   // State variables
   const [route, setRoute] = useState(() => window.location.hash.slice(1) || '/')
@@ -161,6 +163,37 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('speakers')
   const [selectedService, setSelectedService] = useState('keynote-speakers')
+
+  // Handle Supabase magic-link returns (hash or code) globally.
+  useEffect(() => {
+    const bootstrapFromUrl = async () => {
+      try {
+        const { hash, search, pathname } = window.location;
+        if (hash && hash.includes('access_token=')) {
+          const sp = new URLSearchParams(hash.slice(1));
+          const access_token = sp.get('access_token');
+          const refresh_token = sp.get('refresh_token');
+          if (access_token && refresh_token) {
+            await supabase.auth.setSession({ access_token, refresh_token });
+            window.history.replaceState({}, '', pathname + '#/');
+            navigate('/speaker-dashboard', { replace: true });
+            return;
+          }
+        }
+        const qs = new URLSearchParams(search);
+        const code = qs.get('code');
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!error) {
+            window.history.replaceState({}, '', pathname + window.location.hash);
+            navigate('/speaker-dashboard', { replace: true });
+          }
+        }
+      } catch { /* no-op */ }
+    };
+    bootstrapFromUrl();
+  }, [navigate]);
+
 
   const hashToService = {
     'keynotes': 'keynote-speakers',

@@ -25,6 +25,7 @@ export default function SpeakerProfile() {
   const [email, setEmail] = useState('');
   const [activeTab, setActiveTab] = useState('Identity');
   const [err, setErr] = useState('');
+  const [notice, setNotice] = useState('');
 
   // ---- form state (only external tabs) ----
   const [form, setForm] = useState({
@@ -37,6 +38,7 @@ export default function SpeakerProfile() {
     // Experience
     'Years Experience': '', 'Speaking Experience': '', 'Number of Events': '',
     'Largest Audience': '', 'Virtual Experience': '',
+    'Expertise Level': '',
     // Expertise & Content
     'Industry': '', 'Expertise Areas': [], 'Speaking Topics': '', 'Key Messages': '',
     // Why booking
@@ -61,7 +63,7 @@ export default function SpeakerProfile() {
   const tabs = useMemo(() => ([
     { key: 'Identity', fields: ['First Name','Last Name','Email','Phone','Professional Title','Company','Location','Country','Profile Image']},
     { key: 'Background', fields: ['Professional Bio','Education','Achievements']},
-    { key: 'Experience', fields: ['Years Experience','Speaking Experience','Number of Events','Largest Audience','Virtual Experience']},
+    { key: 'Experience', fields: ['Years Experience','Speaking Experience','Number of Events','Largest Audience','Virtual Experience','Expertise Level']},
     { key: 'Expertise & Content', fields: ['Industry','Expertise Areas','Speaking Topics','Key Messages']},
     { key: 'Why booking', fields: ['Speakers Delivery Style','Why the audience should listen to these topics','What the speeches will address','What participants will learn','What the audience will take home','Benefits for the individual','Benefits for the organisation']},
     { key: 'Media & Languages', fields: ['Header Image','Video Link 1','Video Link 2','Video Link 3','Spoken Languages']},
@@ -103,6 +105,7 @@ export default function SpeakerProfile() {
           'Number of Events': toSingle(f['Number of Events']),
           'Largest Audience': toSingle(f['Largest Audience']),
           'Virtual Experience': toSingle(f['Virtual Experience']),
+          'Expertise Level': toSingle(f['Expertise Level']),
           'Industry': toSingle(f['Industry']),
           'Expertise Areas': toMulti(f['Expertise Areas']),
           'Speaking Topics': toSingle(f['Speaking Topics']),
@@ -171,6 +174,7 @@ export default function SpeakerProfile() {
         'Number of Events': ensureAllowed('Number of Events', form['Number of Events']),
         'Largest Audience': ensureAllowed('Largest Audience', form['Largest Audience']),
         'Virtual Experience': ensureAllowed('Virtual Experience', form['Virtual Experience']),
+        'Expertise Level': ensureAllowed('Expertise Level', form['Expertise Level']),
 
         'Industry': ensureAllowed('Industry', form['Industry']),
         'Expertise Areas': ensureAllowed('Expertise Areas', form['Expertise Areas']),
@@ -212,7 +216,8 @@ export default function SpeakerProfile() {
       };
 
       await updateSpeakerRecord(recordId, payload);
-      if (closeAfter) navigate('/speaker-dashboard', { replace: true });
+      setNotice('✅ Profile updated.');
+      if (closeAfter) navigate('/speaker-dashboard', { replace: true, state: { notice: 'Profile updated.' } });
     } catch (e) {
       setErr(e.message || 'Save failed');
     } finally {
@@ -227,6 +232,7 @@ export default function SpeakerProfile() {
       <h1>Edit My Profile</h1>
       <p>Signed in as <strong>{email}</strong></p>
       {err && <p style={{color:'crimson'}}>{err}</p>}
+      {notice && <p style={{color:'#065f46', background:'#ecfdf5', border:'1px solid #a7f3d0', padding:'8px 12px', borderRadius:8}}>{notice}</p>}
 
       <div style={{display:'flex', gap:8, flexWrap:'wrap', margin:'16px 0'}}>
         {tabs.map(t => (
