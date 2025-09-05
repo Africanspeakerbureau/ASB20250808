@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient'
 export default function SpeakerDashboard() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let mounted = true
@@ -13,8 +14,27 @@ export default function SpeakerDashboard() {
         data: { user },
       } = await supabase.auth.getUser()
       if (!mounted) return
-      if (!user) return navigate('/speaker-login', { replace: true })
-      setEmail(user.email || '')
+      if (user?.email) {
+        setEmail(user.email)
+        setLoading(false)
+      } else {
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((_e, session) => {
+          if (!mounted) return
+          if (session?.user?.email) {
+            setEmail(session.user.email)
+            setLoading(false)
+          }
+        })
+        setTimeout(() => {
+          if (mounted && loading) {
+            setLoading(false)
+            navigate('/speaker-login', { replace: true })
+          }
+        }, 800)
+        return () => subscription?.unsubscribe()
+      }
     })()
     return () => {
       mounted = false
@@ -40,6 +60,7 @@ export default function SpeakerDashboard() {
     navigate('/speaker-login', { replace: true })
   }
 
+  if (loading) return <div style={{ padding: 24 }}>Loading…</div>
   if (!email) return null
 
   return (
