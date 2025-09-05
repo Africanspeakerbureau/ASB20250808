@@ -1,37 +1,44 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 
 export default function SpeakerAuthCallback() {
-  const navigate = useNavigate()
   const [msg, setMsg] = useState('Signing you in…')
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       try {
-        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href)
-        if (error) {
-          console.error('Magic-link exchange failed:', error)
-          setMsg(`Sign-in failed: ${error.message}`)
-          // Give users a moment to read, then bounce to login
-          setTimeout(() => navigate('/speaker-login', { replace: true }), 1500)
-          return
-        }
-        // Success -> dashboard
-        navigate('/speaker-dashboard', { replace: true })
-        window.history.replaceState({}, '', `${window.location.origin}/#/speaker-dashboard`)
-      } catch (e) {
-        console.error(e)
-        setMsg('Unexpected error during sign-in.')
-        setTimeout(() => navigate('/speaker-login', { replace: true }), 1500)
+        // 1) Preferred: let Supabase parse hash / query and store the session
+        const res = await supabase.auth.getSessionFromUrl({ storeSession: true })
+        if (!res?.data?.session) throw new Error('No session from URL')
+        window.location.replace('/#/speaker-dashboard')
+        return
+      } catch {
+        // fall through to other shapes
       }
-    })()
-  }, [navigate])
 
-  return (
-    <div className="max-w-md mx-auto py-16">
-      <p>{msg}</p>
-    </div>
-  )
+      // 2) Fallback for email OTP style links (?token_hash=…&type=magiclink)
+      const url = new URL(window.location.href)
+      const token_hash = url.searchParams.get('token_hash')
+      const type = url.searchParams.get('type') || 'magiclink'
+
+      if (token_hash) {
+        try {
+          const { data, error } = await supabase.auth.verifyOtp({ type, token_hash })
+          if (error) throw error
+          if (data?.session) {
+            window.location.replace('/#/speaker-dashboard')
+            return
+          }
+        } catch {
+          // continue to error UI
+        }
+      }
+
+      // 3) If we’re here, we couldn’t create a session
+      setMsg('Sign-in failed. Please request a new magic link and try again.')
+    })()
+  }, [])
+
+  return <p style={{ padding: '2rem' }}>{msg}</p>
 }
 
