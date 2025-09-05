@@ -18,6 +18,7 @@ import SpeakerCallback from './pages/speaker/SpeakerCallback.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 import RequireSpeakerAuth from './routes/RequireSpeakerAuth.jsx'
 import MagicLinkShim from './app/MagicLinkShim.jsx'
+import SignOut from '@/routes/SignOut'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -43,6 +44,7 @@ createRoot(document.getElementById('root')).render(
         </Route>
         <Route path="/speaker-login" element={<SpeakerLogin />} />
         <Route path="/speaker-callback" element={<SpeakerCallback />} />
+        <Route path="/sign-out" element={<SignOut />} />
         <Route
           path="/speaker-dashboard"
           element={
