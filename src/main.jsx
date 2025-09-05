@@ -16,6 +16,7 @@ import PublicLayout from './site/layout/PublicLayout'
 import SpeakerLogin from './pages/speaker/SpeakerLogin.jsx'
 import SpeakerAuthCallback from './pages/speaker/SpeakerAuthCallback.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
+import RequireSpeakerAuth from './routes/RequireSpeakerAuth.jsx'
 
 function MagicLinkShim() {
   useEffect(() => {
@@ -56,7 +57,14 @@ createRoot(document.getElementById('root')).render(
         </Route>
         <Route path="/speaker-login" element={<SpeakerLogin />} />
         <Route path="/speaker-callback" element={<SpeakerAuthCallback />} />
-        <Route path="/speaker-dashboard" element={<SpeakerDashboard />} />
+        <Route
+          path="/speaker-dashboard"
+          element={
+            <RequireSpeakerAuth>
+              <SpeakerDashboard />
+            </RequireSpeakerAuth>
+          }
+        />
         <Route path="/admin/blog" element={<AdminBlogList />} />
         <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
         <Route path="/admin/blog/:id" element={<AdminBlogEditor />} />
