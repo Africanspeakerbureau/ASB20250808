@@ -1,4 +1,4 @@
-import { StrictMode, useEffect } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
@@ -17,21 +17,7 @@ import SpeakerLogin from './pages/speaker/SpeakerLogin.jsx'
 import SpeakerAuthCallback from './pages/speaker/SpeakerAuthCallback.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 import RequireSpeakerAuth from './routes/RequireSpeakerAuth.jsx'
-
-function MagicLinkShim() {
-  useEffect(() => {
-    const qs = new URLSearchParams(window.location.search)
-    const hasCode = qs.get('code')
-    const alreadyOnCallback = window.location.hash.includes('/speaker-callback')
-
-    if (hasCode && !alreadyOnCallback) {
-      // Forward the query string intact to the callback route
-      window.location.replace(`${window.location.origin}/#/speaker-callback${window.location.search}`)
-    }
-  }, [])
-
-  return null
-}
+import MagicLinkShim from './app/MagicLinkShim.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
