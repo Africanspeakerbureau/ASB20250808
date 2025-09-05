@@ -26,8 +26,10 @@ export default function BootAuth() {
           const refresh_token = sp.get('refresh_token')
           if (access_token && refresh_token) {
             await supabase.auth.setSession({ access_token, refresh_token })
+            // Clean URL and force a single, safe reload to hydrate auth everywhere.
             cleanUrl()
-            goDashboard()
+            window.history.replaceState({}, '', `${window.location.pathname}#/speaker-dashboard`)
+            window.location.reload() // ← one-time hard reload
             return
           }
         }
@@ -39,7 +41,8 @@ export default function BootAuth() {
           const { error } = await supabase.auth.exchangeCodeForSession(code)
           if (!error) {
             cleanUrl()
-            goDashboard()
+            window.history.replaceState({}, '', `${window.location.pathname}#/speaker-dashboard`)
+            window.location.reload() // ← one-time hard reload
           }
         }
       } catch { /* no-op */ }
