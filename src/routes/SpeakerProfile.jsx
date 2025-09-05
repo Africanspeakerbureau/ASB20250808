@@ -2,13 +2,20 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { findSpeakerByEmail, updateSpeakerRecord } from '@/lib/airtableClient';
+import { SELECTS, MULTI_FIELDS } from '@/constants/speakerEnums';
 
 // ---- helpers for select coercion ----
 const toSingle = (val) => (val ? String(val) : '');
 const toMulti = (arr) => Array.isArray(arr) ? arr.map(String) : [];
 
+const ensureAllowed = (field, val) => {
+  const opts = SELECTS[field];
+  if (!opts) return val;
+  if (Array.isArray(val)) return val.filter(v => opts.includes(v));
+  return opts.includes(val) ? val : undefined;
+};
+
 const fromSingle = (val) => (val ? String(val) : undefined);               // Airtable singleSelect accepts a string
-const fromMulti = (arr) => (Array.isArray(arr) && arr.length ? arr : undefined); // Airtable multiSelect accepts string[]
 
 export default function SpeakerProfile() {
   const navigate = useNavigate();
@@ -151,7 +158,7 @@ export default function SpeakerProfile() {
         'Professional Title': fromSingle(form['Professional Title']),
         'Company': fromSingle(form['Company']),
         'Location': fromSingle(form['Location']),
-        'Country': fromSingle(form['Country']),
+        'Country': ensureAllowed('Country', form['Country']),
         // Keep existing attachment objects if unchanged
         'Profile Image': Array.isArray(form['Profile Image']) && form['Profile Image'].length ? form['Profile Image'] : undefined,
 
@@ -159,14 +166,14 @@ export default function SpeakerProfile() {
         'Education': fromSingle(form['Education']),
         'Achievements': fromSingle(form['Achievements']),
 
-        'Years Experience': fromSingle(form['Years Experience']),
-        'Speaking Experience': fromSingle(form['Speaking Experience']),
-        'Number of Events': fromSingle(form['Number of Events']),
-        'Largest Audience': fromSingle(form['Largest Audience']),
-        'Virtual Experience': fromSingle(form['Virtual Experience']),
+        'Years Experience': ensureAllowed('Years Experience', form['Years Experience']),
+        'Speaking Experience': ensureAllowed('Speaking Experience', form['Speaking Experience']),
+        'Number of Events': ensureAllowed('Number of Events', form['Number of Events']),
+        'Largest Audience': ensureAllowed('Largest Audience', form['Largest Audience']),
+        'Virtual Experience': ensureAllowed('Virtual Experience', form['Virtual Experience']),
 
-        'Industry': fromSingle(form['Industry']),
-        'Expertise Areas': fromMulti(form['Expertise Areas']),
+        'Industry': ensureAllowed('Industry', form['Industry']),
+        'Expertise Areas': ensureAllowed('Expertise Areas', form['Expertise Areas']),
         'Speaking Topics': fromSingle(form['Speaking Topics']),
         'Key Messages': fromSingle(form['Key Messages']),
 
@@ -182,14 +189,14 @@ export default function SpeakerProfile() {
         'Video Link 1': fromSingle(form['Video Link 1']),
         'Video Link 2': fromSingle(form['Video Link 2']),
         'Video Link 3': fromSingle(form['Video Link 3']),
-        'Spoken Languages': fromMulti(form['Spoken Languages']),
+        'Spoken Languages': ensureAllowed('Spoken Languages', form['Spoken Languages']),
 
-        'Fee Range General': fromSingle(form['Fee Range General']),
-        'Fee Range Local': fromSingle(form['Fee Range Local']),
-        'Fee Range Continental': fromSingle(form['Fee Range Continental']),
-        'Fee Range International': fromSingle(form['Fee Range International']),
-        'Fee Range Virtual': fromSingle(form['Fee Range Virtual']),
-        'Travel Willingness': fromSingle(form['Travel Willingness']),
+        'Fee Range General': ensureAllowed('Fee Range General', form['Fee Range General']),
+        'Fee Range Local': ensureAllowed('Fee Range Local', form['Fee Range Local']),
+        'Fee Range Continental': ensureAllowed('Fee Range Continental', form['Fee Range Continental']),
+        'Fee Range International': ensureAllowed('Fee Range International', form['Fee Range International']),
+        'Fee Range Virtual': ensureAllowed('Fee Range Virtual', form['Fee Range Virtual']),
+        'Travel Willingness': ensureAllowed('Travel Willingness', form['Travel Willingness']),
         'Travel Requirements': fromSingle(form['Travel Requirements']),
 
         'Website': fromSingle(form['Website']),
@@ -235,7 +242,7 @@ export default function SpeakerProfile() {
         ))}
       </div>
 
-      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:16}}>
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, alignItems:'start'}}>
         {tabs.find(t => t.key===activeTab).fields.map((field) => (
           <Field
             key={field}
@@ -270,16 +277,16 @@ function Field({label, value, onChange}) {
     'Banking Details','Special Requirements','Additional Info'
   ].includes(label);
 
-  // Multi-select chips (simple comma list for now)
-  const isMulti = ['Expertise Areas','Spoken Languages'].includes(label);
-
-  // Attachments are shown read-only for Phase-1 (keep existing URLs)
+  const isMulti = MULTI_FIELDS.has(label);
   const isAttachment = ['Profile Image','Header Image'].includes(label);
+  const hasSelect = !!SELECTS[label];
+  const frame = { border:'1px solid #e5e7eb', borderRadius:12, padding:12, background:'#fff' };
+  const labelCss = { fontWeight:600, marginBottom:6, display:'block' };
 
   if (isAttachment) {
     return (
-      <div style={{gridColumn:'1 / -1'}}>
-        <div style={{fontWeight:600, marginBottom:4}}>{label}</div>
+      <div style={{gridColumn:'1 / -1', ...frame}}>
+        <span style={labelCss}>{label}</span>
         {Array.isArray(value) && value.length
           ? <ul>{value.map((a,i)=><li key={i}><a href={a.url} target="_blank" rel="noreferrer">{a.filename || a.url}</a></li>)}</ul>
           : <em>No file selected</em>}
@@ -288,25 +295,63 @@ function Field({label, value, onChange}) {
     );
   }
 
-  if (isMulti) {
+  if (isMulti && hasSelect) {
     return (
-      <div>
-        <div style={{fontWeight:600, marginBottom:4}}>{label}</div>
-        <input
-          type="text"
-          value={Array.isArray(value) ? value.join(', ') : ''}
-          onChange={(e)=>onChange(e.target.value.split(',').map(x=>x.trim()).filter(Boolean))}
-          placeholder="Comma-separate choices (must match Airtable options)"
-        />
+      <div style={frame}>
+        <span style={labelCss}>{label}</span>
+        <div style={{display:'flex', flexWrap:'wrap', gap:8}}>
+          {SELECTS[label].map(opt => {
+            const checked = Array.isArray(value) && value.includes(opt);
+            return (
+              <label key={opt} style={{display:'inline-flex',alignItems:'center', gap:6,
+                padding:'6px 10px', border:'1px solid #e5e7eb', borderRadius:999}}>
+                <input
+                  type="checkbox"
+                  checked={!!checked}
+                  onChange={(e)=>{
+                    const next = new Set(Array.isArray(value) ? value : []);
+                    if (e.target.checked) next.add(opt); else next.delete(opt);
+                    onChange(Array.from(next));
+                  }}
+                />
+                {opt}
+              </label>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (hasSelect && !isMulti) {
+    const opts = SELECTS[label];
+    const v = (value && opts.includes(value)) ? value : '';
+    return (
+      <div style={frame}>
+        <span style={labelCss}>{label}</span>
+        <select
+          value={v}
+          onChange={(e)=>onChange(e.target.value)}
+          style={{width:'100%', height:38, border:'1px solid #e5e7eb', borderRadius:8, padding:'0 10px'}}
+        >
+          <option value="">— Select —</option>
+          {opts.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {value && !opts.includes(value) && (
+          <div style={{fontSize:12, color:'#a00', marginTop:6}}>
+            Current value “{String(value)}” is not in allowed options; pick a value above to save.
+          </div>
+        )}
       </div>
     );
   }
 
   if (isLong) {
     return (
-      <div style={{gridColumn:'1 / -1'}}>
-        <div style={{fontWeight:600, marginBottom:4}}>{label}</div>
-        <textarea rows={6} value={value || ''} onChange={(e)=>onChange(e.target.value)} />
+      <div style={{gridColumn:'1 / -1', ...frame}}>
+        <span style={labelCss}>{label}</span>
+        <textarea rows={6} value={value || ''} onChange={(e)=>onChange(e.target.value)}
+          style={{width:'100%', border:'1px solid #e5e7eb', borderRadius:8, padding:10}} />
       </div>
     );
   }
@@ -317,9 +362,15 @@ function Field({label, value, onChange}) {
              : 'text';
 
   return (
-    <div>
-      <div style={{fontWeight:600, marginBottom:4}}>{label}</div>
-      <input type={type} value={value || ''} onChange={(e)=>onChange(e.target.value)} />
+    <div style={frame}>
+      <span style={labelCss}>{label}</span>
+      <input
+        type={type}
+        value={value || ''}
+        onChange={(e)=>onChange(e.target.value)}
+        disabled={label==='Email'}
+        style={{width:'100%', height:38, border:'1px solid #e5e7eb', borderRadius:8, padding:'0 10px'}}
+      />
     </div>
   );
 }
