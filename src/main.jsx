@@ -13,6 +13,9 @@ import Insights from './site/blog/Insights'
 import AdminBlogList from './admin/blog/AdminBlogList'
 import AdminBlogEditor from './admin/blog/AdminBlogEditor'
 import PublicLayout from './site/layout/PublicLayout'
+import SpeakerLogin from './pages/speaker/SpeakerLogin.jsx'
+import SpeakerAuthCallback from './pages/speaker/SpeakerAuthCallback.jsx'
+import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -34,10 +37,13 @@ createRoot(document.getElementById('root')).render(
             <Route path="/insights" element={<Insights />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/*" element={<App />} />
-          </Route>
-          <Route path="/admin/blog" element={<AdminBlogList />} />
-          <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
-          <Route path="/admin/blog/:id" element={<AdminBlogEditor />} />
+        </Route>
+        <Route path="/speaker-login" element={<SpeakerLogin />} />
+        <Route path="/speaker-callback" element={<SpeakerAuthCallback />} />
+        <Route path="/speaker-dashboard" element={<SpeakerDashboard />} />
+        <Route path="/admin/blog" element={<AdminBlogList />} />
+        <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
+        <Route path="/admin/blog/:id" element={<AdminBlogEditor />} />
         </Routes>
       </Router>
     </ToastProvider>
