@@ -13,16 +13,14 @@ export default function SpeakerDashboard() {
         data: { user },
       } = await supabase.auth.getUser()
       if (!mounted) return
-      if (!user) {
-        navigate('/speaker-login', { replace: true })
-        return
-      }
+      if (!user) return navigate('/speaker-login', { replace: true })
       setEmail(user.email || '')
     })()
     return () => {
       mounted = false
     }
-  }, [navigate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function signOut() {
     await supabase.auth.signOut()
