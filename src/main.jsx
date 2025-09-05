@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
 import App from './App.jsx'
 import FindSpeakersPage from './components/FindSpeakersPage.jsx'
@@ -13,6 +13,10 @@ import Insights from './site/blog/Insights'
 import AdminBlogList from './admin/blog/AdminBlogList'
 import AdminBlogEditor from './admin/blog/AdminBlogEditor'
 import PublicLayout from './site/layout/PublicLayout'
+import SpeakerLogin from '@/pages/speaker/SpeakerLogin.jsx'
+import SpeakerAuthCallback from '@/pages/speaker/SpeakerAuthCallback.jsx'
+import SpeakerDashboard from '@/pages/speaker/SpeakerDashboard.jsx'
+import ProtectedRoute from '@/routes/ProtectedRoute.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -30,16 +34,21 @@ createRoot(document.getElementById('root')).render(
             <Route path="/apply-beta" element={<Navigate to="/apply-card-v1" replace />} />
             {/* Keep existing v2 route as-is */}
             <Route path="/apply-v2" element={<App />} />
-            <Route path="/blog" element={<BlogIndex />} />
-            <Route path="/insights" element={<Insights />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/*" element={<App />} />
-          </Route>
-          <Route path="/admin/blog" element={<AdminBlogList />} />
-          <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
-          <Route path="/admin/blog/:id" element={<AdminBlogEditor />} />
-        </Routes>
-      </Router>
-    </ToastProvider>
-  </StrictMode>,
-)
+              <Route path="/blog" element={<BlogIndex />} />
+              <Route path="/insights" element={<Insights />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/*" element={<App />} />
+            </Route>
+            <Route path="/admin/blog" element={<AdminBlogList />} />
+            <Route path="/admin/blog/new" element={<AdminBlogEditor />} />
+            <Route path="/admin/blog/:id" element={<AdminBlogEditor />} />
+            <Route path="/speaker-admin" element={<SpeakerLogin />} />
+            <Route path="/speaker-admin/callback" element={<SpeakerAuthCallback />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/speaker-admin/dashboard" element={<SpeakerDashboard />} />
+            </Route>
+          </Routes>
+        </Router>
+      </ToastProvider>
+    </StrictMode>,
+  )
