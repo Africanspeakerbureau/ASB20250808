@@ -41,6 +41,24 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function () {
+        // We use a hash router. Supabase sometimes returns to /#access_token=...
+        // That lands on Home (no route). Move tokens under /#/speaker-callback.
+        var hash = window.location.hash || '';
+        var search = window.location.search || '';
+
+        var hasRootTokens =
+          /^#access_token=|^#refresh_token=|^#token_hash=/.test(hash) ||
+          (/#\?/.test(hash) && /code=/.test(hash)) ||      // "#?code=..."
+          (!hash.includes('/speaker-callback') && /[?&]code=/.test(search)); // "?code=" on root
+
+        if (hasRootTokens) {
+          var frag = hash.startsWith('#') ? hash : ('#' + hash);
+          window.location.replace(window.location.origin + '/#/speaker-callback' + frag);
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
     <!-- CKEditor 5 Classic Build (CDN) -->
     <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
