@@ -12,21 +12,21 @@ export default function SpeakerDashboard() {
   useEffect(() => {
     let mounted = true
 
-    // Resolve any persisted session immediately
+    // Fast path: read any persisted session immediately
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return
       if (data?.session?.user?.email) {
         setEmail(data.session.user.email)
         setLoading(false)
-      } else {
-        setLoading(true)
       }
     })
 
-    // Then react to auth events (covers Safari/Firefox timing)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Authoritative path: respond to INITIAL_SESSION / SIGNED_IN
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return
-      if (['INITIAL_SESSION','SIGNED_IN','TOKEN_REFRESHED'].includes(event)) {
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setEmail(session?.user?.email ?? '')
         setLoading(false)
       }
@@ -36,7 +36,10 @@ export default function SpeakerDashboard() {
       }
     })
 
-    return () => { mounted = false; subscription.unsubscribe() }
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const handleSignOut = async (global = false) => {
