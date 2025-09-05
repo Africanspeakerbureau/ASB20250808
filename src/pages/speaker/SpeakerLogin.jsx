@@ -4,49 +4,52 @@ import { supabase } from '../../lib/supabaseClient'
 export default function SpeakerLogin() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [err, setErr] = useState('')
+  const [sending, setSending] = useState(false)
+
+  const redirectTo = `${window.location.origin}/#/speaker-callback`
 
   async function onSubmit(e) {
     e.preventDefault()
-    setLoading(true); setErr('')
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/#/speaker-callback`,
-        },
-      })
-      if (error) throw error
-      setSent(true)
-    } catch (e) {
-      setErr(e?.message ?? 'Unable to send magic link')
-    } finally {
-      setLoading(false)
+    setSending(true)
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo },
+    })
+    setSending(false)
+    if (error) {
+      alert(error.message)
+      return
     }
-  }
-
-  if (sent) {
-    return <p>Check your email for a login link. You can close this tab.</p>
+    setSent(true)
   }
 
   return (
     <div style={{maxWidth: 420, margin: '40px auto'}}>
       <h1>Speaker Login</h1>
-      <form onSubmit={onSubmit}>
-        <input
-          type="email"
-          required
-          value={email}
-          placeholder="you@example.com"
-          onChange={e=>setEmail(e.target.value)}
-          style={{width:'100%', padding:'10px', marginBottom:12}}
-        />
-        <button disabled={loading} type="submit">
-          {loading ? 'Sending…' : 'Email me a magic link'}
-        </button>
-      </form>
-      {err && <p style={{color:'crimson'}}>{err}</p>}
+
+      {!sent ? (
+        <form onSubmit={onSubmit}>
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            placeholder="you@example.com"
+            style={{width:'100%', padding:'10px', marginBottom:12}}
+          />
+          <button
+            type="submit"
+            disabled={sending}
+          >
+            {sending ? 'Sending…' : 'Email me a magic link'}
+          </button>
+          <p style={{fontSize:'0.875rem', color:'#6b7280'}}>
+            We’ll email you a one-time login link. Clicking it brings you back to the site to finish sign-in.
+          </p>
+        </form>
+      ) : (
+        <p>Check your inbox for the login link. You can close this tab.</p>
+      )}
     </div>
   )
 }
