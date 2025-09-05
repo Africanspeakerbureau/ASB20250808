@@ -20,11 +20,13 @@ import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 import RequireSpeakerAuth from './routes/RequireSpeakerAuth.jsx'
 import MagicLinkShim from './app/MagicLinkShim.jsx'
 import SignOut from '@/routes/SignOut'
+import BootAuth from '@/auth/BootAuth'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ToastProvider>
       <Router>
+        <BootAuth />
         <MagicLinkShim />
         <ScrollToTop />
         <Routes>
