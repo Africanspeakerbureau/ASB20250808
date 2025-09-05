@@ -5,7 +5,8 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import ScrollToTop from './components/ScrollToTop'
 import App from './App.jsx'
 import FindSpeakersPage from './components/FindSpeakersPage.jsx'
-import SpeakerProfile from './components/SpeakerProfile.jsx'
+import PublicSpeakerProfile from './components/SpeakerProfile.jsx'
+import SpeakerProfile from '@/routes/SpeakerProfile'
 import { ToastProvider } from './components/Toast'
 import BlogPost from './site/blog/BlogPost'
 import BlogIndex from './site/blog/BlogIndex'
@@ -28,7 +29,7 @@ createRoot(document.getElementById('root')).render(
         <ScrollToTop />
         <Routes>
           <Route element={<PublicLayout />}>
-            <Route path="/speakers/:slug" element={<SpeakerProfile />} />
+            <Route path="/speakers/:slug" element={<PublicSpeakerProfile />} />
             <Route path="/find-speakers" element={<FindSpeakersPage />} />
             <Route path="/book-a-speaker" element={<App />} />
             {/* New canonical route for card-based application */}
@@ -45,6 +46,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/speaker-login" element={<SpeakerLogin />} />
         <Route path="/speaker-callback" element={<SpeakerCallback />} />
         <Route path="/sign-out" element={<SignOut />} />
+        <Route path="/speaker-profile" element={<SpeakerProfile />} />
         <Route
           path="/speaker-dashboard"
           element={
