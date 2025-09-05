@@ -179,3 +179,4 @@ This project is ready for commercial use. Customize as needed for your business.
 
 **Ready to deploy!** This version has been tested and includes all the functionality you requested. Choose your preferred hosting platform and go live in minutes.
 
+Stable branch: prod-2025-09-05 (commit a9a1192)
