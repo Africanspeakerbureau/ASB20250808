@@ -20,9 +20,14 @@ export default function SpeakerLogin() {
   async function onSubmit(e) {
     e.preventDefault()
     setSending(true)
+    // Persist the email so callback can verify magic link without asking again
+    localStorage.setItem('asb_pending_email', email.trim())
     const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo },
+      email: email.trim(),
+      options: {
+        // Always use absolute URL to the hash route callback
+        emailRedirectTo: redirectTo,
+      },
     })
     setSending(false)
     if (error) return alert(error.message)
