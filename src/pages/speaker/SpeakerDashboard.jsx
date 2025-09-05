@@ -6,42 +6,40 @@ import { supabase } from '@/lib/supabaseClient'
 export default function SpeakerDashboard() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(true)
+  const [email, setEmail] = useState('')
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+
+    // Fast path: read any persisted session immediately
+    supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return
-      if (user?.email) {
-        setEmail(user.email)
+      if (data?.session?.user?.email) {
+        setEmail(data.session.user.email)
         setLoading(false)
-      } else {
-        const {
-          data: { subscription },
-        } = supabase.auth.onAuthStateChange((_e, session) => {
-          if (!mounted) return
-          if (session?.user?.email) {
-            setEmail(session.user.email)
-            setLoading(false)
-          }
-        })
-        setTimeout(() => {
-          if (mounted && loading) {
-            setLoading(false)
-            navigate('/speaker-login', { replace: true })
-          }
-        }, 800)
-        return () => subscription?.unsubscribe()
       }
-    })()
+    })
+
+    // Authoritative path: respond to INITIAL_SESSION / SIGNED_IN
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setEmail(session?.user?.email ?? '')
+        setLoading(false)
+      }
+      if (event === 'SIGNED_OUT') {
+        setEmail('')
+        setLoading(false)
+      }
+    })
+
     return () => {
       mounted = false
+      subscription.unsubscribe()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSignOut = async (global = false) => {
