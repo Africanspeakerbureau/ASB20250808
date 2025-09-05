@@ -1,18 +1,27 @@
 const AIRTABLE_API_KEY = import.meta.env.VITE_AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID;
-// Table name used across the site
-export const SPEAKER_TABLE = import.meta.env.VITE_AIRTABLE_SPEAKER_TABLE || 'Speaker Applications';
+export const SPEAKER_TABLE =
+  import.meta.env.VITE_AIRTABLE_SPEAKER_TABLE || 'Speaker Applications';
 
-const API = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}`;
+const BASE = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}`;
 
-async function atFetch(path, init = {}) {
-  const res = await fetch(`${API}/${encodeURIComponent(path)}`, {
+function buildURL(table, params = {}) {
+  const usp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null) usp.set(k, String(v));
+  }
+  // Encode ONLY the table segment, never the entire path with query
+  return `${BASE}/${encodeURIComponent(table)}?${usp.toString()}`;
+}
+
+async function atFetch(url, init = {}) {
+  const res = await fetch(url, {
     ...init,
     headers: {
-      Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+      Authorization: `Bearer ${AIRTABLE_API_KEY}`, // PAT or legacy key
       'Content-Type': 'application/json',
-      ...(init.headers || {})
-    }
+      ...(init.headers || {}),
+    },
   });
   if (!res.ok) {
     const text = await res.text();
@@ -21,17 +30,25 @@ async function atFetch(path, init = {}) {
   return res.json();
 }
 
+// Find 1 speaker by Email
 export async function findSpeakerByEmail(email) {
-  const formula = encodeURIComponent(`{Email} = "${email}"`);
-  const json = await atFetch(`${encodeURIComponent(SPEAKER_TABLE)}?maxRecords=1&filterByFormula=${formula}`);
-  if (!json.records?.length) return null;
-  return json.records[0]; // {id, fields}
+  // escape any quotes inside the email for Airtable formula
+  const safeEmail = String(email).replace(/"/g, '\\"');
+  const formula = `{Email} = "${safeEmail}"`;
+  const url = buildURL(SPEAKER_TABLE, {
+    maxRecords: 1,
+    filterByFormula: formula,
+  });
+  const json = await atFetch(url);
+  return json.records?.[0] || null;
 }
 
+// Update a speaker record
 export async function updateSpeakerRecord(recordId, fields) {
-  // fields is a plain object with Airtable field names
-  return atFetch(`${encodeURIComponent(SPEAKER_TABLE)}/${recordId}`, {
+  const url = `${BASE}/${encodeURIComponent(SPEAKER_TABLE)}/${recordId}`;
+  return atFetch(url, {
     method: 'PATCH',
-    body: JSON.stringify({ fields })
+    body: JSON.stringify({ fields }),
   });
 }
+
