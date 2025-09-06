@@ -1,40 +1,22 @@
-import { useEffect, useState } from 'react'
-import { useLocation, Link } from 'react-router-dom'
-import logoUrl from '/logo-asb.svg'
-import { supabase } from '@/lib/supabaseClient'
+import { useEffect, useState } from 'react';
+import { useLocation, Link } from 'react-router-dom';
+import logoUrl from '/logo-asb.svg';
+import { supabase } from '@/lib/supabaseClient';
+import { requireSpeakerAuth } from '@/auth/requireSpeakerAuth';
 
 export default function SpeakerDashboard() {
-  const location = useLocation()
-  const [status, setStatus] = useState('checking') // 'checking' | 'authed' | 'anon'
-  const [email, setEmail] = useState('')
+  const location = useLocation();
+  const [session, setSession] = useState(null);
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
-    // If we’re here and authed, make sure the flag doesn’t keep the guard waiting later.
-    sessionStorage.removeItem('asb_justSignedIn')
-  }, [])
-
-  useEffect(() => {
-    let unsub = () => {}
-    ;(async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        setEmail(session.user.email || '')
-        setStatus('authed')
-      } else {
-        setStatus('checking')
-      }
-      const sub = supabase.auth.onAuthStateChange((_event, s) => {
-        if (s?.user) {
-          setEmail(s.user.email || '')
-          setStatus('authed')
-        } else {
-          setStatus('anon')
-        }
-      })
-      unsub = () => sub.data.subscription.unsubscribe()
-    })()
-    return () => unsub()
-  }, [])
+    (async () => {
+      const s = await requireSpeakerAuth();
+      if (!s) return;
+      setSession(s);
+      setEmail(s.user?.email || '');
+    })();
+  }, []);
 
   const handleSignOut = async (global = false) => {
     try {
@@ -51,10 +33,8 @@ export default function SpeakerDashboard() {
     window.location.hash = '/speaker-login'
   }
 
-  if (status === 'checking') return <p style={{ padding: 24 }}>Loading…</p>
-  if (status === 'anon') {
-    window.location.hash = '/speaker-login'
-    return null
+  if (!session) {
+    return <p style={{ padding: 24, font: '18px/1.5 system-ui, sans-serif' }}>Loading…</p>;
   }
 
   return (
