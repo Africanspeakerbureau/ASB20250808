@@ -82,12 +82,10 @@ export function buildFields(state: any) {
   if (!fields[F.Twitter] && state.twitter) fields["Twitter"] = state.twitter;
 
   // Attachments
-  const profileUrls: string[] = state.profileImageUrls || [];
-  const headerUrls: string[] = state.headerImageUrls || [];
-  const prof = toAirtableAttachments(profileUrls);
-  const head = toAirtableAttachments(headerUrls);
-  if (prof.length) fields[F.ProfileImage] = prof;
-  if (head.length) fields[F.HeaderImage] = head;
+  const prof = toAirtableAttachments(state.profileImageUrls);
+  const head = toAirtableAttachments(state.headerImageUrls);
+  if (typeof prof !== 'undefined') fields[F.ProfileImage] = prof;
+  if (typeof head !== 'undefined') fields[F.HeaderImage] = head;
 
   return fields;
 }

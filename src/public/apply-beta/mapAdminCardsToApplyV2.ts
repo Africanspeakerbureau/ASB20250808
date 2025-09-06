@@ -19,7 +19,7 @@ export const FIELD = {
 export function buildAirtableFieldsFromForm(form) {
   const profileImages = toAirtableAttachments(form["Profile Image"]);
   const headerImages = toAirtableAttachments(form["Header Image"]);
-  return {
+  const out: Record<string, any> = {
     [FIELD.FIRST_NAME]: form.firstName?.trim(),
     [FIELD.LAST_NAME]: form.lastName?.trim(),
     Title: form.title,
@@ -29,7 +29,6 @@ export function buildAirtableFieldsFromForm(form) {
     Country: form.country,
     [FIELD.EMAIL]: form.email?.trim(),
     Phone: form.phone,
-    [FIELD.PROFILE_IMAGE]: profileImages,
     Industry: form.industry,
     "Expertise Level": form.expertiseLevel,
     "Years Experience": form.yearsExperience,
@@ -52,7 +51,6 @@ export function buildAirtableFieldsFromForm(form) {
     "What the audience will take home": form.whatTakeHome,
     "Benefits for the individual": form.benefitsIndividual,
     "Benefits for the organisation": form.benefitsOrganisation,
-    [FIELD.HEADER_IMAGE]: headerImages,
     "Video Link 1": form.videoLink1,
     "Video Link 2": form.videoLink2,
     "Video Link 3": form.videoLink3,
@@ -78,4 +76,7 @@ export function buildAirtableFieldsFromForm(form) {
     "Special Requirements": form.specialRequirements,
     "Additional Info": form.additionalInfo,
   };
+  if (typeof profileImages !== 'undefined') out[FIELD.PROFILE_IMAGE] = profileImages;
+  if (typeof headerImages !== 'undefined') out[FIELD.HEADER_IMAGE] = headerImages;
+  return out;
 }

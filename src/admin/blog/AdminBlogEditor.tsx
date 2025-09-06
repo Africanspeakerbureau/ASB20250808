@@ -19,7 +19,7 @@ export default function AdminBlogEditor() {
     'Hero Image URL':''
   });
   const [existingHeroAttachment, setExistingHeroAttachment] = useState<any[]>([]);
-  const [heroAttachmentToSet, setHeroAttachmentToSet] = useState<string | null>(null); // Cloudinary URL to attach on save
+  const [heroAttachmentToSet, setHeroAttachmentToSet] = useState<{ url: string; filename: string } | string | null>(null); // staged attachment
   const [saving, setSaving] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tagsOpen, setTagsOpen] = useState(false);
@@ -71,7 +71,7 @@ export default function AdminBlogEditor() {
         editorInstance.current.plugins.get('FileRepository').createUploadAdapter = (loader: any) => {
           return {
             upload: () => loader.file.then(async (file: File) => {
-              const url = await uploadToCloudinary(file);
+              const { url } = await uploadToCloudinary(file);
               return { default: url };
             }),
             abort: () => {}
@@ -91,9 +91,9 @@ export default function AdminBlogEditor() {
 
   async function uploadHero(file: File) {
     try {
-      const url = await uploadToCloudinary(file);
-      set('Hero Image URL', url);         // fill text field too (nice to copy/share)
-      setHeroAttachmentToSet(url);        // stage as attachment on save
+      const uploaded = await uploadToCloudinary(file);
+      set('Hero Image URL', uploaded.url);         // fill text field too (nice to copy/share)
+      setHeroAttachmentToSet(uploaded);            // stage as attachment on save
       alert('Hero image uploaded');
     } catch (e:any) {
       alert('Upload failed: ' + (e?.message || e));
@@ -135,22 +135,26 @@ export default function AdminBlogEditor() {
       // attachments logic (works whether Airtable field is Attachment or Text)
       if (heroAttachmentToSet === '') {
         payload['Hero Image'] = []; // clear attachment
-      } else if (typeof heroAttachmentToSet === 'string' && heroAttachmentToSet) {
-        payload['Hero Image'] = [{ url: heroAttachmentToSet }];
+      } else if (heroAttachmentToSet && typeof heroAttachmentToSet === 'object') {
+        payload['Hero Image'] = [{ url: heroAttachmentToSet.url, filename: heroAttachmentToSet.filename }];
       }
 
       if (id && id !== 'new') {
         await updatePost(id, payload);
       } else {
         const rec = await createPost(payload);
-        setExistingHeroAttachment(heroAttachmentToSet ? [{ url: heroAttachmentToSet }] : []);
+        setExistingHeroAttachment(heroAttachmentToSet ? [{ url: heroAttachmentToSet.url, filename: heroAttachmentToSet.filename }] : []);
         setHeroAttachmentToSet(null);
         alert('Saved');
         return nav(`/admin/blog/${rec.id}`);
       }
 
       if (heroAttachmentToSet !== null) {
-        setExistingHeroAttachment(heroAttachmentToSet === '' ? [] : [{ url: heroAttachmentToSet }]);
+        setExistingHeroAttachment(
+          heroAttachmentToSet === ''
+            ? []
+            : [{ url: (heroAttachmentToSet as any).url, filename: (heroAttachmentToSet as any).filename }]
+        );
         setHeroAttachmentToSet(null);
       }
       alert('Saved');

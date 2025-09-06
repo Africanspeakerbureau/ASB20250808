@@ -1,13 +1,13 @@
 import React from "react";
-import { CLOUDINARY } from "@/config/cloudinary";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 type Props = {
-  onUpload: (files: any[]) => void;
+  onUpload: (file: { url: string; filename: string }) => void;
   children: React.ReactElement;
   onUploadingChange?: (uploading: boolean) => void;
 };
 
-// Uploads a file to Cloudinary and returns the attachment shape expected by Airtable
+// Uploads a file to Cloudinary and returns { url, filename }
 export default function UploadWidget({ onUpload, children, onUploadingChange }: Props) {
   const openNative = () => {
     const input = document.createElement("input");
@@ -18,20 +18,8 @@ export default function UploadWidget({ onUpload, children, onUploadingChange }: 
       if (!file) return;
       try {
         onUploadingChange?.(true);
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", CLOUDINARY.uploadPreset);
-        const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/auto/upload`;
-        const res = await fetch(uploadUrl, { method: "POST", body: formData });
-        const result = await res.json();
-        const { secure_url, original_filename, bytes, resource_type, format } = result;
-        const attachment = [{
-          url: secure_url,
-          filename: `${original_filename}.${format ?? ""}`.replace(/\.$/, ""),
-          type: resource_type === "image" ? "image/*" : "application/octet-stream",
-          size: bytes,
-        }];
-        onUpload(attachment);
+        const uploaded = await uploadToCloudinary(file);
+        onUpload(uploaded);
       } catch (e) {
         console.error("Upload failed", e);
       } finally {

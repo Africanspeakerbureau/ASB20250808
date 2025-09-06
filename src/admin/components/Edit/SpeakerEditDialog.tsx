@@ -49,13 +49,11 @@ function buildSpeakerPayload(
     let nextVal: any = val;
     // Normalize attachments to Airtable shape
     if (ATTACHMENT_FIELDS.has(key)) {
-      nextVal = toAirtableAttachments(val);
-      // If nothing to send and previous value was also empty, skip
+      const norm = toAirtableAttachments(val);
+      if (typeof norm === 'undefined') continue;
       const prevNorm = toAirtableAttachments(original?.fields?.[key]);
-      if (prevNorm.length === 0 && nextVal.length === 0) continue;
-      // prevent false “unchanged” if shapes differ
-      if (isEqualShallow(nextVal, prevNorm)) continue;
-      out[key] = nextVal;
+      if (Array.isArray(prevNorm) && isEqualShallow(norm, prevNorm)) continue;
+      out[key] = norm;
       continue;
     }
     // unchanged (non-attachment)?
@@ -104,6 +102,7 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
     if (!record?.id) return;
     if (hydratedRef.current) return;
     buf.current = { ...(record.fields || {}) };
+    for (const fld of ATTACHMENT_FIELDS) delete buf.current[fld];
     const f = buf.current;
     if (f['Fee Range']) {
       setLegacyFeeRange(String(f['Fee Range']));
@@ -167,6 +166,8 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
         ...rest,
         'Speaking Topics': normalizeMultiline(speakingTopicsText ?? rest['Speaking Topics']),
         'Key Messages': normalizeMultiline(keyMessagesText ?? rest['Key Messages']),
+        'Profile Image': buf.current['Profile Image'],
+        'Header Image': buf.current['Header Image'],
       };
       const payload = buildSpeakerPayload(prepared, record);
       if (Object.keys(payload.fields).length === 0) {
@@ -500,26 +501,42 @@ export default function SpeakerEditDialog({ recordId, onClose }: Props) {
 
   function Upload({ id, label, hint }: { id: string; label: string; hint?: string }) {
     const [, force] = React.useReducer(x => x + 1, 0);
-    const files = buf.current[id] as any[];
+    const file = buf.current[id] as any;
+    const existing = (record?.fields?.[id] as any)?.[0];
+    const preview = file === undefined ? existing : file;
     return (
       <Field label={label} hint={hint}>
         <div className="upload-row">
           <div className="upload-preview">
-            {Array.isArray(files) && files.length ? (
-              files.map((f, i) => <img key={i} src={f.url ?? f} alt="" className="thumb" />)
+            {preview ? (
+              <img src={preview.url ?? preview} alt="" className="thumb" />
             ) : (
               <div className="empty">No file selected</div>
             )}
           </div>
-          <UploadWidget
-            onUpload={uploaded => {
-              buf.current[id] = uploaded;
-              force();
-            }}
-            onUploadingChange={setUploading}
-          >
-            <button className="btn btn--dark">Upload</button>
-          </UploadWidget>
+          <div style={{display:'flex', gap:8}}>
+            <UploadWidget
+              onUpload={uploaded => {
+                buf.current[id] = uploaded;
+                force();
+              }}
+              onUploadingChange={setUploading}
+            >
+              <button className="btn btn--dark">Upload</button>
+            </UploadWidget>
+            {preview && (
+              <button
+                className="btn"
+                type="button"
+                onClick={() => {
+                  buf.current[id] = null;
+                  force();
+                }}
+              >
+                Remove
+              </button>
+            )}
+          </div>
         </div>
       </Field>
     );

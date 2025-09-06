@@ -4,6 +4,7 @@ import { requireSpeakerAuth } from '@/auth/requireSpeakerAuth';
 import { findSpeakerByEmail, updateSpeakerRecord } from '@/lib/airtableClient';
 import { SELECTS, MULTI_FIELDS } from '@/constants/speakerEnums';
 import { uploadToCloudinary } from '@/lib/cloudinary';
+import { toAirtableAttachments } from '@/utils/airtableAttachments';
 
 // ---- helpers for select coercion ----
 const toSingle = (val) => (val ? String(val) : '');
@@ -33,7 +34,6 @@ export default function SpeakerProfile() {
     // Identity
     'First Name': '', 'Last Name': '', 'Email': '', 'Phone': '',
     'Professional Title': '', 'Company': '', 'Location': '', 'Country': '',
-    'Profile Image': [], // attachments (array of {url})
     // Background
     'Professional Bio': '', 'Education': '', 'Achievements': '',
     // Experience
@@ -48,7 +48,7 @@ export default function SpeakerProfile() {
     'What the audience will take home': '', 'Benefits for the individual': '',
     'Benefits for the organisation': '',
     // Media & Languages
-    'Header Image': [], 'Video Link 1': '', 'Video Link 2': '', 'Video Link 3': '',
+    'Video Link 1': '', 'Video Link 2': '', 'Video Link 3': '',
     'Spoken Languages': [],
     // Logistics & Fees
     'Fee Range General': '', 'Fee Range Local': '', 'Fee Range Continental': '',
@@ -61,8 +61,10 @@ export default function SpeakerProfile() {
     'Special Requirements': '', 'Additional Info': '',
   });
 
-  const [profileImage, setProfileImage] = useState(form['Profile Image'] ?? []);
-  const [headerImage, setHeaderImage] = useState(form['Header Image'] ?? []);
+  const [profileImage, setProfileImage] = useState();
+  const [headerImage, setHeaderImage] = useState();
+  const [existingProfileImage, setExistingProfileImage] = useState(null);
+  const [existingHeaderImage, setExistingHeaderImage] = useState(null);
 
   const tabs = useMemo(() => ([
     { key: 'Identity', fields: ['First Name','Last Name','Email','Phone','Professional Title','Company','Location','Country','Profile Image']},
@@ -120,7 +122,6 @@ export default function SpeakerProfile() {
           'Company': toSingle(f['Company'] || f['Company/Organization']),
           'Location': toSingle(f['Location']),
           'Country': toSingle(f['Country']),
-          'Profile Image': Array.isArray(f['Profile Image']) ? f['Profile Image'] : [],
           'Professional Bio': toSingle(f['Professional Bio']),
           'Education': toSingle(f['Education']),
           'Achievements': toSingle(f['Achievements']),
@@ -141,7 +142,6 @@ export default function SpeakerProfile() {
           'What the audience will take home': toSingle(f['What the audience will take home']),
           'Benefits for the individual': toSingle(f['Benefits for the individual']),
           'Benefits for the organisation': toSingle(f['Benefits for the organisation']),
-          'Header Image': Array.isArray(f['Header Image']) ? f['Header Image'] : [],
           'Video Link 1': toSingle(f['Video Link 1']),
           'Video Link 2': toSingle(f['Video Link 2']),
           'Video Link 3': toSingle(f['Video Link 3']),
@@ -164,8 +164,8 @@ export default function SpeakerProfile() {
           'Special Requirements': toSingle(f['Special Requirements']),
           'Additional Info': toSingle(f['Additional Info']),
         }));
-        setProfileImage(Array.isArray(f['Profile Image']) ? f['Profile Image'] : []);
-        setHeaderImage(Array.isArray(f['Header Image']) ? f['Header Image'] : []);
+        setExistingProfileImage(Array.isArray(f['Profile Image']) ? f['Profile Image'][0] : null);
+        setExistingHeaderImage(Array.isArray(f['Header Image']) ? f['Header Image'][0] : null);
         setLoading(false);
       } catch (e) {
         setErr(e.message || 'Failed to load profile'); setLoading(false);
@@ -174,15 +174,6 @@ export default function SpeakerProfile() {
   }, []);
 
   const handleChange = (field, value) => setForm((x) => ({ ...x, [field]: value }));
-
-  function toAttachment(url, file) {
-    return {
-      url,
-      filename: file?.name || 'image',
-      type: file?.type,
-      size: file?.size,
-    };
-  }
 
   async function handlePickAndUpload(setter) {
     try {
@@ -197,8 +188,8 @@ export default function SpeakerProfile() {
           return;
         }
         try {
-          const url = await uploadToCloudinary(file);
-          setter([toAttachment(url, file)]);
+          const uploaded = await uploadToCloudinary(file);
+          setter(uploaded);
           alert('Image uploaded');
         } catch (e) {
           console.error(e);
@@ -213,7 +204,7 @@ export default function SpeakerProfile() {
   }
 
   function removeImage(setter) {
-    setter([]);
+    setter(null);
   }
 
   const handleSave = async (closeAfter = false) => {
@@ -229,7 +220,6 @@ export default function SpeakerProfile() {
         'Company': fromSingle(form['Company']),
         'Location': fromSingle(form['Location']),
         'Country': ensureAllowed('Country', form['Country']),
-        'Profile Image': profileImage,
 
         'Professional Bio': fromSingle(form['Professional Bio']),
         'Education': fromSingle(form['Education']),
@@ -255,7 +245,6 @@ export default function SpeakerProfile() {
         'Benefits for the individual': fromSingle(form['Benefits for the individual']),
         'Benefits for the organisation': fromSingle(form['Benefits for the organisation']),
 
-        'Header Image': headerImage,
         'Video Link 1': fromSingle(form['Video Link 1']),
         'Video Link 2': fromSingle(form['Video Link 2']),
         'Video Link 3': fromSingle(form['Video Link 3']),
@@ -280,6 +269,11 @@ export default function SpeakerProfile() {
         'Special Requirements': fromSingle(form['Special Requirements']),
         'Additional Info': fromSingle(form['Additional Info']),
       };
+
+      const profAtt = toAirtableAttachments(profileImage);
+      if (typeof profAtt !== 'undefined') payload['Profile Image'] = profAtt;
+      const headAtt = toAirtableAttachments(headerImage);
+      if (typeof headAtt !== 'undefined') payload['Header Image'] = headAtt;
 
       await updateSpeakerRecord(recordId, payload);
       setNotice('✅ Profile updated.');
@@ -321,7 +315,7 @@ export default function SpeakerProfile() {
               <AttachmentField
                 key={field}
                 label="Profile Image"
-                attachment={profileImage}
+                attachment={profileImage === undefined ? existingProfileImage : profileImage}
                 onPick={() => handlePickAndUpload(setProfileImage)}
                 onRemove={() => removeImage(setProfileImage)}
                 imgStyle={{ width:96, height:96, objectFit:'cover', borderRadius:12 }}
@@ -334,7 +328,7 @@ export default function SpeakerProfile() {
               <AttachmentField
                 key={field}
                 label="Header Image"
-                attachment={headerImage}
+                attachment={headerImage === undefined ? existingHeaderImage : headerImage}
                 onPick={() => handlePickAndUpload(setHeaderImage)}
                 onRemove={() => removeImage(setHeaderImage)}
                 imgStyle={{ width:240, height:120, objectFit:'cover', borderRadius:12 }}
@@ -372,9 +366,9 @@ function AttachmentField({ label, attachment, onPick, onRemove, imgStyle, help }
   return (
     <div style={frame}>
       <span style={labelCss}>{label}</span>
-      {attachment[0]?.url ? (
+      {attachment?.url ? (
         <div style={{display:'flex', gap:12, alignItems:'center'}}>
-          <img src={attachment[0].url} alt={label} style={imgStyle} />
+          <img src={attachment.url} alt={label} style={imgStyle} />
           <div style={{display:'flex', gap:8}}>
             <button type="button" onClick={onPick}>Replace</button>
             <button type="button" onClick={onRemove}>Remove</button>
