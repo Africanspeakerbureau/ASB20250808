@@ -75,6 +75,17 @@ export default function SpeakerProfile() {
     { key: 'Contact & Admin', fields: ['Website','LinkedIn','Twitter','References','Banking Details','PA Name','PA Email','PA Phone','Special Requirements','Additional Info']},
   ]), []);
 
+  const fullName =
+    form['First Name'] && form['Last Name']
+      ? `${form['First Name']} ${form['Last Name']}`
+      : null;
+
+  useEffect(() => {
+    document.title = fullName
+      ? `Edit ${fullName}'s Profile — ASB`
+      : 'Edit My Profile — ASB';
+  }, [fullName]);
+
   // ---- load current user + their record ----
   useEffect(() => {
     (async () => {
@@ -284,7 +295,7 @@ export default function SpeakerProfile() {
   if (loading) return <PageWrap><h1>Loading your profile…</h1></PageWrap>;
   return (
     <PageWrap>
-      <h1>Edit My Profile</h1>
+      <h1>{fullName ? `Edit ${fullName}'s profile` : 'Edit My Profile'}</h1>
       <p>Signed in as <strong>{email}</strong></p>
       {err && <p style={{color:'crimson'}}>{err}</p>}
       {notice && <p style={{color:'#065f46', background:'#ecfdf5', border:'1px solid #a7f3d0', padding:'8px 12px', borderRadius:8}}>{notice}</p>}

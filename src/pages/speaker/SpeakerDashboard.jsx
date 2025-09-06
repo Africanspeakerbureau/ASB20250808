@@ -1,22 +1,16 @@
-import { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import logoUrl from '/logo-asb.svg';
 import { supabase } from '@/lib/supabaseClient';
-import { requireSpeakerAuth } from '@/auth/requireSpeakerAuth';
+import { useSpeakerRecord } from '@/hooks/useSpeakerRecord';
 
 export default function SpeakerDashboard() {
   const location = useLocation();
-  const [session, setSession] = useState(null);
-  const [email, setEmail] = useState('');
+  const { speaker, loading, email } = useSpeakerRecord();
 
-  useEffect(() => {
-    (async () => {
-      const s = await requireSpeakerAuth();
-      if (!s) return;
-      setSession(s);
-      setEmail(s.user?.email || '');
-    })();
-  }, []);
+  const fullName =
+    speaker?.firstName && speaker?.lastName
+      ? `${speaker.firstName} ${speaker.lastName}`
+      : null;
 
   const handleSignOut = async (global = false) => {
     try {
@@ -33,7 +27,7 @@ export default function SpeakerDashboard() {
     window.location.hash = '/speaker-login'
   }
 
-  if (!session) {
+  if (loading) {
     return <p style={{ padding: 24, font: '18px/1.5 system-ui, sans-serif' }}>Loading…</p>;
   }
 
@@ -48,8 +42,11 @@ export default function SpeakerDashboard() {
         )}
         <h1 style={{fontSize:48, lineHeight:1, margin:'0 0 12px'}}>Speaker Portal</h1>
         <p style={{margin:'0 0 20px', color:'#374151'}}>Signed in as <strong>{email}</strong></p>
-        <p style={{margin:'0 0 28px', color:'#4b5563'}}>
-          This portal lets listed speakers update their public profile on the ASB site.
+        <p style={{margin:'0 0 20px', color:'#4b5563'}}>
+          This portal lets listed speakers update their profile on the ASB site.
+        </p>
+        <p style={{margin:'0 0 28px', color:'#374151'}}>
+          {fullName ? <>This page links you to the profile of <span style={{fontWeight:600}}>{fullName}</span>.</> : 'This page links you to your profile.'}
         </p>
         <div style={{display:'flex', justifyContent:'center', gap:12, flexWrap:'wrap'}}>
           <Link to="/speaker-profile" style={{padding:'10px 16px', borderRadius:10, background:'#111827', color:'#fff', textDecoration:'none'}}>Edit my profile</Link>
