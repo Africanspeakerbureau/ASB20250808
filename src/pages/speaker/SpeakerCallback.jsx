@@ -1,78 +1,70 @@
-import { useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '@/lib/supabaseClient'
 
-function parseSupabaseTokensFromUrl() {
-  // Works for:
-  //   #access_token=...&refresh_token=...
-  //   ?access_token=...&refresh_token=...
-  //   #/speaker-callback#access_token=... (double-hash)
-  const { href, hash, search } = window.location;
+function getParams() {
+  const search = new URLSearchParams(window.location.search)
+  const access_token = search.get('access_token')
+  const refresh_token = search.get('refresh_token')
+  if (access_token && refresh_token) return { access_token, refresh_token }
 
-  const doubleHashIdx = href.indexOf('#access_token=');
-  if (doubleHashIdx !== -1) {
-    const frag = href.substring(doubleHashIdx + 1);
-    return new URLSearchParams(frag);
+  const rawHash = window.location.hash || ''
+  const hashPart = rawHash.includes('?')
+    ? rawHash.slice(rawHash.indexOf('?') + 1)
+    : rawHash.replace(/^#/, '')
+  const hashParams = new URLSearchParams(hashPart)
+  return {
+    access_token: hashParams.get('access_token') || undefined,
+    refresh_token: hashParams.get('refresh_token') || undefined,
   }
-
-  if (hash && hash.startsWith('#access_token=')) {
-    return new URLSearchParams(hash.slice(1));
-  }
-
-  if (search && search.includes('access_token=')) {
-    return new URLSearchParams(search.slice(1));
-  }
-
-  return null;
 }
 
 export default function SpeakerCallback() {
+  const nav = useNavigate()
+  const [msg, setMsg] = useState('Finalizing sign-in…')
+
   useEffect(() => {
-    (async () => {
-      try {
-        const params = parseSupabaseTokensFromUrl();
+    let cancelled = false
 
-        if (params) {
-          const access_token = params.get('access_token');
-          const refresh_token = params.get('refresh_token');
-          const code = params.get('code');
+    ;(async () => {
+      const { access_token, refresh_token } = getParams()
 
-          if (access_token && refresh_token) {
-            const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-            if (error) throw error;
-          } else if (code && supabase.auth.exchangeCodeForSession) {
-            try {
-              await supabase.auth.exchangeCodeForSession({ code });
-            } catch {
-              await supabase.auth.exchangeCodeForSession(window.location.search);
-            }
-          }
-        }
-
-        history.replaceState({}, '', '/#/speaker-dashboard');
-
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          await new Promise((resolve) => {
-            const { data: { subscription } } = supabase.auth.onAuthStateChange((_evt, s) => {
-              if (s) { subscription.unsubscribe(); resolve(); }
-            });
-            setTimeout(() => { subscription.unsubscribe(); resolve(); }, 2500);
-          });
-        }
-        window.location.replace('/#/speaker-dashboard');
-      } catch (err) {
-        console.error('Callback error:', err);
-        document.body.innerHTML = `<p style="font: 18px/1.5 system-ui, sans-serif; padding: 24px; color: #b00020;">
-      Sorry—sign-in failed. Please close this tab and try again.
-    </p>`;
+      if (!access_token || !refresh_token) {
+        setMsg('Missing sign-in tokens. Redirecting to login…')
+        setTimeout(() => nav('/speaker-login', { replace: true }), 800)
+        return
       }
-    })();
-  }, []);
+
+      const { error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      })
+
+      if (error) {
+        setMsg('Sign-in failed. Redirecting to login…')
+        setTimeout(() => nav('/speaker-login', { replace: true }), 1000)
+        return
+      }
+
+      const { data: sess } = await supabase.auth.getSession()
+      if (!sess?.session) {
+        setMsg('Starting session…')
+      }
+
+      if (!cancelled) {
+        nav('/speaker-dashboard', { replace: true })
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [nav])
 
   return (
-    <p style={{ font: '18px/1.5 system-ui, sans-serif', padding: 24 }}>
-      Signing you in…
-    </p>
-  );
+    <div style={{ padding: 24, fontSize: 18 }}>
+      {msg}
+    </div>
+  )
 }
 
