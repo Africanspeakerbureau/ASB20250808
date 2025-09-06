@@ -1,35 +1,32 @@
-type CloudinaryUpload =
-  | { secure_url: string; original_filename?: string; public_id?: string }
-  | string;
+export type AttachmentLike =
+  | { url?: string; secure_url?: string; filename?: string; original_filename?: string; format?: string | null }
+  | string
+  | null
+  | undefined;
 
- type AirtableAttachment = { url: string; filename?: string };
+export function toAirtableAttachments(input: AttachmentLike | AttachmentLike[]) {
+  // undefined -> do not include field in PATCH (user didn't touch it)
+  if (typeof input === 'undefined') return undefined;
 
- export function toAirtableAttachments(
-   input: unknown
- ): AirtableAttachment[] {
-   if (!input) return [];
-   const arr = Array.isArray(input) ? input : [input];
+  const norm = (x: AttachmentLike) => {
+    if (!x) return null;
 
-   return arr
-     .map((item) => {
-       // 1) Cloudinary upload response
-       if (item && typeof item === "object" && "secure_url" in item) {
-         const u = item as any;
-         return {
-           url: u.secure_url,
-           filename: u.original_filename || u.public_id || undefined,
-         };
-       }
-       // 2) Already-hosted URL string
-       if (typeof item === "string" && /^https?:\/\//.test(item)) {
-         return { url: item };
-       }
-       // 3) Objects from previous code paths: { url, filename, ...extras }
-       if (item && typeof item === "object" && (item as any).url) {
-         return { url: (item as any).url, filename: (item as any).filename };
-       }
-       return null;
-     })
-     .filter(Boolean) as AirtableAttachment[];
- }
+    if (typeof x === 'string') return { url: x };
+
+    const url = x.secure_url || x.url;
+    const filename =
+      x.filename ||
+      (x.original_filename
+        ? `${x.original_filename}${x.format ? `.${x.format}` : ''}`
+        : undefined);
+
+    return url ? { url, ...(filename ? { filename } : {}) } : null;
+  };
+
+  const arr = Array.isArray(input) ? input : [input];
+  const cleaned = arr.map(norm).filter(Boolean) as Array<{ url: string; filename?: string }>;
+
+  // Airtable expects an array (empty array clears the field)
+  return cleaned;
+}
 
