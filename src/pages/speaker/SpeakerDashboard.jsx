@@ -1,67 +1,56 @@
 import { useEffect, useState } from 'react'
-import { useLocation, Link, useNavigate } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import logoUrl from '/logo-asb.svg'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function SpeakerDashboard() {
-  const navigate = useNavigate()
   const location = useLocation()
-  const [loading, setLoading] = useState(true)
+  const [status, setStatus] = useState('checking') // 'checking' | 'authed' | 'anon'
   const [email, setEmail] = useState('')
 
   useEffect(() => {
-    let mounted = true
-
-    // Fast path: read any persisted session immediately
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return
-      if (data?.session?.user?.email) {
-        setEmail(data.session.user.email)
-        setLoading(false)
+    let unsub = () => {}
+    ;(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        setEmail(session.user.email || '')
+        setStatus('authed')
+      } else {
+        setStatus('checking')
       }
-    })
-
-    // Authoritative path: respond to INITIAL_SESSION / SIGNED_IN
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!mounted) return
-      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setEmail(session?.user?.email ?? '')
-        setLoading(false)
-      }
-      if (event === 'SIGNED_OUT') {
-        setEmail('')
-        setLoading(false)
-      }
-    })
-
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
+      const sub = supabase.auth.onAuthStateChange((_event, s) => {
+        if (s?.user) {
+          setEmail(s.user.email || '')
+          setStatus('authed')
+        } else {
+          setStatus('anon')
+        }
+      })
+      unsub = () => sub.data.subscription.unsubscribe()
+    })()
+    return () => unsub()
   }, [])
 
   const handleSignOut = async (global = false) => {
     try {
-      // Ends session on this browser. If your supabase-js supports it,
-      // set { scope: 'global' } to revoke all sessions.
       await supabase.auth.signOut(global ? { scope: 'global' } : undefined)
     } catch { /* ignore */ }
-    // Hard clean local artifacts so we don't see stale emails/tokens
     try {
       localStorage.removeItem('asb_pending_email')
-      Object.keys(localStorage).forEach((k) => {
+      Object.keys(localStorage).forEach(k => {
         if (k.startsWith('sb-') || k.includes('supabase') || k.includes('pkce')) {
           localStorage.removeItem(k)
         }
       })
     } catch { /* ignore */ }
-    navigate('/speaker-login', { replace: true })
+    window.location.hash = '/speaker-login'
   }
 
-  if (loading) return <div style={{ padding: 24 }}>Loading…</div>
-  if (!email) return null
+  if (status === 'checking') return <p style={{ padding: 24 }}>Loading…</p>
+  if (status === 'anon') {
+    window.location.hash = '/speaker-login'
+    return null
+  }
 
   return (
     <div style={{minHeight:'70vh', display:'grid', placeItems:'center', padding:'40px 16px'}}>
@@ -86,4 +75,3 @@ export default function SpeakerDashboard() {
     </div>
   )
 }
-
