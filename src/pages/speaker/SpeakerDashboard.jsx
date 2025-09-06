@@ -9,6 +9,11 @@ export default function SpeakerDashboard() {
   const [email, setEmail] = useState('')
 
   useEffect(() => {
+    // If we’re here and authed, make sure the flag doesn’t keep the guard waiting later.
+    sessionStorage.removeItem('asb_justSignedIn')
+  }, [])
+
+  useEffect(() => {
     let unsub = () => {}
     ;(async () => {
       const { data: { session } } = await supabase.auth.getSession()
