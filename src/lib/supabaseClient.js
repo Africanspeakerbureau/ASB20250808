@@ -15,7 +15,7 @@ export const supabase = createClient(url, anon, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true, // let the client read #access_token on load
+    detectSessionInUrl: false, // we’ll handle tokens on the callback page
     flowType: 'implicit', // use token flow, not PKCE
     storage: window.localStorage,
   },

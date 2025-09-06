@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabaseClient';
+import { requireSpeakerAuth } from '@/auth/requireSpeakerAuth';
 import { findSpeakerByEmail, updateSpeakerRecord } from '@/lib/airtableClient';
 import { SELECTS, MULTI_FIELDS } from '@/constants/speakerEnums';
 
@@ -75,13 +75,12 @@ export default function SpeakerProfile() {
   useEffect(() => {
     (async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user?.email) {
-          navigate('/speaker-login', { replace: true }); return;
-        }
-        setEmail(user.email);
+        const session = await requireSpeakerAuth();
+        if (!session) return;
+        const email = session.user.email;
+        setEmail(email);
 
-        const rec = await findSpeakerByEmail(user.email);
+        const rec = await findSpeakerByEmail(email);
         if (!rec) { setErr('No profile found for your email. Please contact ASB.'); setLoading(false); return; }
         setRecordId(rec.id);
 
@@ -145,7 +144,7 @@ export default function SpeakerProfile() {
         setErr(e.message || 'Failed to load profile'); setLoading(false);
       }
     })();
-  }, [navigate]);
+  }, []);
 
   const handleChange = (field, value) => setForm((x) => ({ ...x, [field]: value }));
 
