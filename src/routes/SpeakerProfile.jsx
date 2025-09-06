@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { requireSpeakerAuth } from '@/auth/requireSpeakerAuth';
 import { findSpeakerByEmail, updateSpeakerRecord } from '@/lib/airtableClient';
 import { SELECTS, MULTI_FIELDS } from '@/constants/speakerEnums';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 
 // ---- helpers for select coercion ----
 const toSingle = (val) => (val ? String(val) : '');
@@ -59,6 +60,9 @@ export default function SpeakerProfile() {
     'PA Name': '', 'PA Email': '', 'PA Phone': '',
     'Special Requirements': '', 'Additional Info': '',
   });
+
+  const [profileImage, setProfileImage] = useState(form['Profile Image'] ?? []);
+  const [headerImage, setHeaderImage] = useState(form['Header Image'] ?? []);
 
   const tabs = useMemo(() => ([
     { key: 'Identity', fields: ['First Name','Last Name','Email','Phone','Professional Title','Company','Location','Country','Profile Image']},
@@ -149,6 +153,8 @@ export default function SpeakerProfile() {
           'Special Requirements': toSingle(f['Special Requirements']),
           'Additional Info': toSingle(f['Additional Info']),
         }));
+        setProfileImage(Array.isArray(f['Profile Image']) ? f['Profile Image'] : []);
+        setHeaderImage(Array.isArray(f['Header Image']) ? f['Header Image'] : []);
         setLoading(false);
       } catch (e) {
         setErr(e.message || 'Failed to load profile'); setLoading(false);
@@ -157,6 +163,47 @@ export default function SpeakerProfile() {
   }, []);
 
   const handleChange = (field, value) => setForm((x) => ({ ...x, [field]: value }));
+
+  function toAttachment(url, file) {
+    return {
+      url,
+      filename: file?.name || 'image',
+      type: file?.type,
+      size: file?.size,
+    };
+  }
+
+  async function handlePickAndUpload(setter) {
+    try {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Max file size is 5MB');
+          return;
+        }
+        try {
+          const url = await uploadToCloudinary(file);
+          setter([toAttachment(url, file)]);
+          alert('Image uploaded');
+        } catch (e) {
+          console.error(e);
+          alert('Upload failed');
+        }
+      };
+      input.click();
+    } catch (e) {
+      console.error(e);
+      alert('Could not open file picker');
+    }
+  }
+
+  function removeImage(setter) {
+    setter([]);
+  }
 
   const handleSave = async (closeAfter = false) => {
     if (!recordId) return;
@@ -171,8 +218,7 @@ export default function SpeakerProfile() {
         'Company': fromSingle(form['Company']),
         'Location': fromSingle(form['Location']),
         'Country': ensureAllowed('Country', form['Country']),
-        // Keep existing attachment objects if unchanged
-        'Profile Image': Array.isArray(form['Profile Image']) && form['Profile Image'].length ? form['Profile Image'] : undefined,
+        'Profile Image': profileImage,
 
         'Professional Bio': fromSingle(form['Professional Bio']),
         'Education': fromSingle(form['Education']),
@@ -198,7 +244,7 @@ export default function SpeakerProfile() {
         'Benefits for the individual': fromSingle(form['Benefits for the individual']),
         'Benefits for the organisation': fromSingle(form['Benefits for the organisation']),
 
-        'Header Image': Array.isArray(form['Header Image']) && form['Header Image'].length ? form['Header Image'] : undefined,
+        'Header Image': headerImage,
         'Video Link 1': fromSingle(form['Video Link 1']),
         'Video Link 2': fromSingle(form['Video Link 2']),
         'Video Link 3': fromSingle(form['Video Link 3']),
@@ -258,14 +304,42 @@ export default function SpeakerProfile() {
       </div>
 
       <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, alignItems:'start'}}>
-        {tabs.find(t => t.key===activeTab).fields.map((field) => (
-          <Field
-            key={field}
-            label={field}
-            value={form[field]}
-            onChange={(v)=>handleChange(field, v)}
-          />
-        ))}
+        {tabs.find(t => t.key===activeTab).fields.map((field) => {
+          if (field === 'Profile Image') {
+            return (
+              <AttachmentField
+                key={field}
+                label="Profile Image"
+                attachment={profileImage}
+                onPick={() => handlePickAndUpload(setProfileImage)}
+                onRemove={() => removeImage(setProfileImage)}
+                imgStyle={{ width:96, height:96, objectFit:'cover', borderRadius:12 }}
+                help="JPG/PNG, max 5MB"
+              />
+            );
+          }
+          if (field === 'Header Image') {
+            return (
+              <AttachmentField
+                key={field}
+                label="Header Image"
+                attachment={headerImage}
+                onPick={() => handlePickAndUpload(setHeaderImage)}
+                onRemove={() => removeImage(setHeaderImage)}
+                imgStyle={{ width:240, height:120, objectFit:'cover', borderRadius:12 }}
+                help="Wide aspect recommended; JPG/PNG, max 5MB"
+              />
+            );
+          }
+          return (
+            <Field
+              key={field}
+              label={field}
+              value={form[field]}
+              onChange={(v)=>handleChange(field, v)}
+            />
+          );
+        })}
       </div>
 
       <div style={{marginTop:24, display:'flex', gap:12}}>
@@ -281,6 +355,28 @@ function PageWrap({children}) {
   return <div style={{padding:24, maxWidth:1100, margin:'0 auto'}}>{children}</div>;
 }
 
+function AttachmentField({ label, attachment, onPick, onRemove, imgStyle, help }) {
+  const frame = { border:'1px solid #e5e7eb', borderRadius:12, padding:12, background:'#fff', gridColumn:'1 / -1' };
+  const labelCss = { fontWeight:600, marginBottom:6, display:'block' };
+  return (
+    <div style={frame}>
+      <span style={labelCss}>{label}</span>
+      {attachment[0]?.url ? (
+        <div style={{display:'flex', gap:12, alignItems:'center'}}>
+          <img src={attachment[0].url} alt={label} style={imgStyle} />
+          <div style={{display:'flex', gap:8}}>
+            <button type="button" onClick={onPick}>Replace</button>
+            <button type="button" onClick={onRemove}>Remove</button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" onClick={onPick}>Upload</button>
+      )}
+      <div style={{fontSize:12, color:'#666'}}>{help}</div>
+    </div>
+  );
+}
+
 // Minimal field renderer; swap with your existing Input components later
 function Field({label, value, onChange}) {
   const isLong = [
@@ -293,22 +389,9 @@ function Field({label, value, onChange}) {
   ].includes(label);
 
   const isMulti = MULTI_FIELDS.has(label);
-  const isAttachment = ['Profile Image','Header Image'].includes(label);
   const hasSelect = !!SELECTS[label];
   const frame = { border:'1px solid #e5e7eb', borderRadius:12, padding:12, background:'#fff' };
   const labelCss = { fontWeight:600, marginBottom:6, display:'block' };
-
-  if (isAttachment) {
-    return (
-      <div style={{gridColumn:'1 / -1', ...frame}}>
-        <span style={labelCss}>{label}</span>
-        {Array.isArray(value) && value.length
-          ? <ul>{value.map((a,i)=><li key={i}><a href={a.url} target="_blank" rel="noreferrer">{a.filename || a.url}</a></li>)}</ul>
-          : <em>No file selected</em>}
-        <div style={{fontSize:12, color:'#666'}}>File uploads: enable in Phase-2 (we’ll wire S3/Cloudinary and update Airtable attachments).</div>
-      </div>
-    );
-  }
 
   if (isMulti && hasSelect) {
     return (
