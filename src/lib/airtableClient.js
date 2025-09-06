@@ -30,17 +30,16 @@ async function atFetch(url, init = {}) {
   return res.json();
 }
 
-// Find 1 speaker by Email
+// Find speaker(s) by Email or PA Email (case-insensitive)
 export async function findSpeakerByEmail(email) {
-  // escape any quotes inside the email for Airtable formula
-  const safeEmail = String(email).replace(/"/g, '\\"');
-  const formula = `{Email} = "${safeEmail}"`;
+  const emailLower = String(email).trim().toLowerCase().replace(/"/g, '\\"');
+  const formula = `OR(LOWER({Email}) = "${emailLower}", LOWER({PA Email}) = "${emailLower}")`;
   const url = buildURL(SPEAKER_TABLE, {
-    maxRecords: 1,
+    maxRecords: 2,
     filterByFormula: formula,
   });
   const json = await atFetch(url);
-  return json.records?.[0] || null;
+  return json.records || [];
 }
 
 // Update a speaker record

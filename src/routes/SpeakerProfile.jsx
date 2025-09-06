@@ -80,8 +80,18 @@ export default function SpeakerProfile() {
         const email = session.user.email;
         setEmail(email);
 
-        const rec = await findSpeakerByEmail(email);
-        if (!rec) { setErr('No profile found for your email. Please contact ASB.'); setLoading(false); return; }
+        const recs = await findSpeakerByEmail(email);
+        if (recs.length === 0) {
+          setErr('We couldn\'t find a profile for this email. Please use the email on file or contact support.');
+          setLoading(false);
+          return;
+        }
+        if (recs.length > 1) {
+          setErr("This PA email is linked to multiple profiles. Please sign in with the speaker's main email, or contact support.");
+          setLoading(false);
+          return;
+        }
+        const rec = recs[0];
         setRecordId(rec.id);
 
         const f = rec.fields || {};
