@@ -49,7 +49,7 @@ export default function SpeakerDashboard() {
           {fullName ? <>This page links you to the profile of <span style={{fontWeight:600}}>{fullName}</span>.</> : 'This page links you to your profile.'}
         </p>
         <div style={{display:'flex', justifyContent:'center', gap:12, flexWrap:'wrap'}}>
-          <Link to="/speaker-profile" style={{padding:'10px 16px', borderRadius:10, background:'#111827', color:'#fff', textDecoration:'none'}}>Edit my profile</Link>
+          <Link to="/speaker-profile" style={{padding:'10px 16px', borderRadius:10, background:'#111827', color:'#fff', textDecoration:'none'}}>Edit profile</Link>
           <button onClick={() => handleSignOut(false)} style={{padding:'10px 16px', borderRadius:10, border:'1px solid #e5e7eb', background:'#fff'}}>Sign out</button>
           <button onClick={() => handleSignOut(true)} style={{padding:'10px 16px', borderRadius:10, background:'#111827', color:'#fff'}}>Sign out (all devices)</button>
         </div>
