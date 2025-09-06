@@ -1,11 +1,19 @@
 import { useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabaseClient'
 
+const AUTO_REDIRECT_FROM = new Set(['/speaker-login', '/speaker-callback'])
+
 export default function BootAuth() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
   useEffect(() => {
     const goDashboard = () => {
-      if (window.location.hash !== '#/speaker-dashboard') {
-        window.history.replaceState({}, '', `${window.location.pathname}#/speaker-dashboard`)
+      const raw = location.hash?.slice(1) || location.pathname || '/'
+      const path = raw.startsWith('/') ? raw : `/${raw}`
+      if (AUTO_REDIRECT_FROM.has(path)) {
+        navigate('/speaker-dashboard', { replace: true })
       }
     }
 
@@ -28,7 +36,7 @@ export default function BootAuth() {
             await supabase.auth.setSession({ access_token, refresh_token })
             // Clean URL and force a single, safe reload to hydrate auth everywhere.
             cleanUrl()
-            window.history.replaceState({}, '', `${window.location.pathname}#/speaker-dashboard`)
+            goDashboard()
             window.location.reload() // ← one-time hard reload
             return
           }
@@ -41,7 +49,7 @@ export default function BootAuth() {
           const { error } = await supabase.auth.exchangeCodeForSession(code)
           if (!error) {
             cleanUrl()
-            window.history.replaceState({}, '', `${window.location.pathname}#/speaker-dashboard`)
+            goDashboard()
             window.location.reload() // ← one-time hard reload
           }
         }
@@ -67,7 +75,7 @@ export default function BootAuth() {
       subscription?.unsubscribe()
       window.removeEventListener('hashchange', onHash)
     }
-  }, [])
+  }, [location, navigate])
 
   return null
 }

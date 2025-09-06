@@ -9,7 +9,7 @@ import HomeInsights from './site/home/HomeInsights'
 import BookingForm from './components/BookingForm'
 import SectionTitle from '@/components/SectionTitle'
 import BottomCta from '@/components/BottomCta'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button.jsx'
 import { supabase } from '@/lib/supabaseClient'
 import { getLocationAndRate } from './lib/geo.js'
@@ -129,6 +129,8 @@ function App() {
   
   const widgetRef = useRef()
   const navigate = useNavigate()
+  const location = useLocation()
+  const AUTO_REDIRECT_FROM = new Set(['/speaker-login', '/speaker-callback'])
   
   // State variables
   const [route, setRoute] = useState(() => window.location.hash.slice(1) || '/')
@@ -168,31 +170,37 @@ function App() {
   useEffect(() => {
     const bootstrapFromUrl = async () => {
       try {
-        const { hash, search, pathname } = window.location;
+        const { hash, search, pathname } = window.location
+        const raw = (location.hash?.slice(1) || location.pathname || '/')
+        const path = raw.startsWith('/') ? raw : `/${raw}`
         if (hash && hash.includes('access_token=')) {
-          const sp = new URLSearchParams(hash.slice(1));
-          const access_token = sp.get('access_token');
-          const refresh_token = sp.get('refresh_token');
+          const sp = new URLSearchParams(hash.slice(1))
+          const access_token = sp.get('access_token')
+          const refresh_token = sp.get('refresh_token')
           if (access_token && refresh_token) {
-            await supabase.auth.setSession({ access_token, refresh_token });
-            window.history.replaceState({}, '', pathname + '#/');
-            navigate('/speaker-dashboard', { replace: true });
-            return;
+            await supabase.auth.setSession({ access_token, refresh_token })
+            window.history.replaceState({}, '', pathname + '#/')
+            if (AUTO_REDIRECT_FROM.has(path)) {
+              navigate('/speaker-dashboard', { replace: true })
+            }
+            return
           }
         }
-        const qs = new URLSearchParams(search);
-        const code = qs.get('code');
+        const qs = new URLSearchParams(search)
+        const code = qs.get('code')
         if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          const { error } = await supabase.auth.exchangeCodeForSession(code)
           if (!error) {
-            window.history.replaceState({}, '', pathname + window.location.hash);
-            navigate('/speaker-dashboard', { replace: true });
+            window.history.replaceState({}, '', pathname + window.location.hash)
+            if (AUTO_REDIRECT_FROM.has(path)) {
+              navigate('/speaker-dashboard', { replace: true })
+            }
           }
         }
       } catch { /* no-op */ }
-    };
-    bootstrapFromUrl();
-  }, [navigate]);
+    }
+    bootstrapFromUrl()
+  }, [navigate, location])
 
 
   const hashToService = {
