@@ -41,21 +41,32 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Normalize Supabase magic-link URLs for HashRouter -->
     <script>
       (function () {
-        // We use a hash router. Supabase sometimes returns to /#access_token=...
-        // That lands on Home (no route). Move tokens under /#/speaker-callback.
-        var hash = window.location.hash || '';
-        var search = window.location.search || '';
+        // If Supabase returned tokens as the first hash (e.g. /#access_token=…)
+        var h = window.location.hash || "";
+        if (h.startsWith("#access_token=") || h.startsWith("#id_token=") || h.startsWith("#refresh_token=")) {
+          // Move the token params into a query string *after* the router path
+          // Result: /#/speaker-callback?access_token=…&refresh_token=…
+          var params = h.slice(1); // remove the '#'
+          var target = window.location.origin + "/#"
+            + "/speaker-callback?" + params;
+          window.location.replace(target);
+          return;
+        }
 
-        var hasRootTokens =
-          /^#access_token=|^#refresh_token=|^#token_hash=/.test(hash) ||
-          (/#\?/.test(hash) && /code=/.test(hash)) ||      // "#?code=..."
-          (!hash.includes('/speaker-callback') && /[?&]code=/.test(search)); // "?code=" on root
-
-        if (hasRootTokens) {
-          var frag = hash.startsWith('#') ? hash : ('#' + hash);
-          window.location.replace(window.location.origin + '/#/speaker-callback' + frag);
+        // If we *do* have the route but Supabase added a second '#'
+        // Example: /#/speaker-callback#access_token=…
+        if (h.includes("speaker-callback#access_token=")) {
+          var parts = h.split("#");
+          // parts[0] => "/speaker-callback"
+          // parts[1] => "access_token=…&refresh_token=…"
+          var params2 = parts[1];
+          var target2 = window.location.origin + "/#"
+            + parts[0] + "?" + params2;
+          window.location.replace(target2);
+          return;
         }
       })();
     </script>
